@@ -69,6 +69,25 @@
   transition: width 0.3s ease;
 }
 
+/* Simple Progress (Percentage Only) */
+.onboarding-progress-simple {
+  margin-top: 48px;
+  margin-bottom: 24px;
+}
+
+.onboarding-progress-simple .progress-bar-container {
+  margin-bottom: 0;
+}
+
+.progress-percentage-large {
+  font-family: var(--font-primary);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--primary-green);
+  text-align: right;
+  margin-bottom: 8px;
+}
+
 .progress-steps {
   display: flex;
   justify-content: space-between;
