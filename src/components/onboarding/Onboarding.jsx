@@ -5,6 +5,7 @@ import OnboardingProfessional from './OnboardingProfessional'
 import OnboardingQuote from './OnboardingQuote'
 import OnboardingJoy from './OnboardingJoy'
 import OnboardingIntro from './OnboardingIntro'
+import OnboardingLocation from './OnboardingLocation'
 import OnboardingComplete from './OnboardingComplete'
 
 function Onboarding() {
@@ -17,6 +18,7 @@ function Onboarding() {
     <OnboardingQuote key="quote" />,
     <OnboardingJoy key="joy" />,
     <OnboardingIntro key="intro" />,
+    <OnboardingLocation key="location" />,
     <OnboardingComplete key="complete" />
   ]
 
