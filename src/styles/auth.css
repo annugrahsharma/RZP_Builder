@@ -16,7 +16,7 @@
 }
 
 .auth-logo-img {
-  width: 140px;
+  width: 70px;
   height: auto;
 }
 
@@ -28,9 +28,9 @@
 
 .auth-title {
   font-family: var(--font-primary);
-  font-size: 26px;
+  font-size: 52px;
   font-weight: 700;
-  color: var(--primary-green);
+  color: #000000;
   line-height: 1;
   margin-bottom: 8px;
 }
