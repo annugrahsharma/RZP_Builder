@@ -106,9 +106,6 @@ function Login() {
 
           {/* Footer with Need Assistance */}
           <div className="auth-footer">
-            <p className="auth-footer-text">
-              This is an invite-only community
-            </p>
             <button
               className="need-assistance-link"
               onClick={() => setShowAssistanceModal(true)}
