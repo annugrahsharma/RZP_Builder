@@ -2,7 +2,8 @@ import { useOnboarding } from '../../context/OnboardingContext'
 import OnboardingWelcome from './OnboardingWelcome'
 import OnboardingBasicInfo from './OnboardingBasicInfo'
 import OnboardingProfessional from './OnboardingProfessional'
-import OnboardingPersonal from './OnboardingPersonal'
+import OnboardingQuote from './OnboardingQuote'
+import OnboardingJoy from './OnboardingJoy'
 import OnboardingComplete from './OnboardingComplete'
 
 function Onboarding() {
@@ -12,7 +13,8 @@ function Onboarding() {
     <OnboardingWelcome key="welcome" />,
     <OnboardingBasicInfo key="basic-info" />,
     <OnboardingProfessional key="professional" />,
-    <OnboardingPersonal key="personal" />,
+    <OnboardingQuote key="quote" />,
+    <OnboardingJoy key="joy" />,
     <OnboardingComplete key="complete" />
   ]
 

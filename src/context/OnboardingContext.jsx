@@ -34,7 +34,7 @@ export function OnboardingProvider({ children }) {
   const [profileData, setProfileData] = useState(initialProfileData)
   const [currentStep, setCurrentStep] = useState(0)
 
-  const totalSteps = 5 // Welcome, Name, Work, Personal, Complete
+  const totalSteps = 6 // Welcome, Name, Work, Quote, Joy, Complete
 
   const updateProfileData = (updates) => {
     setProfileData(prev => ({ ...prev, ...updates }))
