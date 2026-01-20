@@ -7,6 +7,7 @@ import OnboardingJoy from './OnboardingJoy'
 import OnboardingIntro from './OnboardingIntro'
 import OnboardingLocation from './OnboardingLocation'
 import OnboardingSocial from './OnboardingSocial'
+import OnboardingContent from './OnboardingContent'
 import OnboardingComplete from './OnboardingComplete'
 
 function Onboarding() {
@@ -21,6 +22,7 @@ function Onboarding() {
     <OnboardingIntro key="intro" />,
     <OnboardingLocation key="location" />,
     <OnboardingSocial key="social" />,
+    <OnboardingContent key="content" />,
     <OnboardingComplete key="complete" />
   ]
 
