@@ -1011,3 +1011,32 @@
 .add-content-link-btn:hover {
   background-color: var(--primary-green-light);
 }
+
+/* Other Social Handles */
+.other-socials-section {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--light-gray);
+}
+
+.other-socials-label {
+  margin-bottom: 12px;
+}
+
+.other-social-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.other-social-fields {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.other-social-item .delete-link-btn {
+  margin-top: 4px;
+}

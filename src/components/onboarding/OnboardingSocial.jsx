@@ -1,8 +1,10 @@
+import { useState } from 'react'
 import { useOnboarding } from '../../context/OnboardingContext'
 import OnboardingLayout from './OnboardingLayout'
 
 function OnboardingSocial() {
   const { profileData, updateProfileData, nextStep } = useOnboarding()
+  const [otherLinks, setOtherLinks] = useState(profileData.otherSocialLinks || [])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -11,8 +13,30 @@ function OnboardingSocial() {
     updateProfileData({ [name]: cleanValue })
   }
 
+  const updateOtherLinks = (newLinks) => {
+    setOtherLinks(newLinks)
+    updateProfileData({ otherSocialLinks: newLinks })
+  }
+
+  const handleOtherLinkChange = (index, field, value) => {
+    const newLinks = [...otherLinks]
+    newLinks[index] = { ...newLinks[index], [field]: value }
+    updateOtherLinks(newLinks)
+  }
+
+  const addOtherLink = () => {
+    updateOtherLinks([...otherLinks, { platform: '', handle: '' }])
+  }
+
+  const removeOtherLink = (index) => {
+    const newLinks = otherLinks.filter((_, i) => i !== index)
+    updateOtherLinks(newLinks)
+  }
+
   const validateAndNext = () => {
-    // Social handles are optional, just move forward
+    // Filter out empty other links before saving
+    const validOtherLinks = otherLinks.filter(link => link.platform.trim() !== '' || link.handle.trim() !== '')
+    updateProfileData({ otherSocialLinks: validOtherLinks })
     nextStep()
   }
 
@@ -85,6 +109,56 @@ function OnboardingSocial() {
               onChange={handleChange}
             />
           </div>
+        </div>
+
+        {/* Other Social Handles */}
+        <div className="other-socials-section">
+          <label className="input-label other-socials-label">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="2" y1="12" x2="22" y2="12"/>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+            </svg>
+            Other Social Handles
+          </label>
+
+          {otherLinks.map((link, index) => (
+            <div key={index} className="other-social-item">
+              <div className="other-social-fields">
+                <input
+                  type="text"
+                  className="input-field"
+                  placeholder="Platform (e.g., YouTube, TikTok)"
+                  value={link.platform}
+                  onChange={(e) => handleOtherLinkChange(index, 'platform', e.target.value)}
+                />
+                <input
+                  type="text"
+                  className="input-field"
+                  placeholder="@username or profile URL"
+                  value={link.handle}
+                  onChange={(e) => handleOtherLinkChange(index, 'handle', e.target.value)}
+                />
+              </div>
+              <button
+                type="button"
+                className="delete-link-btn"
+                onClick={() => removeOtherLink(index)}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                </svg>
+              </button>
+            </div>
+          ))}
+
+          <button type="button" className="add-content-link-btn" onClick={addOtherLink}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Add Other Social Handle
+          </button>
         </div>
 
         <button className="btn-primary" onClick={validateAndNext}>
