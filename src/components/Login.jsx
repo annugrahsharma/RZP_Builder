@@ -41,7 +41,7 @@ function Login() {
 
           {/* Welcome Text */}
           <div className="auth-welcome">
-            <h1 className="auth-title">Gang 360</h1>
+            <h1 className="auth-title">Welcome to Gang 360</h1>
             <p className="auth-subtitle">Sign in to continue</p>
           </div>
 
