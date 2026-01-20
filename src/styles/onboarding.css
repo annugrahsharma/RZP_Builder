@@ -816,3 +816,13 @@
 .input-naked::placeholder {
   color: var(--medium-gray);
 }
+
+.input-field-with-icon .intro-icon {
+  font-size: 20px;
+}
+
+.word-counter-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
