@@ -62,8 +62,8 @@ function Login() {
 
           {/* Welcome Text */}
           <div className="auth-welcome">
-            <h1 className="auth-title">Hey, Welcome Back!</h1>
-            <p className="auth-subtitle">Sign in to continue to Super Morpheus</p>
+            <h1 className="auth-title">Gang 360</h1>
+            <p className="auth-subtitle">Sign in to continue</p>
           </div>
 
           {/* Login Form */}
