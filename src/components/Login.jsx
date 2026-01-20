@@ -10,6 +10,7 @@ function Login() {
     password: ''
   })
   const [showPassword, setShowPassword] = useState(false)
+  const [showAssistanceModal, setShowAssistanceModal] = useState(false)
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -103,14 +104,64 @@ function Login() {
             </button>
           </form>
 
-          {/* Invite-only notice */}
+          {/* Footer with Need Assistance */}
           <div className="auth-footer">
             <p className="auth-footer-text">
               This is an invite-only community
             </p>
+            <button
+              className="need-assistance-link"
+              onClick={() => setShowAssistanceModal(true)}
+            >
+              Need Assistance?
+            </button>
           </div>
         </div>
       </div>
+
+      {/* Assistance Modal */}
+      {showAssistanceModal && (
+        <div className="modal-overlay" onClick={() => setShowAssistanceModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="modal-close"
+              onClick={() => setShowAssistanceModal(false)}
+              aria-label="Close modal"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+
+            <h2 className="modal-title">Need Assistance?</h2>
+
+            <p className="modal-description">
+              If you need any assistance with accessing or using the platform, please reach out to us.
+            </p>
+
+            <div className="modal-contact">
+              <div className="contact-item">
+                <span className="contact-label">Email:</span>
+                <a href="mailto:gang360@supermorpheus.com" className="contact-link">
+                  gang360@supermorpheus.com
+                </a>
+              </div>
+
+              <div className="contact-item">
+                <span className="contact-label">Phone:</span>
+                <a href="tel:+919711493162" className="contact-link">
+                  +91-97114-93162
+                </a>
+              </div>
+            </div>
+
+            <p className="modal-note">
+              We'll get back to you quickly to help you access your account.
+            </p>
+          </div>
+        </div>
+      )}
     </>
   )
 }

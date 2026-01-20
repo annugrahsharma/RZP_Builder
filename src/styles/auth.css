@@ -264,3 +264,115 @@
 .terms-checkbox a:hover {
   text-decoration: underline;
 }
+
+/* Need Assistance Link */
+.need-assistance-link {
+  background: none;
+  border: none;
+  font-family: var(--font-secondary);
+  font-size: 15px;
+  color: var(--primary-green);
+  cursor: pointer;
+  margin-top: 12px;
+  text-decoration: none;
+}
+
+.need-assistance-link:hover {
+  text-decoration: underline;
+}
+
+/* Modal Overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+/* Modal Content */
+.modal-content {
+  background-color: var(--white);
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 340px;
+  width: 100%;
+  position: relative;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+}
+
+.modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--medium-gray);
+  padding: 4px;
+}
+
+.modal-close:hover {
+  color: var(--dark-gray);
+}
+
+.modal-title {
+  font-family: var(--font-primary);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--dark-gray);
+  margin-bottom: 16px;
+  padding-right: 32px;
+}
+
+.modal-description {
+  font-family: var(--font-secondary);
+  font-size: 15px;
+  color: var(--medium-gray);
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.modal-contact {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.contact-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.contact-label {
+  font-family: var(--font-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--dark-gray);
+}
+
+.contact-link {
+  font-family: var(--font-secondary);
+  font-size: 16px;
+  color: var(--primary-green);
+  text-decoration: none;
+}
+
+.contact-link:hover {
+  text-decoration: underline;
+}
+
+.modal-note {
+  font-family: var(--font-secondary);
+  font-size: 14px;
+  color: var(--medium-gray);
+  line-height: 1.5;
+}
