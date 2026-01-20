@@ -3,28 +3,6 @@ import { Link, useNavigate } from 'react-router-dom'
 import StatusBar from './StatusBar'
 import '../styles/auth.css'
 
-// SuperMorpheus Logo Icon Component
-function SuperMorpheusLogo({ size = 80 }) {
-  return (
-    <svg width={size} height={size * 1.52} viewBox="0 0 422 642" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* Aspiration - Bottom */}
-      <path d="M-1.732 36.95L207.99 9.474L241.622 59.531L-18.994 129.523Z" transform="translate(48.317 512.358)" fill="#D5CC8E"/>
-      {/* Courage */}
-      <path d="M20.351 34.309L226.646 0L257.7 49.431L0 128.222Z" transform="translate(36.792 400.951) rotate(13)" fill="#648349"/>
-      {/* Sincerity */}
-      <path d="M22.2 39.027L224.841 0L254.008 49.687L0 135.008Z" transform="translate(54.913 289.077) rotate(24)" fill="#E2B910"/>
-      {/* Perseverance */}
-      <path d="M224.361 36.95L14.638 9.474L-18.994 59.531L241.624 129.522Z" transform="translate(150.696 259.618)" fill="#D5CC8E"/>
-      {/* Generosity */}
-      <path d="M20.352 93.913L226.652 128.222L257.7 78.792L0 0Z" transform="translate(413.696 273.146) rotate(167)" fill="#648349"/>
-      {/* Progress */}
-      <path d="M22.2 95.981L224.842 135.008L254.009 85.321L0 0Z" transform="matrix(-0.914, 0.407, -0.407, -0.914, 421.641, 159.672)" fill="#E2B910"/>
-      {/* Truth - Top circle */}
-      <ellipse cx="330.446" cy="36" rx="36.5" ry="36" fill="#F0BA3F"/>
-    </svg>
-  )
-}
-
 function Signup() {
   const navigate = useNavigate()
   const [formData, setFormData] = useState({
@@ -75,9 +53,13 @@ function Signup() {
       <StatusBar />
       <div className="page-content">
         <div className="auth-screen">
-          {/* SuperMorpheus Logo */}
+          {/* SuperMorpheus Full Logo */}
           <div className="auth-logo">
-            <SuperMorpheusLogo size={70} />
+            <img
+              src="/SM/SM_Color_Whole.png"
+              alt="Super Morpheus"
+              className="auth-logo-img"
+            />
           </div>
 
           {/* Welcome Text */}
