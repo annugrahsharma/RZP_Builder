@@ -33,7 +33,7 @@ function OnboardingComplete() {
         <div className="complete-content">
           <h1 className="complete-title">You're All Set!</h1>
           <p className="complete-subtitle">
-            Your profile is ready. Welcome to the Gang 360 community!
+            Your profile is ready. Welcome to the Super Morpheus community!
           </p>
         </div>
 

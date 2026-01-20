@@ -136,18 +136,9 @@
 }
 
 .welcome-logo {
-  margin-bottom: 32px;
-}
-
-.welcome-logo-icon {
-  width: 80px;
-  height: 80px;
-  background-color: var(--primary-green-light);
-  border-radius: 20px;
+  margin-bottom: 24px;
   display: flex;
-  align-items: center;
   justify-content: center;
-  color: var(--primary-green);
 }
 
 .welcome-content {

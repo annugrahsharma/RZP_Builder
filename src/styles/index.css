@@ -1,12 +1,50 @@
-/* G360 Design System - Base Styles */
+/* SuperMorpheus Design System - Base Styles */
+
+/* Font Definitions */
+@font-face {
+  font-family: 'DIN Condensed';
+  src: url('/SM/fonts/DIN Condensed Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'DIN Alternate';
+  src: url('/SM/fonts/DIN Alternate Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Eina';
+  src: url('/SM/fonts/Eina01-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Eina';
+  src: url('/SM/fonts/Eina01-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Eina';
+  src: url('/SM/fonts/Eina01-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+}
 
 :root {
-  /* Primary Colors */
-  --primary-green: #648349;
+  /* SuperMorpheus Brand Colors */
+  --primary-green: #648349;        /* Meta Green */
   --primary-green-light: #EDFAE2;
+  --milk-green: #D5CC8E;           /* Milk Green */
 
   /* Secondary Colors */
-  --golden-orange: #F0BA3F;
+  --golden-orange: #E2B910;        /* One Gold */
+  --truth-orange: #F0BA3F;         /* Truth (logo top) */
   --event-card-bg: #FFF6DA;
   --notification-red: #E53935;
 
@@ -17,10 +55,11 @@
   --light-gray: #F5F5F5;
   --border-gray: #E0E0E0;
 
-  /* Typography */
-  --font-primary: 'Proxima Nova', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-secondary: 'DM Sans', sans-serif;
-  --font-accent: 'IBM Plex Sans', sans-serif;
+  /* Typography - SuperMorpheus Brand Fonts */
+  --font-logo: 'DIN Condensed', sans-serif;
+  --font-primary: 'DIN Alternate', 'DIN Condensed', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-secondary: 'Eina', 'DM Sans', sans-serif;
+  --font-accent: 'Eina', 'IBM Plex Sans', sans-serif;
 
   /* Spacing */
   --space-xs: 4px;
@@ -43,31 +82,9 @@
 }
 
 body {
-  font-family: var(--font-primary);
+  font-family: var(--font-secondary);
   background-color: #f0f0f0;
   color: var(--dark-gray);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-/* Proxima Nova fallback using system fonts */
-@font-face {
-  font-family: 'Proxima Nova';
-  src: local('Proxima Nova'), local('ProximaNova-Regular'), local('-apple-system');
-  font-weight: 400;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Proxima Nova';
-  src: local('Proxima Nova Semibold'), local('ProximaNova-Semibold'), local('-apple-system');
-  font-weight: 600;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Proxima Nova';
-  src: local('Proxima Nova Bold'), local('ProximaNova-Bold'), local('-apple-system');
-  font-weight: 700;
-  font-style: normal;
 }
