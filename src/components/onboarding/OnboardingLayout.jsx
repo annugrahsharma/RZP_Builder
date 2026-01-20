@@ -5,7 +5,7 @@ import '../../styles/onboarding.css'
 function OnboardingLayout({ children, showProgress = true, showBack = true }) {
   const { currentStep, totalSteps, prevStep, getCompletionPercentage } = useOnboarding()
 
-  const stepLabels = ['Welcome', 'Name', 'Work', 'Quote', 'Joy', 'Intro', 'Location', 'Complete']
+  const stepLabels = ['Welcome', 'Name', 'Work', 'Quote', 'Joy', 'Intro', 'Location', 'Social', 'Complete']
 
   return (
     <>
