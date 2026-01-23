@@ -120,7 +120,7 @@ function OnboardingVideoProfessional() {
           <div className="video-tips">
             <h4>Tips for a great video:</h4>
             <ul>
-              <li>Keep it under 2 minutes</li>
+              <li>Find a quiet, well-lit space</li>
               <li>Share your career highlights and learnings</li>
               <li>Mention key projects or achievements</li>
             </ul>

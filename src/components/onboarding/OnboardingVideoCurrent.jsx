@@ -120,7 +120,7 @@ function OnboardingVideoCurrent() {
           <div className="video-tips">
             <h4>Tips for a great video:</h4>
             <ul>
-              <li>Keep it under 2 minutes</li>
+              <li>Find a quiet, well-lit space</li>
               <li>Share what you're passionate about right now</li>
               <li>Mention how you'd like to connect with others</li>
             </ul>

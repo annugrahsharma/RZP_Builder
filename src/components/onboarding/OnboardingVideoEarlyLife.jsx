@@ -121,9 +121,9 @@ function OnboardingVideoEarlyLife() {
           <div className="video-tips">
             <h4>Tips for a great video:</h4>
             <ul>
-              <li>Keep it under 2 minutes</li>
               <li>Find a quiet, well-lit space</li>
               <li>Share memorable moments from your early years</li>
+              <li>Talk about where you grew up and formative experiences</li>
             </ul>
           </div>
         </div>
