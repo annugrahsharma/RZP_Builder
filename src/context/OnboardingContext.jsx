@@ -28,14 +28,22 @@ const initialProfileData = {
   instagram: '',
   linkedin: '',
   contentLinks: [],
-  otherSocialLinks: []
+  otherSocialLinks: [],
+
+  // Video Introductions
+  videoEarlyLife: null,
+  videoEarlyLifeUrl: null,
+  videoProfessional: null,
+  videoProfessionalUrl: null,
+  videoCurrent: null,
+  videoCurrentUrl: null
 }
 
 export function OnboardingProvider({ children }) {
   const [profileData, setProfileData] = useState(initialProfileData)
   const [currentStep, setCurrentStep] = useState(0)
 
-  const totalSteps = 10 // Welcome, Name, Work, Quote, Joy, Intro, Location, Social, Content, Complete
+  const totalSteps = 13 // Welcome, Name, Work, Quote, Joy, Intro, Location, Social, Content, VideoEarly, VideoPro, VideoCurrent, Complete
 
   const updateProfileData = (updates) => {
     setProfileData(prev => ({ ...prev, ...updates }))
