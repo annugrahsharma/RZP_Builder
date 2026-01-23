@@ -67,8 +67,24 @@ function OnboardingVideoCurrent() {
     <OnboardingLayout>
       <div className="onboarding-form">
         <div className="form-header">
-          <h1 className="form-title">Your Current Life</h1>
-          <p className="form-subtitle">Record a short video about what you're working on now, your current focus, and what excites you</p>
+          <h1 className="form-title">Let's Create Your Current Life Video / Audio</h1>
+          <p className="form-subtitle">Give gang members an overview of your current life.</p>
+        </div>
+
+        <div className="video-prompt-list">
+          <p className="prompt-intro"><strong>Personal:</strong></p>
+          <ul>
+            <li>Location / base, family, friends, areas of interest</li>
+          </ul>
+
+          <p className="prompt-intro"><strong>Professional:</strong></p>
+          <ul>
+            <li>Name of your current organisation and your work profile</li>
+            <li>How and when did you start this journey / role?</li>
+            <li>What work does the organisation do — problems solved via products, solutions, services</li>
+            <li>Current state — progress in terms of products, customers, revenues, team size</li>
+            <li>Anything interesting about your organisation / startup, team etc.</li>
+          </ul>
         </div>
 
         <div className="video-recording-section">
@@ -118,12 +134,7 @@ function OnboardingVideoCurrent() {
           </div>
 
           <div className="video-tips">
-            <h4>Tips for a great video:</h4>
-            <ul>
-              <li>Find a quiet, well-lit space</li>
-              <li>Share what you're passionate about right now</li>
-              <li>Mention how you'd like to connect with others</li>
-            </ul>
+            <p>Find a quiet, well-lit space for best results.</p>
           </div>
         </div>
 

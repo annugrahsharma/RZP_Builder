@@ -1226,3 +1226,60 @@
   left: 6px;
   color: var(--primary-green);
 }
+
+.video-tips p {
+  font-family: var(--font-secondary);
+  font-size: 13px;
+  color: var(--medium-gray);
+  margin: 0;
+}
+
+/* Video Prompt List */
+.video-prompt-list {
+  background-color: var(--light-gray);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.video-prompt-list .prompt-intro {
+  font-family: var(--font-secondary);
+  font-size: 14px;
+  color: var(--dark-gray);
+  margin: 0 0 10px 0;
+}
+
+.video-prompt-list .prompt-intro:not(:first-child) {
+  margin-top: 16px;
+}
+
+.video-prompt-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.video-prompt-list li {
+  font-family: var(--font-secondary);
+  font-size: 13px;
+  color: var(--medium-gray);
+  padding-left: 20px;
+  position: relative;
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.video-prompt-list li:last-child {
+  margin-bottom: 0;
+}
+
+.video-prompt-list li::before {
+  content: "•";
+  position: absolute;
+  left: 6px;
+  color: var(--primary-green);
+}
+
+.video-prompt-list li strong {
+  color: var(--dark-gray);
+}

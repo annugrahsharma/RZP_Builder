@@ -68,8 +68,21 @@ function OnboardingVideoEarlyLife() {
     <OnboardingLayout>
       <div className="onboarding-form">
         <div className="form-header">
-          <h1 className="form-title">Your Early Life</h1>
-          <p className="form-subtitle">Record a short video about where you grew up, your childhood, and formative experiences</p>
+          <h1 className="form-title">Let's Create Your Early Life Video / Audio</h1>
+          <p className="form-subtitle">In this video / audio, tell gang members the story of your early life.</p>
+        </div>
+
+        <div className="video-prompt-list">
+          <p className="prompt-intro">You can talk about:</p>
+          <ul>
+            <li>Places where you were born and grew up</li>
+            <li>Various cities you lived in and experienced</li>
+            <li>Family and parents</li>
+            <li>Who were your friends — what did you do together?</li>
+            <li>What were the things that interested you?</li>
+            <li>Educational institutes you attended — schools, colleges, universities. Give some idea of timelines.</li>
+            <li>Anything else that feels natural for this video / audio</li>
+          </ul>
         </div>
 
         <div className="video-recording-section">
@@ -119,12 +132,7 @@ function OnboardingVideoEarlyLife() {
           </div>
 
           <div className="video-tips">
-            <h4>Tips for a great video:</h4>
-            <ul>
-              <li>Find a quiet, well-lit space</li>
-              <li>Share memorable moments from your early years</li>
-              <li>Talk about where you grew up and formative experiences</li>
-            </ul>
+            <p>Find a quiet, well-lit space for best results.</p>
           </div>
         </div>
 

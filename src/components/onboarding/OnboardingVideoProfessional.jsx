@@ -67,8 +67,19 @@ function OnboardingVideoProfessional() {
     <OnboardingLayout>
       <div className="onboarding-form">
         <div className="form-header">
-          <h1 className="form-title">Your Professional Journey</h1>
-          <p className="form-subtitle">Record a short video about your career path, key milestones, and professional experiences</p>
+          <h1 className="form-title">Let's Create Your Professional Life Video / Audio</h1>
+          <p className="form-subtitle">Give a glimpse of your career journey, roles, organisations, learnings, experiences, and locations.</p>
+        </div>
+
+        <div className="video-prompt-list">
+          <p className="prompt-intro">Try to follow a chronological order with a sense of timelines:</p>
+          <ul>
+            <li>No. of years in your professional journey</li>
+            <li>Various jobs including titles (analyst, director, etc.) / roles as intern, employee, founder, owner, freelancer</li>
+            <li>Organisations you have worked with — role, work, duration, cities / countries</li>
+            <li>From each role — share specific learnings, experiences, or incidents that stand out</li>
+            <li>Cover all career <strong>except</strong> what you are doing right now</li>
+          </ul>
         </div>
 
         <div className="video-recording-section">
@@ -118,12 +129,7 @@ function OnboardingVideoProfessional() {
           </div>
 
           <div className="video-tips">
-            <h4>Tips for a great video:</h4>
-            <ul>
-              <li>Find a quiet, well-lit space</li>
-              <li>Share your career highlights and learnings</li>
-              <li>Mention key projects or achievements</li>
-            </ul>
+            <p>Find a quiet, well-lit space for best results.</p>
           </div>
         </div>
 
