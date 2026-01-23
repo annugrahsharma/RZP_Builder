@@ -38,7 +38,14 @@ const initialProfileData = {
       videoUrl: null,
       audioBlob: null,
       audioUrl: null,
-      text: ''
+      text: '',
+      // Extracted/editable content
+      interests: [],
+      bornIn: '',
+      hometown: '',
+      schools: [], // { name, location }
+      universities: [], // { name, location, major }
+      summary: ''
     },
     professional: {
       inputMethod: null,
@@ -46,7 +53,12 @@ const initialProfileData = {
       videoUrl: null,
       audioBlob: null,
       audioUrl: null,
-      text: ''
+      text: '',
+      // Extracted/editable content
+      skills: [],
+      firstJob: null, // { company, titles: [] }
+      subsequentJobs: [], // { company, titles: [] }
+      summary: ''
     },
     current: {
       inputMethod: null,
@@ -54,7 +66,12 @@ const initialProfileData = {
       videoUrl: null,
       audioBlob: null,
       audioUrl: null,
-      text: ''
+      text: '',
+      // Extracted/editable content
+      interests: [],
+      rolesOrganizations: [], // { organization, role }
+      travelCities: [],
+      summary: ''
     }
   }
 }
@@ -117,7 +134,7 @@ export function OnboardingProvider({ children }) {
 
   // Life stories flow state
   const [selectedLifeStory, setSelectedLifeStory] = useState(null) // 'earlyLife', 'professional', 'current'
-  const [lifeStorySubStep, setLifeStorySubStep] = useState('selection') // 'selection', 'prompts', 'inputMethod', 'input'
+  const [lifeStorySubStep, setLifeStorySubStep] = useState('selection') // 'selection', 'prompts', 'inputMethod', 'input', 'confirm'
 
   const totalSteps = 11 // Welcome, Name, Work, Quote, Joy, Intro, Location, Social, Content, LifeStories, Complete
 
@@ -168,7 +185,16 @@ export function OnboardingProvider({ children }) {
 
   const selectInputMethod = (method) => {
     updateLifeStory(selectedLifeStory, { inputMethod: method })
-    setLifeStorySubStep('input')
+    // For text, skip input and go directly to confirm
+    if (method === 'text') {
+      setLifeStorySubStep('confirm')
+    } else {
+      setLifeStorySubStep('input')
+    }
+  }
+
+  const goToConfirmation = () => {
+    setLifeStorySubStep('confirm')
   }
 
   const backToLifeStorySelection = () => {
@@ -184,6 +210,16 @@ export function OnboardingProvider({ children }) {
     setLifeStorySubStep('inputMethod')
   }
 
+  const backToInput = () => {
+    const story = profileData.lifeStories[selectedLifeStory]
+    // For text, go back to input method since there's no separate input step
+    if (story.inputMethod === 'text') {
+      setLifeStorySubStep('inputMethod')
+    } else {
+      setLifeStorySubStep('input')
+    }
+  }
+
   const completeLifeStory = () => {
     setSelectedLifeStory(null)
     setLifeStorySubStep('selection')
@@ -191,11 +227,8 @@ export function OnboardingProvider({ children }) {
 
   const isLifeStoryComplete = (storyKey) => {
     const story = profileData.lifeStories[storyKey]
-    if (!story.inputMethod) return false
-    if (story.inputMethod === 'video') return !!story.videoUrl
-    if (story.inputMethod === 'audio') return !!story.audioUrl
-    if (story.inputMethod === 'text') return story.text.trim().length > 0
-    return false
+    // Check if confirmation data exists (summary is filled)
+    return story.summary && story.summary.trim().length > 0
   }
 
   const getCompletionPercentage = () => {
@@ -233,9 +266,11 @@ export function OnboardingProvider({ children }) {
     selectLifeStory,
     goToInputMethodSelection,
     selectInputMethod,
+    goToConfirmation,
     backToLifeStorySelection,
     backToPrompts,
     backToInputMethod,
+    backToInput,
     completeLifeStory,
     isLifeStoryComplete
   }

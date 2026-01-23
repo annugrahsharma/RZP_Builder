@@ -1635,3 +1635,260 @@
 .video-prompt-list.collapsed-by-default {
   margin-bottom: 16px;
 }
+
+/* ==================== */
+/* Confirmation Screens */
+/* ==================== */
+
+.confirm-media-preview {
+  margin-bottom: 24px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.confirm-video {
+  width: 100%;
+  max-height: 200px;
+  background-color: var(--dark-gray);
+  border-radius: 12px;
+}
+
+.confirm-audio {
+  width: 100%;
+  height: 48px;
+}
+
+.confirm-section {
+  margin-bottom: 24px;
+}
+
+.section-divider-line {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.section-divider-line::before,
+.section-divider-line::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background-color: var(--light-gray);
+}
+
+.section-divider-line span {
+  padding: 0 16px;
+  font-family: var(--font-secondary);
+  font-size: 12px;
+  color: var(--medium-gray);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Tags */
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background-color: var(--primary-green-light);
+  color: var(--primary-green);
+  border-radius: 20px;
+  font-family: var(--font-secondary);
+  font-size: 13px;
+}
+
+.tag-location {
+  background-color: #E3F2FD;
+  color: #1976D2;
+}
+
+.tag-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.tag-remove:hover {
+  opacity: 1;
+}
+
+.tag-input-row {
+  display: flex;
+  gap: 8px;
+}
+
+.tag-input-row .input-field {
+  flex: 1;
+}
+
+.add-tag-btn {
+  padding: 0 20px;
+  background-color: var(--primary-green);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-family: var(--font-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.add-tag-btn:hover {
+  background-color: #567339;
+}
+
+/* Entry Cards */
+.entry-card {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 16px;
+  background-color: var(--light-gray);
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+
+.entry-fields {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.entry-remove-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: #e74c3c;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.entry-remove-btn:hover {
+  background-color: rgba(231, 76, 60, 0.1);
+}
+
+.add-entry-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px;
+  background: transparent;
+  border: 2px dashed var(--primary-green);
+  border-radius: 10px;
+  color: var(--primary-green);
+  font-family: var(--font-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.add-entry-btn:hover {
+  background-color: var(--primary-green-light);
+}
+
+/* Job Entry Cards */
+.job-entry-card {
+  padding: 16px;
+  background-color: var(--light-gray);
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+
+.job-entry-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+
+.job-entry-card .input-group {
+  margin-bottom: 12px;
+}
+
+.job-entry-card .input-group:last-child {
+  margin-bottom: 0;
+}
+
+.input-label.small {
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+/* Titles List */
+.titles-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.title-input-row {
+  display: flex;
+  gap: 8px;
+}
+
+.title-input-row .input-field {
+  flex: 1;
+}
+
+.title-remove-btn {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: #e74c3c;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.title-remove-btn:hover {
+  background-color: rgba(231, 76, 60, 0.1);
+}
+
+.add-title-btn {
+  align-self: flex-start;
+  padding: 8px 16px;
+  background: transparent;
+  border: none;
+  color: var(--primary-green);
+  font-family: var(--font-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  border-radius: 6px;
+}
+
+.add-title-btn:hover {
+  background-color: var(--primary-green-light);
+}

@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import { useOnboarding, lifeStoryPrompts } from '../../context/OnboardingContext'
 
 function LifeStoryVideoInput({ storyKey }) {
-  const { profileData, updateLifeStory, completeLifeStory } = useOnboarding()
+  const { profileData, updateLifeStory, goToConfirmation } = useOnboarding()
   const storyData = profileData.lifeStories[storyKey]
   const story = lifeStoryPrompts[storyKey]
 
@@ -60,7 +60,7 @@ function LifeStoryVideoInput({ storyKey }) {
   }
 
   const handleSave = () => {
-    completeLifeStory()
+    goToConfirmation()
   }
 
   return (
