@@ -30,23 +30,112 @@ const initialProfileData = {
   contentLinks: [],
   otherSocialLinks: [],
 
-  // Video Introductions
-  videoEarlyLife: null,
-  videoEarlyLifeUrl: null,
-  videoProfessional: null,
-  videoProfessionalUrl: null,
-  videoCurrent: null,
-  videoCurrentUrl: null
+  // Life Stories
+  lifeStories: {
+    earlyLife: {
+      inputMethod: null, // 'video', 'audio', 'text'
+      videoBlob: null,
+      videoUrl: null,
+      audioBlob: null,
+      audioUrl: null,
+      text: ''
+    },
+    professional: {
+      inputMethod: null,
+      videoBlob: null,
+      videoUrl: null,
+      audioBlob: null,
+      audioUrl: null,
+      text: ''
+    },
+    current: {
+      inputMethod: null,
+      videoBlob: null,
+      videoUrl: null,
+      audioBlob: null,
+      audioUrl: null,
+      text: ''
+    }
+  }
+}
+
+// Life story prompts data
+export const lifeStoryPrompts = {
+  earlyLife: {
+    title: 'Your Early Life',
+    subtitle: 'Tell gang members the story of your early life',
+    icon: '🌱',
+    prompts: [
+      'Places where you were born and grew up',
+      'Various cities you lived in and experienced',
+      'Family and parents',
+      'Who were your friends — what did you do together?',
+      'What were the things that interested you?',
+      'Educational institutes you attended — schools, colleges, universities. Give some idea of timelines.',
+      'Anything else that feels natural'
+    ]
+  },
+  professional: {
+    title: 'Your Professional Life',
+    subtitle: 'Share your professional journey and career experiences',
+    icon: '💼',
+    introText: 'Try to follow a chronological order with a sense of timelines:',
+    prompts: [
+      'No. of years in your professional journey',
+      'Various jobs including titles / roles as intern, employee, founder, owner, freelancer',
+      'Organisations you have worked with — role, work, duration, cities / countries',
+      'From each role — share specific learnings, experiences, or incidents that stand out',
+      'Cover all career except what you are doing right now'
+    ]
+  },
+  current: {
+    title: 'Your Current Life',
+    subtitle: 'Tell us about your life and work right now',
+    icon: '✨',
+    sections: [
+      {
+        title: 'Personal',
+        prompts: ['Location / base, family, friends, areas of interest']
+      },
+      {
+        title: 'Professional',
+        prompts: [
+          'Name of your current organisation and your work profile',
+          'How and when did you start this journey / role?',
+          'What work does the organisation do — problems solved via products, solutions, services',
+          'Current state — progress in terms of products, customers, revenues, team size',
+          'Anything interesting about your organisation / startup, team etc.'
+        ]
+      }
+    ]
+  }
 }
 
 export function OnboardingProvider({ children }) {
   const [profileData, setProfileData] = useState(initialProfileData)
   const [currentStep, setCurrentStep] = useState(0)
 
-  const totalSteps = 13 // Welcome, Name, Work, Quote, Joy, Intro, Location, Social, Content, VideoEarly, VideoPro, VideoCurrent, Complete
+  // Life stories flow state
+  const [selectedLifeStory, setSelectedLifeStory] = useState(null) // 'earlyLife', 'professional', 'current'
+  const [lifeStorySubStep, setLifeStorySubStep] = useState('selection') // 'selection', 'prompts', 'inputMethod', 'input'
+
+  const totalSteps = 11 // Welcome, Name, Work, Quote, Joy, Intro, Location, Social, Content, LifeStories, Complete
 
   const updateProfileData = (updates) => {
     setProfileData(prev => ({ ...prev, ...updates }))
+  }
+
+  const updateLifeStory = (storyKey, updates) => {
+    setProfileData(prev => ({
+      ...prev,
+      lifeStories: {
+        ...prev.lifeStories,
+        [storyKey]: {
+          ...prev.lifeStories[storyKey],
+          ...updates
+        }
+      }
+    }))
   }
 
   const nextStep = () => {
@@ -65,6 +154,48 @@ export function OnboardingProvider({ children }) {
     if (step >= 0 && step < totalSteps) {
       setCurrentStep(step)
     }
+  }
+
+  // Life stories navigation
+  const selectLifeStory = (storyKey) => {
+    setSelectedLifeStory(storyKey)
+    setLifeStorySubStep('prompts')
+  }
+
+  const goToInputMethodSelection = () => {
+    setLifeStorySubStep('inputMethod')
+  }
+
+  const selectInputMethod = (method) => {
+    updateLifeStory(selectedLifeStory, { inputMethod: method })
+    setLifeStorySubStep('input')
+  }
+
+  const backToLifeStorySelection = () => {
+    setSelectedLifeStory(null)
+    setLifeStorySubStep('selection')
+  }
+
+  const backToPrompts = () => {
+    setLifeStorySubStep('prompts')
+  }
+
+  const backToInputMethod = () => {
+    setLifeStorySubStep('inputMethod')
+  }
+
+  const completeLifeStory = () => {
+    setSelectedLifeStory(null)
+    setLifeStorySubStep('selection')
+  }
+
+  const isLifeStoryComplete = (storyKey) => {
+    const story = profileData.lifeStories[storyKey]
+    if (!story.inputMethod) return false
+    if (story.inputMethod === 'video') return !!story.videoUrl
+    if (story.inputMethod === 'audio') return !!story.audioUrl
+    if (story.inputMethod === 'text') return story.text.trim().length > 0
+    return false
   }
 
   const getCompletionPercentage = () => {
@@ -88,13 +219,25 @@ export function OnboardingProvider({ children }) {
   const value = {
     profileData,
     updateProfileData,
+    updateLifeStory,
     currentStep,
     setCurrentStep,
     totalSteps,
     nextStep,
     prevStep,
     goToStep,
-    getCompletionPercentage
+    getCompletionPercentage,
+    // Life stories
+    selectedLifeStory,
+    lifeStorySubStep,
+    selectLifeStory,
+    goToInputMethodSelection,
+    selectInputMethod,
+    backToLifeStorySelection,
+    backToPrompts,
+    backToInputMethod,
+    completeLifeStory,
+    isLifeStoryComplete
   }
 
   return (

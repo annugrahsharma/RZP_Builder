@@ -1322,3 +1322,316 @@
 .prompt-section-title:first-of-type {
   margin-top: 0;
 }
+
+/* ==================== */
+/* Life Stories Section */
+/* ==================== */
+
+/* Life Story Selection Cards */
+.life-story-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.life-story-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background-color: white;
+  border: 1px solid var(--light-gray);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.life-story-card:hover {
+  border-color: var(--primary-green);
+  background-color: var(--primary-green-light);
+}
+
+.life-story-card.completed {
+  border-color: var(--primary-green);
+}
+
+.story-card-icon {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  background-color: var(--light-gray);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+
+.life-story-card.completed .story-card-icon {
+  background-color: var(--primary-green-light);
+}
+
+.story-card-content {
+  flex: 1;
+}
+
+.story-card-title {
+  font-family: var(--font-primary);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--dark-gray);
+  margin-bottom: 2px;
+}
+
+.story-card-subtitle {
+  font-family: var(--font-secondary);
+  font-size: 13px;
+  color: var(--medium-gray);
+  margin: 0;
+}
+
+.story-card-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  padding: 3px 8px;
+  background-color: var(--primary-green-light);
+  color: var(--primary-green);
+  border-radius: 4px;
+  font-family: var(--font-secondary);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.story-card-arrow {
+  color: var(--medium-gray);
+}
+
+/* Story Header Icon */
+.story-header-icon {
+  font-size: 40px;
+  margin-bottom: 12px;
+}
+
+/* Input Method Selection */
+.input-method-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.input-method-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background-color: white;
+  border: 1px solid var(--light-gray);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.input-method-card:hover {
+  border-color: var(--primary-green);
+  background-color: var(--primary-green-light);
+}
+
+.method-card-icon {
+  width: 56px;
+  height: 56px;
+  min-width: 56px;
+  background-color: var(--light-gray);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--dark-gray);
+}
+
+.input-method-card:hover .method-card-icon {
+  background-color: white;
+  color: var(--primary-green);
+}
+
+.method-card-content {
+  flex: 1;
+}
+
+.method-card-title {
+  font-family: var(--font-primary);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--dark-gray);
+  margin-bottom: 4px;
+}
+
+.method-card-description {
+  font-family: var(--font-secondary);
+  font-size: 13px;
+  color: var(--medium-gray);
+  margin: 0;
+}
+
+.method-card-arrow {
+  color: var(--medium-gray);
+}
+
+/* Prompts Action Note */
+.prompts-action-note {
+  background-color: var(--primary-green-light);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.prompts-action-note p {
+  font-family: var(--font-secondary);
+  font-size: 14px;
+  color: var(--dark-gray);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Prompt Content */
+.prompt-content {
+  margin-top: 8px;
+}
+
+.prompt-intro-text {
+  font-family: var(--font-secondary);
+  font-size: 14px;
+  color: var(--dark-gray);
+  margin: 0 0 10px 0;
+}
+
+/* Audio Recording Section */
+.audio-recording-section {
+  margin-bottom: 24px;
+}
+
+.audio-container {
+  position: relative;
+  width: 100%;
+  min-height: 180px;
+  background-color: var(--light-gray);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.audio-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: var(--medium-gray);
+}
+
+.audio-placeholder span {
+  font-family: var(--font-secondary);
+  font-size: 14px;
+}
+
+.audio-icon-large {
+  width: 80px;
+  height: 80px;
+  background-color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--medium-gray);
+}
+
+.audio-recording-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.recording-pulse-ring {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background-color: rgba(231, 76, 60, 0.2);
+  animation: audio-pulse 1.5s ease-out infinite;
+}
+
+@keyframes audio-pulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+
+.audio-icon-recording {
+  width: 80px;
+  height: 80px;
+  background-color: #e74c3c;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  z-index: 1;
+}
+
+.recording-time {
+  font-family: var(--font-primary);
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--dark-gray);
+  margin-top: 8px;
+}
+
+.recording-label {
+  font-family: var(--font-secondary);
+  font-size: 14px;
+  color: #e74c3c;
+}
+
+.audio-player-container {
+  width: 100%;
+  padding: 20px;
+}
+
+.audio-player {
+  width: 100%;
+  height: 48px;
+}
+
+.audio-controls {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+/* Text Story Input */
+.text-input-section {
+  margin-bottom: 16px;
+}
+
+.text-story-input {
+  min-height: 200px;
+  line-height: 1.6;
+}
+
+/* Collapsed by default prompt list */
+.video-prompt-list.collapsed-by-default {
+  margin-bottom: 16px;
+}

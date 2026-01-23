@@ -8,9 +8,7 @@ import OnboardingIntro from './OnboardingIntro'
 import OnboardingLocation from './OnboardingLocation'
 import OnboardingSocial from './OnboardingSocial'
 import OnboardingContent from './OnboardingContent'
-import OnboardingVideoEarlyLife from './OnboardingVideoEarlyLife'
-import OnboardingVideoProfessional from './OnboardingVideoProfessional'
-import OnboardingVideoCurrent from './OnboardingVideoCurrent'
+import LifeStoriesHub from './LifeStoriesHub'
 import OnboardingComplete from './OnboardingComplete'
 
 function Onboarding() {
@@ -26,9 +24,7 @@ function Onboarding() {
     <OnboardingLocation key="location" />,
     <OnboardingSocial key="social" />,
     <OnboardingContent key="content" />,
-    <OnboardingVideoEarlyLife key="video-early" />,
-    <OnboardingVideoProfessional key="video-professional" />,
-    <OnboardingVideoCurrent key="video-current" />,
+    <LifeStoriesHub key="life-stories" />,
     <OnboardingComplete key="complete" />
   ]
 
