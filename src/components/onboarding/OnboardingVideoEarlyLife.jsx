@@ -7,6 +7,7 @@ function OnboardingVideoEarlyLife() {
   const [isRecording, setIsRecording] = useState(false)
   const [videoBlob, setVideoBlob] = useState(profileData.videoEarlyLife || null)
   const [videoUrl, setVideoUrl] = useState(profileData.videoEarlyLifeUrl || null)
+  const [promptsExpanded, setPromptsExpanded] = useState(true)
   const videoRef = useRef(null)
   const mediaRecorderRef = useRef(null)
   const chunksRef = useRef([])
@@ -73,16 +74,35 @@ function OnboardingVideoEarlyLife() {
         </div>
 
         <div className="video-prompt-list">
-          <p className="prompt-intro">You can talk about:</p>
-          <ul>
-            <li>Places where you were born and grew up</li>
-            <li>Various cities you lived in and experienced</li>
-            <li>Family and parents</li>
-            <li>Who were your friends — what did you do together?</li>
-            <li>What were the things that interested you?</li>
-            <li>Educational institutes you attended — schools, colleges, universities. Give some idea of timelines.</li>
-            <li>Anything else that feels natural for this video / audio</li>
-          </ul>
+          <button
+            type="button"
+            className="prompt-collapse-btn"
+            onClick={() => setPromptsExpanded(!promptsExpanded)}
+          >
+            <span className="prompt-intro">You can talk about:</span>
+            <svg
+              className={`collapse-chevron ${promptsExpanded ? 'expanded' : ''}`}
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path d="M6 9l6 6 6-6"/>
+            </svg>
+          </button>
+          {promptsExpanded && (
+            <ul>
+              <li>Places where you were born and grew up</li>
+              <li>Various cities you lived in and experienced</li>
+              <li>Family and parents</li>
+              <li>Who were your friends — what did you do together?</li>
+              <li>What were the things that interested you?</li>
+              <li>Educational institutes you attended — schools, colleges, universities. Give some idea of timelines.</li>
+              <li>Anything else that feels natural for this video / audio</li>
+            </ul>
+          )}
         </div>
 
         <div className="video-recording-section">

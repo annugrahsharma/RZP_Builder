@@ -1283,3 +1283,42 @@
 .video-prompt-list li strong {
   color: var(--dark-gray);
 }
+
+/* Collapsible Prompt Button */
+.prompt-collapse-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: none;
+  border: none;
+  padding: 0;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+.prompt-collapse-btn .prompt-intro {
+  margin: 0;
+  text-align: left;
+}
+
+.collapse-chevron {
+  color: var(--medium-gray);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.collapse-chevron.expanded {
+  transform: rotate(180deg);
+}
+
+.prompt-section-title {
+  font-family: var(--font-secondary);
+  font-size: 14px;
+  color: var(--dark-gray);
+  margin: 16px 0 10px 0;
+}
+
+.prompt-section-title:first-of-type {
+  margin-top: 0;
+}

@@ -7,6 +7,7 @@ function OnboardingVideoProfessional() {
   const [isRecording, setIsRecording] = useState(false)
   const [videoBlob, setVideoBlob] = useState(profileData.videoProfessional || null)
   const [videoUrl, setVideoUrl] = useState(profileData.videoProfessionalUrl || null)
+  const [promptsExpanded, setPromptsExpanded] = useState(true)
   const videoRef = useRef(null)
   const mediaRecorderRef = useRef(null)
   const chunksRef = useRef([])
@@ -72,14 +73,33 @@ function OnboardingVideoProfessional() {
         </div>
 
         <div className="video-prompt-list">
-          <p className="prompt-intro">Try to follow a chronological order with a sense of timelines:</p>
-          <ul>
-            <li>No. of years in your professional journey</li>
-            <li>Various jobs including titles (analyst, director, etc.) / roles as intern, employee, founder, owner, freelancer</li>
-            <li>Organisations you have worked with — role, work, duration, cities / countries</li>
-            <li>From each role — share specific learnings, experiences, or incidents that stand out</li>
-            <li>Cover all career <strong>except</strong> what you are doing right now</li>
-          </ul>
+          <button
+            type="button"
+            className="prompt-collapse-btn"
+            onClick={() => setPromptsExpanded(!promptsExpanded)}
+          >
+            <span className="prompt-intro">Try to follow a chronological order with a sense of timelines:</span>
+            <svg
+              className={`collapse-chevron ${promptsExpanded ? 'expanded' : ''}`}
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path d="M6 9l6 6 6-6"/>
+            </svg>
+          </button>
+          {promptsExpanded && (
+            <ul>
+              <li>No. of years in your professional journey</li>
+              <li>Various jobs including titles (analyst, director, etc.) / roles as intern, employee, founder, owner, freelancer</li>
+              <li>Organisations you have worked with — role, work, duration, cities / countries</li>
+              <li>From each role — share specific learnings, experiences, or incidents that stand out</li>
+              <li>Cover all career <strong>except</strong> what you are doing right now</li>
+            </ul>
+          )}
         </div>
 
         <div className="video-recording-section">

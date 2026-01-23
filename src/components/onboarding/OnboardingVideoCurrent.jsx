@@ -7,6 +7,7 @@ function OnboardingVideoCurrent() {
   const [isRecording, setIsRecording] = useState(false)
   const [videoBlob, setVideoBlob] = useState(profileData.videoCurrent || null)
   const [videoUrl, setVideoUrl] = useState(profileData.videoCurrentUrl || null)
+  const [promptsExpanded, setPromptsExpanded] = useState(true)
   const videoRef = useRef(null)
   const mediaRecorderRef = useRef(null)
   const chunksRef = useRef([])
@@ -72,19 +73,41 @@ function OnboardingVideoCurrent() {
         </div>
 
         <div className="video-prompt-list">
-          <p className="prompt-intro"><strong>Personal:</strong></p>
-          <ul>
-            <li>Location / base, family, friends, areas of interest</li>
-          </ul>
+          <button
+            type="button"
+            className="prompt-collapse-btn"
+            onClick={() => setPromptsExpanded(!promptsExpanded)}
+          >
+            <span className="prompt-intro">What to include:</span>
+            <svg
+              className={`collapse-chevron ${promptsExpanded ? 'expanded' : ''}`}
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path d="M6 9l6 6 6-6"/>
+            </svg>
+          </button>
+          {promptsExpanded && (
+            <>
+              <p className="prompt-section-title"><strong>Personal:</strong></p>
+              <ul>
+                <li>Location / base, family, friends, areas of interest</li>
+              </ul>
 
-          <p className="prompt-intro"><strong>Professional:</strong></p>
-          <ul>
-            <li>Name of your current organisation and your work profile</li>
-            <li>How and when did you start this journey / role?</li>
-            <li>What work does the organisation do — problems solved via products, solutions, services</li>
-            <li>Current state — progress in terms of products, customers, revenues, team size</li>
-            <li>Anything interesting about your organisation / startup, team etc.</li>
-          </ul>
+              <p className="prompt-section-title"><strong>Professional:</strong></p>
+              <ul>
+                <li>Name of your current organisation and your work profile</li>
+                <li>How and when did you start this journey / role?</li>
+                <li>What work does the organisation do — problems solved via products, solutions, services</li>
+                <li>Current state — progress in terms of products, customers, revenues, team size</li>
+                <li>Anything interesting about your organisation / startup, team etc.</li>
+              </ul>
+            </>
+          )}
         </div>
 
         <div className="video-recording-section">
