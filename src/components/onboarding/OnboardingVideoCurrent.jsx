@@ -67,7 +67,7 @@ function OnboardingVideoCurrent() {
     <OnboardingLayout>
       <div className="onboarding-form">
         <div className="form-header">
-          <h1 className="form-title">Your Current Chapter</h1>
+          <h1 className="form-title">Your Current Life</h1>
           <p className="form-subtitle">Record a short video about what you're working on now, your current focus, and what excites you</p>
         </div>
 
