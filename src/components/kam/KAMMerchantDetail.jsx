@@ -8,7 +8,6 @@ import {
   routingStrategies,
   isTerminalZeroCost,
   computeTSPCompliance,
-  detectRoutingConflicts,
   getBackwardPricingBreakdown,
   generateMerchantTransactions,
 } from '../../data/kamMockData'
@@ -256,7 +255,6 @@ export default function KAMMerchantDetail() {
 
   // ---- Computed values ----
   const tspCompliance = useMemo(() => computeTSPCompliance(merchant), [merchant])
-  const routingConflicts = useMemo(() => detectRoutingConflicts(merchant), [merchant])
   const revenue = computeMerchantRevenue(merchant)
   const projectedSavings = Math.abs(threshold) * 0.316
   const hasModelChanged = selectedModel !== merchant.routingStrategy
@@ -586,21 +584,6 @@ export default function KAMMerchantDetail() {
               )}
             </div>
           </div>
-        </div>
-      )}
-
-      {/* ── Routing Conflict Warnings ──────────────────────────────── */}
-      {routingConflicts.length > 0 && (
-        <div className="kam-conflicts-section">
-          {routingConflicts.map((conflict, i) => (
-            <div key={i} className={`kam-conflict-banner ${conflict.severity}`}>
-              <WarningIcon />
-              <div className="kam-conflict-banner-content">
-                <div className="kam-conflict-message">{conflict.message}</div>
-                <div className="kam-conflict-recommendation">{conflict.recommendation}</div>
-              </div>
-            </div>
-          ))}
         </div>
       )}
 
