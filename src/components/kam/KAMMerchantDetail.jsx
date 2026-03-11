@@ -8,7 +8,6 @@ import {
   routingStrategies,
   isTerminalZeroCost,
   computeTSPCompliance,
-  computeNTFRisk,
   detectRoutingConflicts,
   getBackwardPricingBreakdown,
   generateMerchantTransactions,
@@ -256,7 +255,6 @@ export default function KAMMerchantDetail() {
   }
 
   // ---- Computed values ----
-  const ntfRisk = useMemo(() => computeNTFRisk(merchant), [merchant])
   const tspCompliance = useMemo(() => computeTSPCompliance(merchant), [merchant])
   const routingConflicts = useMemo(() => detectRoutingConflicts(merchant), [merchant])
   const revenue = computeMerchantRevenue(merchant)
@@ -478,6 +476,24 @@ export default function KAMMerchantDetail() {
         </div>
       </div>
 
+      {/* ── Tabs ─────────────────────────────────────────────── */}
+      <div className="kam-detail-tabs">
+        <button
+          className={`kam-detail-tab${activeTab === 'overview' ? ' active' : ''}`}
+          onClick={() => setActiveTab('overview')}
+        >
+          Overview
+        </button>
+        <button
+          className={`kam-detail-tab${activeTab === 'transactions' ? ' active' : ''}`}
+          onClick={() => setActiveTab('transactions')}
+        >
+          Transactions ({transactions.length})
+        </button>
+      </div>
+
+      {activeTab === 'overview' && (
+      <>
       {/* ── Deal Constraint Banner ────────────────────────────────── */}
       {merchant.dealType === 'tsp' && merchant.dealDetails && (
         <div className="kam-deal-banner tsp">
@@ -588,38 +604,6 @@ export default function KAMMerchantDetail() {
         </div>
       )}
 
-      {/* ── NTF Risk Assessment ───────────────────────────────────── */}
-      {ntfRisk.score > 0 && (
-        <div className="kam-card" style={{ marginBottom: 'var(--space-md)' }}>
-          <div className="kam-card-header">
-            <span className="kam-card-title">
-              <ShieldAlertIcon />
-              NTF Risk Assessment
-            </span>
-            <span className={`kam-badge ${ntfRisk.level === 'critical' ? 'danger' : ntfRisk.level === 'high' ? 'warning' : ntfRisk.level === 'medium' ? 'info' : 'success'}`}>
-              {ntfRisk.level.charAt(0).toUpperCase() + ntfRisk.level.slice(1)} Risk
-            </span>
-          </div>
-          <div className="kam-ntf-score-bar">
-            <div className="kam-ntf-score-track">
-              <div className="kam-ntf-score-fill" style={{ width: `${ntfRisk.score}%` }} />
-            </div>
-            <span className="kam-ntf-score-label">{ntfRisk.score}/100</span>
-          </div>
-          {ntfRisk.factors.length > 0 && (
-            <div className="kam-ntf-factors">
-              <div className="kam-ntf-factors-title">Risk Factors</div>
-              {ntfRisk.factors.map((f, i) => (
-                <div key={i} className="kam-ntf-factor-item">
-                  <AlertCircleIcon />
-                  <span>{f}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
       {/* ── SR Sensitivity ───────────────────────────────────── */}
       <div className="kam-sr-card">
         <div className="kam-sr-card-header">
@@ -683,24 +667,6 @@ export default function KAMMerchantDetail() {
         )}
       </div>
 
-      {/* ── Tabs ─────────────────────────────────────────────── */}
-      <div className="kam-detail-tabs">
-        <button
-          className={`kam-detail-tab${activeTab === 'overview' ? ' active' : ''}`}
-          onClick={() => setActiveTab('overview')}
-        >
-          Overview
-        </button>
-        <button
-          className={`kam-detail-tab${activeTab === 'transactions' ? ' active' : ''}`}
-          onClick={() => setActiveTab('transactions')}
-        >
-          Transactions ({transactions.length})
-        </button>
-      </div>
-
-      {activeTab === 'overview' && (
-      <>
       {/* ── Metric Cards (3x2) ───────────────────────────────────── */}
       <div className="kam-detail-metrics">
         <MetricCard
