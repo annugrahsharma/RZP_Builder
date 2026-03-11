@@ -551,6 +551,16 @@ export default function KAMMerchantTable() {
                   <tr
                     key={merchant.id}
                     className={`kam-table-row${isSelected ? ' selected' : ''}`}
+                    style={{ cursor: 'pointer' }}
+                    onClick={(e) => {
+                      // Don't navigate when clicking checkbox, action button, or dropdown
+                      if (
+                        e.target.closest('.kam-table-checkbox') ||
+                        e.target.closest('.kam-actions-cell') ||
+                        e.target.closest('input')
+                      ) return
+                      navigate(`/kam/merchant/${merchant.id}`)
+                    }}
                   >
                     {/* Checkbox */}
                     <td>
