@@ -10,6 +10,7 @@ import {
   computeTSPCompliance,
   getBackwardPricingBreakdown,
   generateMerchantTransactions,
+  generateSRTimeSeries,
 } from '../../data/kamMockData'
 
 // ---------------------------------------------------------------------------
@@ -200,6 +201,301 @@ const AlertCircleIcon = () => (
 )
 
 // ---------------------------------------------------------------------------
+// SR Line Chart sub-component
+// ---------------------------------------------------------------------------
+
+const SR_COLORS = {
+  overall: '#528FF0',
+  CC: '#E65100',
+  DC: '#1565C0',
+  UPI: '#2E7D32',
+  NB: '#7B1FA2',
+}
+
+const METHOD_DISPLAY = {
+  CC: 'Credit Cards',
+  DC: 'Debit Cards',
+  UPI: 'UPI',
+  NB: 'Net Banking',
+}
+
+function SRLineChart({ srData }) {
+  const [selectedSeries, setSelectedSeries] = useState(() => new Set(['overall']))
+  const [expandedMethods, setExpandedMethods] = useState(() => new Set())
+  const [hoverIdx, setHoverIdx] = useState(null)
+
+  const { dates, overall, byMethod } = srData
+  const methodKeys = Object.keys(byMethod)
+
+  // Build all visible lines with their data & color
+  const visibleLines = useMemo(() => {
+    const lines = []
+    if (selectedSeries.has('overall')) {
+      lines.push({ key: 'overall', label: 'All Methods', color: SR_COLORS.overall, data: overall })
+    }
+    methodKeys.forEach((m) => {
+      if (selectedSeries.has(m)) {
+        lines.push({ key: m, label: METHOD_DISPLAY[m] || m, color: SR_COLORS[m] || '#888', data: byMethod[m].sr })
+      }
+      // Terminal lines
+      const terminals = byMethod[m].terminals
+      Object.keys(terminals).forEach((tId) => {
+        const tKey = m + ':' + tId
+        if (selectedSeries.has(tKey)) {
+          lines.push({ key: tKey, label: tId, color: SR_COLORS[m] || '#888', data: terminals[tId], dashed: true })
+        }
+      })
+    })
+    return lines
+  }, [selectedSeries, overall, byMethod, methodKeys])
+
+  // Compute Y-axis bounds
+  const { yMin, yMax, yTicks } = useMemo(() => {
+    let lo = 100, hi = 0
+    visibleLines.forEach((l) => l.data.forEach((v) => { if (v < lo) lo = v; if (v > hi) hi = v }))
+    if (lo === 100 && hi === 0) { lo = 85; hi = 100 } // fallback
+    const padding = 2
+    const rMin = Math.floor((lo - padding) / 2) * 2
+    const rMax = Math.ceil((hi + padding) / 2) * 2
+    const ticks = []
+    for (let t = rMin; t <= rMax; t += 2) ticks.push(t)
+    if (ticks.length < 3) { ticks.unshift(ticks[0] - 2); ticks.push(ticks[ticks.length - 1] + 2) }
+    return { yMin: ticks[0], yMax: ticks[ticks.length - 1], yTicks: ticks }
+  }, [visibleLines])
+
+  // Chart layout constants
+  const chartPadLeft = 44
+  const chartPadRight = 12
+  const chartPadTop = 10
+  const chartPadBottom = 28
+  const chartH = 280
+
+  const toggleSeries = useCallback((key) => {
+    setSelectedSeries((prev) => {
+      const next = new Set(prev)
+      if (next.has(key)) next.delete(key); else next.add(key)
+      return next
+    })
+  }, [])
+
+  const toggleExpand = useCallback((method) => {
+    setExpandedMethods((prev) => {
+      const next = new Set(prev)
+      if (next.has(method)) next.delete(method); else next.add(method)
+      return next
+    })
+  }, [])
+
+  // Convert data point to SVG coordinates
+  const toX = useCallback((i, w) => chartPadLeft + (i / (dates.length - 1)) * (w - chartPadLeft - chartPadRight), [dates.length])
+  const toY = useCallback((v) => chartPadTop + ((yMax - v) / (yMax - yMin)) * (chartH - chartPadTop - chartPadBottom), [yMin, yMax])
+
+  // Build polyline points string
+  const buildPoints = useCallback((data, w) => data.map((v, i) => `${toX(i, w)},${toY(v)}`).join(' '), [toX, toY])
+
+  // Build area path (fill under line)
+  const buildArea = useCallback((data, w) => {
+    const bottom = chartH - chartPadBottom
+    const pts = data.map((v, i) => `${toX(i, w)},${toY(v)}`)
+    return `M${toX(0, w)},${bottom} L${pts.join(' L')} L${toX(data.length - 1, w)},${bottom} Z`
+  }, [toX, toY])
+
+  // SVG ref for measuring width
+  const [svgWidth, setSvgWidth] = useState(600)
+  const svgRef = useCallback((node) => {
+    if (node) {
+      const ro = new ResizeObserver((entries) => {
+        for (const entry of entries) setSvgWidth(entry.contentRect.width)
+      })
+      ro.observe(node)
+      setSvgWidth(node.getBoundingClientRect().width)
+    }
+  }, [])
+
+  // Hover handling
+  const handleMouseMove = useCallback((e) => {
+    const svg = e.currentTarget
+    const rect = svg.getBoundingClientRect()
+    const mouseX = e.clientX - rect.left
+    const dataAreaStart = chartPadLeft
+    const dataAreaEnd = svgWidth - chartPadRight
+    if (mouseX < dataAreaStart || mouseX > dataAreaEnd) { setHoverIdx(null); return }
+    const ratio = (mouseX - dataAreaStart) / (dataAreaEnd - dataAreaStart)
+    const idx = Math.round(ratio * (dates.length - 1))
+    setHoverIdx(Math.max(0, Math.min(dates.length - 1, idx)))
+  }, [svgWidth, dates.length])
+
+  const handleMouseLeave = useCallback(() => setHoverIdx(null), [])
+
+  // Format date for display
+  const formatDate = (dateStr) => {
+    const d = new Date(dateStr + 'T00:00:00')
+    return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
+  }
+
+  return (
+    <div className="kam-sr-chart-card">
+      <div className="kam-sr-chart-card-header">
+        <div className="kam-sr-chart-card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+          </svg>
+          Success Rate Trend
+        </div>
+        <span className="kam-sr-chart-period">Last 30 days</span>
+      </div>
+
+      <div className="kam-sr-chart-body">
+        {/* ── Sidebar ── */}
+        <div className="kam-sr-chart-sidebar">
+          {/* All Methods */}
+          <label className="kam-sr-method-item overall">
+            <input type="checkbox" checked={selectedSeries.has('overall')} onChange={() => toggleSeries('overall')} />
+            <span className="kam-sr-color-dot" style={{ background: SR_COLORS.overall }} />
+            <span className="kam-sr-method-label">All Methods</span>
+            <span className="kam-sr-method-value">{overall[overall.length - 1]}%</span>
+          </label>
+
+          {/* Per-method */}
+          {methodKeys.map((m) => {
+            const md = byMethod[m]
+            const isExpanded = expandedMethods.has(m)
+            const terminalKeys = Object.keys(md.terminals)
+            return (
+              <div key={m}>
+                <div className="kam-sr-method-item">
+                  <input type="checkbox" checked={selectedSeries.has(m)} onChange={() => toggleSeries(m)} />
+                  <span className="kam-sr-color-dot" style={{ background: SR_COLORS[m] || '#888' }} />
+                  <span className="kam-sr-method-label">{METHOD_DISPLAY[m] || m}</span>
+                  <span className="kam-sr-method-value">{md.sr[md.sr.length - 1]}%</span>
+                  {terminalKeys.length > 0 && (
+                    <span className={`kam-sr-method-expand${isExpanded ? ' open' : ''}`} onClick={() => toggleExpand(m)}>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6" /></svg>
+                    </span>
+                  )}
+                </div>
+                <div className={`kam-sr-terminal-list ${isExpanded ? 'expanded' : 'collapsed'}`}>
+                  {terminalKeys.map((tId) => {
+                    const tKey = m + ':' + tId
+                    const tData = md.terminals[tId]
+                    return (
+                      <label key={tKey} className="kam-sr-terminal-item">
+                        <input type="checkbox" checked={selectedSeries.has(tKey)} onChange={() => toggleSeries(tKey)} />
+                        <span className="kam-sr-color-dot" style={{ background: SR_COLORS[m] || '#888', opacity: 0.6 }} />
+                        <span className="kam-sr-method-label">{tId}</span>
+                        <span className="kam-sr-method-value">{tData[tData.length - 1]}%</span>
+                      </label>
+                    )
+                  })}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+
+        {/* ── Chart Area ── */}
+        <div className="kam-sr-chart-area">
+          <svg
+            ref={svgRef}
+            className="kam-sr-chart-svg"
+            viewBox={`0 0 ${svgWidth} ${chartH}`}
+            preserveAspectRatio="none"
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
+          >
+            {/* Grid lines */}
+            {yTicks.map((t) => (
+              <g key={t}>
+                <line
+                  x1={chartPadLeft} y1={toY(t)} x2={svgWidth - chartPadRight} y2={toY(t)}
+                  stroke="var(--rzp-border, #E8E8E8)" strokeDasharray="4 4" strokeWidth="1"
+                />
+                <text x={chartPadLeft - 6} y={toY(t) + 4} textAnchor="end" fontSize="11" fill="#888" fontFamily="inherit">
+                  {t}%
+                </text>
+              </g>
+            ))}
+
+            {/* X-axis date labels (every 5th day) */}
+            {dates.map((d, i) => (i % 5 === 0 || i === dates.length - 1) ? (
+              <text key={d} x={toX(i, svgWidth)} y={chartH - 4} textAnchor="middle" fontSize="10" fill="#888" fontFamily="inherit">
+                {formatDate(d)}
+              </text>
+            ) : null)}
+
+            {/* Area fills */}
+            {visibleLines.map((line) => (
+              <path
+                key={'area-' + line.key}
+                d={buildArea(line.data, svgWidth)}
+                fill={line.color}
+                opacity={0.06}
+              />
+            ))}
+
+            {/* Lines */}
+            {visibleLines.map((line) => (
+              <polyline
+                key={'line-' + line.key}
+                points={buildPoints(line.data, svgWidth)}
+                fill="none"
+                stroke={line.color}
+                strokeWidth="2"
+                strokeLinejoin="round"
+                strokeLinecap="round"
+                strokeDasharray={line.dashed ? '6 3' : 'none'}
+              />
+            ))}
+
+            {/* Hover crosshair */}
+            {hoverIdx !== null && (
+              <line
+                x1={toX(hoverIdx, svgWidth)} y1={chartPadTop}
+                x2={toX(hoverIdx, svgWidth)} y2={chartH - chartPadBottom}
+                stroke="#aaa" strokeDasharray="3 3" strokeWidth="1"
+              />
+            )}
+
+            {/* Hover dots */}
+            {hoverIdx !== null && visibleLines.map((line) => (
+              <circle
+                key={'dot-' + line.key}
+                cx={toX(hoverIdx, svgWidth)}
+                cy={toY(line.data[hoverIdx])}
+                r="4"
+                fill="#fff"
+                stroke={line.color}
+                strokeWidth="2"
+              />
+            ))}
+          </svg>
+
+          {/* Tooltip */}
+          {hoverIdx !== null && (
+            <div
+              className="kam-sr-chart-tooltip"
+              style={{
+                left: Math.min(toX(hoverIdx, svgWidth) + 12, svgWidth - 170),
+                top: 20,
+              }}
+            >
+              <div className="kam-sr-tooltip-date">{formatDate(dates[hoverIdx])}</div>
+              {visibleLines.map((line) => (
+                <div key={line.key} className="kam-sr-tooltip-row">
+                  <span className="kam-sr-tooltip-dot" style={{ background: line.color }} />
+                  <span className="kam-sr-tooltip-label">{line.label}</span>
+                  <span className="kam-sr-tooltip-value">{line.data[hoverIdx]}%</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 export default function KAMMerchantDetail() {
@@ -296,6 +592,7 @@ export default function KAMMerchantDetail() {
 
   // Transaction data
   const transactions = useMemo(() => generateMerchantTransactions(merchant), [merchant])
+  const srData = useMemo(() => generateSRTimeSeries(merchant), [merchant])
 
   const filteredTxns = useMemo(() => {
     if (!txnSearch) return transactions
@@ -492,6 +789,9 @@ export default function KAMMerchantDetail() {
 
       {activeTab === 'overview' && (
       <>
+      {/* ── SR Trend Chart ──────────────────────────────────────── */}
+      <SRLineChart srData={srData} />
+
       {/* ── Deal Constraint Banner ────────────────────────────────── */}
       {merchant.dealType === 'tsp' && merchant.dealDetails && (
         <div className="kam-deal-banner tsp">
