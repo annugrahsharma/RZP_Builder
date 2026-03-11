@@ -785,6 +785,12 @@ export default function KAMMerchantDetail() {
         >
           Transactions ({transactions.length})
         </button>
+        <button
+          className={`kam-detail-tab${activeTab === 'config' ? ' active' : ''}`}
+          onClick={() => setActiveTab('config')}
+        >
+          Config
+        </button>
       </div>
 
       {activeTab === 'overview' && (
@@ -887,6 +893,45 @@ export default function KAMMerchantDetail() {
         </div>
       )}
 
+      {/* ── Metric Cards (3x2) ───────────────────────────────────── */}
+      <div className="kam-detail-metrics">
+        <MetricCard
+          icon={<CheckCircleIcon />}
+          iconBg="var(--rzp-success-light)"
+          iconColor="var(--rzp-success)"
+          label="Success Rate"
+          value={`${merchant.avgPaymentSuccessRate}%`}
+          delta={merchant.avgPaymentSuccessRate >= 95 ? '+0.3%' : null}
+          deltaType={merchant.avgPaymentSuccessRate >= 95 ? 'positive' : 'negative'}
+        />
+        <MetricCard
+          icon={<BarChartIcon />}
+          iconBg="var(--rzp-blue-light)"
+          iconColor="var(--rzp-blue)"
+          label="Monthly Transactions"
+          value={formatNumber(merchant.monthlyTxnVolume)}
+          delta="+2.1%"
+          deltaType="positive"
+        />
+        <MetricCard
+          icon={<TrendUpIcon />}
+          iconBg="var(--rzp-success-light)"
+          iconColor="var(--rzp-success)"
+          label="Net Revenue"
+          value={formatINR(revenue.netRevenue)}
+          delta="+1.8%"
+          deltaType="positive"
+        />
+      </div>
+
+      </>
+      )}
+
+      {/* ══════════════════════════════════════════════════════════ */}
+      {/*  CONFIG TAB                                                */}
+      {/* ══════════════════════════════════════════════════════════ */}
+      {activeTab === 'config' && (
+      <>
       {/* ── SR Sensitivity ───────────────────────────────────── */}
       <div className="kam-sr-card">
         <div className="kam-sr-card-header">
@@ -948,60 +993,6 @@ export default function KAMMerchantDetail() {
             </div>
           </>
         )}
-      </div>
-
-      {/* ── Metric Cards (3x2) ───────────────────────────────────── */}
-      <div className="kam-detail-metrics">
-        <MetricCard
-          icon={<CheckCircleIcon />}
-          iconBg="var(--rzp-success-light)"
-          iconColor="var(--rzp-success)"
-          label="Success Rate"
-          value={`${merchant.avgPaymentSuccessRate}%`}
-          delta={merchant.avgPaymentSuccessRate >= 95 ? '+0.3%' : null}
-          deltaType={merchant.avgPaymentSuccessRate >= 95 ? 'positive' : 'negative'}
-        />
-        <MetricCard
-          icon={<BarChartIcon />}
-          iconBg="var(--rzp-blue-light)"
-          iconColor="var(--rzp-blue)"
-          label="Monthly Transactions"
-          value={formatNumber(merchant.monthlyTxnVolume)}
-          delta="+2.1%"
-          deltaType="positive"
-        />
-        <MetricCard
-          icon={<CreditCardIcon />}
-          iconBg="#FFF3E0"
-          iconColor="#E65100"
-          label="Monthly GMV"
-          value={formatINR(merchant.monthlyGMV)}
-          delta="+4.5%"
-          deltaType="positive"
-        />
-        <MetricCard
-          icon={<PercentIcon />}
-          iconBg="var(--rzp-blue-light)"
-          iconColor="var(--rzp-blue)"
-          label="Forward Pricing"
-          value={`${merchant.forwardPricing}%`}
-        />
-        <MetricCard
-          icon={<DollarIcon />}
-          iconBg="var(--rzp-danger-light)"
-          iconColor="var(--rzp-danger)"
-          label="Backward Cost"
-          value={formatINR(revenue.backwardCost)}
-        />
-        <MetricCard
-          icon={<TrendUpIcon />}
-          iconBg="var(--rzp-success-light)"
-          iconColor="var(--rzp-success)"
-          label="Net Revenue"
-          value={formatINR(revenue.netRevenue)}
-          delta="+1.8%"
-          deltaType="positive"
-        />
       </div>
 
       {/* ── Doppler Routing Engine ───────────────────────────────── */}
