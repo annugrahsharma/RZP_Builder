@@ -5,6 +5,7 @@ import {
   computeMerchantRevenue,
   computeAggregateStats,
   getMonthlyTargetData,
+  generateMonthlyHistory,
 } from '../data/kamMockData'
 
 const KAMContext = createContext(null)
@@ -310,6 +311,8 @@ export function KAMProvider({ children }) {
 
   const stats = useMemo(() => computeAggregateStats(merchants), [merchants])
   const targetData = useMemo(() => getMonthlyTargetData(merchants), [merchants])
+  const monthlyHistory = useMemo(() => generateMonthlyHistory(merchants), [merchants])
+  const [selectedMonth, setSelectedMonth] = useState(null)
 
   const toggleSort = useCallback(
     (field) => {
@@ -328,6 +331,9 @@ export function KAMProvider({ children }) {
     allMerchants: merchants,
     stats,
     targetData,
+    monthlyHistory,
+    selectedMonth,
+    setSelectedMonth,
     searchQuery,
     setSearchQuery,
     sortField,

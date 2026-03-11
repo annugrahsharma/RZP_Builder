@@ -471,3 +471,63 @@ export function getMonthlyTargetData(merchantList) {
     projectedRevenue: achieved * (daysInMonth / daysElapsed),
   }
 }
+
+// ---------------------------------------------------------------------------
+// Monthly performance history (24 months) for heatmap
+// ---------------------------------------------------------------------------
+const MONTH_LABELS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+const MONTH_FULL = ['January','February','March','April','May','June','July','August','September','October','November','December']
+
+// Hardcoded achievement percentages for deterministic rendering
+// Distribution: ~13 green (>=90%), ~8 yellow (70-89%), ~3 red (<70%)
+const ACHIEVEMENT_PCT = [
+  92.3, 88.5, 95.1, 67.4, 101.2, 85.7,   // Apr-Sep 2024
+  93.8, 78.2, 96.5, 104.3, 91.0, 89.1,    // Oct 2024 - Mar 2025
+  87.6, 94.2, 72.8, 98.7, 82.3, 95.9,     // Apr-Sep 2025
+  103.1, 76.5, 90.8, 97.4, 88.3,          // Oct 2025 - Feb 2026
+  // March 2026 uses live data — not in this array
+]
+
+function classifyMonth(pct) {
+  if (pct >= 90) return 'green'
+  if (pct >= 70) return 'yellow'
+  return 'red'
+}
+
+export function generateMonthlyHistory(merchantList) {
+  const stats = computeAggregateStats(merchantList)
+  const baseTarget = 120000000 // 12 Cr
+
+  const months = []
+  const startYear = 2024
+  const startMonth = 4 // April (1-indexed)
+
+  for (let i = 0; i < 24; i++) {
+    const monthIdx = (startMonth - 1 + i) % 12 // 0-indexed
+    const year = startYear + Math.floor((startMonth - 1 + i) / 12)
+    const isCurrent = year === 2026 && monthIdx === 2 // March 2026
+
+    let pct, achieved
+    if (isCurrent) {
+      achieved = stats.totalNetRevenue
+      pct = Number(((achieved / baseTarget) * 100).toFixed(1))
+    } else {
+      pct = ACHIEVEMENT_PCT[i]
+      achieved = Math.round(baseTarget * (pct / 100))
+    }
+
+    months.push({
+      year,
+      month: monthIdx + 1,
+      monthLabel: MONTH_LABELS[monthIdx],
+      monthFull: `${MONTH_FULL[monthIdx]} ${year}`,
+      target: baseTarget,
+      achieved,
+      percentage: pct,
+      status: classifyMonth(pct),
+      isCurrent,
+    })
+  }
+
+  return months
+}
