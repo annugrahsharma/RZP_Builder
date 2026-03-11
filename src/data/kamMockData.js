@@ -90,11 +90,11 @@ export const merchants = [
     dealType: 'tsp',
     dealDetails: {
       description: 'HDFC has given special CC rates for Swiggy based on combined CC+UPI acquiring volume.',
-      constraint: 'Min 70% traffic via HDFC terminals',
+      constraint: 'Annual GMV commitment of ₹300Cr via HDFC terminals',
       expiresAt: 'Sep 2026',
       contact: 'pranavn.rattan@razorpay.com',
       lockedGatewayId: 'gw-hdfc',
-      tspCompliance: { requiredTrafficPct: 70 },
+      tspCompliance: { gmvCommitment: 3000000000, commitmentPeriod: 'annual' },
     },
     monthlyTxnVolume: 1100000,
     monthlyGMV: 385000000,
@@ -199,11 +199,11 @@ export const merchants = [
     dealType: 'tsp',
     dealDetails: {
       description: 'HDFC has given special CC+DC rates for Myntra based on acquiring volume commitment via Midsign.',
-      constraint: 'Min 65% traffic via HDFC Midsign',
+      constraint: 'Annual GMV commitment of ₹250Cr via HDFC Midsign',
       expiresAt: 'Jun 2026',
       contact: 'pranavn.rattan@razorpay.com',
       lockedGatewayId: 'gw-hdfc',
-      tspCompliance: { requiredTrafficPct: 65 },
+      tspCompliance: { gmvCommitment: 2500000000, commitmentPeriod: 'annual' },
     },
     monthlyTxnVolume: 920000,
     monthlyGMV: 350000000,
@@ -674,21 +674,43 @@ export function getBackwardPricingBreakdown(terminalId) {
 // ── TSP Compliance ────────────────────────
 export function computeTSPCompliance(merchant) {
   if (merchant.dealType !== 'tsp' || !merchant.dealDetails) return null
-  const required = merchant.dealDetails.tspCompliance?.requiredTrafficPct
-  if (required == null) return null
+  const gmvCommitment = merchant.dealDetails.tspCompliance?.gmvCommitment
+  if (gmvCommitment == null) return null
 
   const lockedGwId = merchant.dealDetails.lockedGatewayId
-  const actualPct = merchant.gatewayMetrics
+
+  // Actual traffic % going through the locked gateway
+  const actualTrafficPct = merchant.gatewayMetrics
     .filter((gm) => gm.gatewayId === lockedGwId)
     .reduce((sum, gm) => sum + gm.txnShare, 0)
 
-  const gap = actualPct - required
-  const status = gap >= 0 ? 'compliant' : gap >= -10 ? 'at_risk' : 'violation'
+  // Projected annual GMV via locked gateway
+  const projectedAnnualGMV = merchant.monthlyGMV * (actualTrafficPct / 100) * 12
+
+  // Gap: positive = ahead of commitment, negative = behind
+  const gmvGap = projectedAnnualGMV - gmvCommitment
+
+  // Suggested traffic % to meet commitment
+  const suggestedTrafficPct = Number(
+    ((gmvCommitment / 12 / merchant.monthlyGMV) * 100).toFixed(1)
+  )
+
+  // Status: advisory, not punitive
+  let status
+  if (projectedAnnualGMV >= gmvCommitment) {
+    status = 'on_track'
+  } else if (projectedAnnualGMV >= gmvCommitment * 0.8) {
+    status = 'at_risk'
+  } else {
+    status = 'off_track'
+  }
 
   return {
-    requiredPct: required,
-    actualPct,
-    gap,
+    gmvCommitment,
+    projectedAnnualGMV,
+    gmvGap,
+    suggestedTrafficPct,
+    actualTrafficPct,
     status,
     lockedGatewayName: gateways.find((g) => g.id === lockedGwId)?.shortName || 'Unknown',
   }

@@ -1,4 +1,4 @@
-import { HashRouter, Routes, Route, Outlet } from 'react-router-dom'
+import { HashRouter, Routes, Route, Outlet, Navigate } from 'react-router-dom'
 import Login from './components/Login'
 import Onboarding from './components/onboarding/Onboarding'
 import Dashboard from './components/dashboard/Dashboard'
@@ -39,7 +39,7 @@ function App() {
           <Route path="merchant/:merchantId" element={<KAMMerchantDetail />} />
         </Route>
         <Route element={<MobileLayout />}>
-          <Route path="/" element={<Login />} />
+          <Route path="/" element={<Navigate to="/kam" replace />} />
           <Route path="/login" element={<Login />} />
           <Route path="/onboarding" element={<OnboardingWrapper />} />
           <Route path="/dashboard" element={<Dashboard />} />

@@ -469,23 +469,28 @@ export default function KAMMerchantDetail() {
             {tspCompliance && (
               <div style={{ margin: '8px 0 12px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <div className="kam-tsp-gauge" style={{ margin: 0, maxWidth: 280 }}>
+                  <div className="kam-tsp-gauge" style={{ margin: 0, maxWidth: 320 }}>
                     <div className="kam-tsp-gauge-bar">
                       <div
-                        className={`kam-tsp-gauge-fill ${tspCompliance.status === 'violation' ? 'violation' : tspCompliance.status === 'at_risk' ? 'at-risk' : ''}`}
-                        style={{ width: `${Math.min(tspCompliance.actualPct, 100)}%` }}
+                        className={`kam-tsp-gauge-fill ${tspCompliance.status === 'off_track' ? 'violation' : tspCompliance.status === 'at_risk' ? 'at-risk' : ''}`}
+                        style={{ width: `${tspCompliance.gmvCommitment > 0 ? Math.min((tspCompliance.projectedAnnualGMV / tspCompliance.gmvCommitment) * 100, 100) : 0}%` }}
                       />
-                      <div className="kam-tsp-gauge-threshold" style={{ left: `${tspCompliance.requiredPct}%` }} />
+                      <div className="kam-tsp-gauge-threshold" style={{ left: '100%' }} />
                     </div>
-                    <span className="kam-tsp-gauge-label">{tspCompliance.actualPct}% / {tspCompliance.requiredPct}% min</span>
+                    <span className="kam-tsp-gauge-label">{formatINR(tspCompliance.projectedAnnualGMV)} / {formatINR(tspCompliance.gmvCommitment)} commitment</span>
                   </div>
-                  <span className={`kam-badge ${tspCompliance.status === 'compliant' ? 'success' : tspCompliance.status === 'at_risk' ? 'warning' : 'danger'}`}>
-                    {tspCompliance.status === 'compliant' ? 'Compliant' : tspCompliance.status === 'at_risk' ? 'At Risk' : 'Violation'}
+                  <span className={`kam-badge ${tspCompliance.status === 'on_track' ? 'success' : tspCompliance.status === 'at_risk' ? 'warning' : 'danger'}`}>
+                    {tspCompliance.status === 'on_track' ? 'On Track' : tspCompliance.status === 'at_risk' ? 'At Risk' : 'Off Track'}
                   </span>
                 </div>
-                {tspCompliance.status === 'violation' && (
+                {tspCompliance.status === 'off_track' && (
                   <div style={{ fontSize: 12, color: 'var(--rzp-danger)', fontWeight: 600, marginTop: 6 }}>
-                    Traffic via {tspCompliance.lockedGatewayName} is {tspCompliance.gap}% below required minimum. Immediate action needed.
+                    At current routing ({tspCompliance.actualTrafficPct}% via {tspCompliance.lockedGatewayName}), projected annual GMV is {formatINR(tspCompliance.projectedAnnualGMV)} against {formatINR(tspCompliance.gmvCommitment)} commitment. Consider increasing {tspCompliance.lockedGatewayName} traffic share to ~{tspCompliance.suggestedTrafficPct}%.
+                  </div>
+                )}
+                {tspCompliance.status === 'at_risk' && (
+                  <div style={{ fontSize: 12, color: '#E65100', fontWeight: 600, marginTop: 6 }}>
+                    At current routing ({tspCompliance.actualTrafficPct}% via {tspCompliance.lockedGatewayName}), projected annual GMV is {formatINR(tspCompliance.projectedAnnualGMV)} against {formatINR(tspCompliance.gmvCommitment)} commitment. Suggest routing ~{tspCompliance.suggestedTrafficPct}% via {tspCompliance.lockedGatewayName} to meet target.
                   </div>
                 )}
               </div>

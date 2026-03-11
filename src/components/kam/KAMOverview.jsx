@@ -405,7 +405,8 @@ export default function KAMOverview() {
           {Object.entries(tspComplianceMap).map(([merchantId, compliance]) => {
             const merchant = allMerchants.find((m) => m.id === merchantId)
             if (!merchant) return null
-            const fillClass = compliance.status === 'violation' ? 'violation' : compliance.status === 'at_risk' ? 'at-risk' : ''
+            const fillClass = compliance.status === 'off_track' ? 'violation' : compliance.status === 'at_risk' ? 'at-risk' : ''
+            const fillPct = compliance.gmvCommitment > 0 ? Math.min((compliance.projectedAnnualGMV / compliance.gmvCommitment) * 100, 100) : 0
             return (
               <div
                 key={merchantId}
@@ -420,19 +421,19 @@ export default function KAMOverview() {
                   <div className="kam-tsp-gauge-bar">
                     <div
                       className={`kam-tsp-gauge-fill ${fillClass}`}
-                      style={{ width: `${Math.min(compliance.actualPct, 100)}%` }}
+                      style={{ width: `${fillPct}%` }}
                     />
                     <div
                       className="kam-tsp-gauge-threshold"
-                      style={{ left: `${compliance.requiredPct}%` }}
+                      style={{ left: '100%' }}
                     />
                   </div>
                   <span className="kam-tsp-gauge-label">
-                    {compliance.actualPct}% / {compliance.requiredPct}% min via {compliance.lockedGatewayName}
+                    {formatINR(compliance.projectedAnnualGMV)} projected / {formatINR(compliance.gmvCommitment)} commitment via {compliance.lockedGatewayName}
                   </span>
                 </div>
-                <span className={`kam-badge ${compliance.status === 'compliant' ? 'success' : compliance.status === 'at_risk' ? 'warning' : 'danger'}`}>
-                  {compliance.status === 'compliant' ? 'Compliant' : compliance.status === 'at_risk' ? 'At Risk' : 'Violation'}
+                <span className={`kam-badge ${compliance.status === 'on_track' ? 'success' : compliance.status === 'at_risk' ? 'warning' : 'danger'}`}>
+                  {compliance.status === 'on_track' ? 'On Track' : compliance.status === 'at_risk' ? 'At Risk' : 'Off Track'}
                 </span>
               </div>
             )
