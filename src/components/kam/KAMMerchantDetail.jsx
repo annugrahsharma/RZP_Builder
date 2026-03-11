@@ -11,6 +11,7 @@ import {
   computeNTFRisk,
   detectRoutingConflicts,
   getBackwardPricingBreakdown,
+  generateMerchantTransactions,
 } from '../../data/kamMockData'
 
 // ---------------------------------------------------------------------------
@@ -214,6 +215,8 @@ export default function KAMMerchantDetail() {
     auditLog,
     addAuditEntry,
     showToast,
+    toggleSRSensitive,
+    updateSRThreshold,
   } = useKAM()
 
   const merchant = getMerchantById(merchantId)
@@ -232,6 +235,11 @@ export default function KAMMerchantDetail() {
   const [confirmTerminal, setConfirmTerminal] = useState(null)
   const [showDealWarning, setShowDealWarning] = useState(false)
   const [expandedTerminal, setExpandedTerminal] = useState(null)
+
+  // ---- Tab & transaction state ----
+  const [activeTab, setActiveTab] = useState('overview')
+  const [txnSearch, setTxnSearch] = useState('')
+  const [selectedTxn, setSelectedTxn] = useState(null)
 
   // ---- Guard ----
   if (!merchant) {
@@ -289,6 +297,22 @@ export default function KAMMerchantDetail() {
         t.method.toLowerCase().includes(q)
     )
   }, [terminals, terminalSearch])
+
+  // Transaction data
+  const transactions = useMemo(() => generateMerchantTransactions(merchant), [merchant])
+
+  const filteredTxns = useMemo(() => {
+    if (!txnSearch) return transactions
+    const q = txnSearch.toLowerCase()
+    return transactions.filter(
+      (t) =>
+        t.txnId.toLowerCase().includes(q) ||
+        t.paymentMethod.type.toLowerCase().includes(q) ||
+        t.paymentMethod.short.toLowerCase().includes(q) ||
+        t.status.toLowerCase().includes(q) ||
+        t.routingDecision.selectedGatewayShort.toLowerCase().includes(q)
+    )
+  }, [transactions, txnSearch])
 
   // Filtered audit log for this merchant
   const relevantLogs = useMemo(() => {
@@ -406,6 +430,14 @@ export default function KAMMerchantDetail() {
                   <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" />
                 </svg>
                 Offer
+              </span>
+            )}
+            {merchant.srSensitive && (
+              <span className="kam-badge-sr" style={{ padding: '2px 10px', fontSize: 11 }}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                </svg>
+                SR Sensitive
               </span>
             )}
           </div>
@@ -588,6 +620,87 @@ export default function KAMMerchantDetail() {
         </div>
       )}
 
+      {/* ── SR Sensitivity ───────────────────────────────────── */}
+      <div className="kam-sr-card">
+        <div className="kam-sr-card-header">
+          <div className="kam-sr-card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+            SR Sensitivity
+          </div>
+          <label className="kam-toggle">
+            <input
+              type="checkbox"
+              checked={merchant.srSensitive}
+              onChange={() => toggleSRSensitive(merchantId)}
+            />
+            <span className="kam-toggle-slider" />
+          </label>
+        </div>
+        {merchant.srSensitive ? (
+          <div className="kam-sr-info-banner locked">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+            <div>
+              <strong>Routing Locked</strong> — Cost optimization is disabled for this merchant. All transactions route to the highest success rate terminal to maximize payment reliability.
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="kam-sr-info-banner threshold">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              <div>
+                Terminals with success rate below the threshold will be de-prioritized. Routing will pick the cheapest terminal above the threshold.
+              </div>
+            </div>
+            <div className="kam-sr-threshold-control">
+              <div className="kam-sr-threshold-label">
+                <span className="label">SR Threshold</span>
+                <span className="value">{merchant.srThreshold || 92}%</span>
+              </div>
+              <input
+                type="range"
+                min="85"
+                max="98"
+                step="1"
+                value={merchant.srThreshold || 92}
+                onChange={(e) => updateSRThreshold(merchantId, Number(e.target.value))}
+                className="kam-sr-slider"
+              />
+              <div className="kam-sr-slider-range">
+                <span>85%</span>
+                <span>98%</span>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* ── Tabs ─────────────────────────────────────────────── */}
+      <div className="kam-detail-tabs">
+        <button
+          className={`kam-detail-tab${activeTab === 'overview' ? ' active' : ''}`}
+          onClick={() => setActiveTab('overview')}
+        >
+          Overview
+        </button>
+        <button
+          className={`kam-detail-tab${activeTab === 'transactions' ? ' active' : ''}`}
+          onClick={() => setActiveTab('transactions')}
+        >
+          Transactions ({transactions.length})
+        </button>
+      </div>
+
+      {activeTab === 'overview' && (
+      <>
       {/* ── Metric Cards (3x2) ───────────────────────────────────── */}
       <div className="kam-detail-metrics">
         <MetricCard
@@ -971,6 +1084,139 @@ export default function KAMMerchantDetail() {
           </div>
         )}
       </div>
+      </>
+      )}
+
+      {activeTab === 'transactions' && (
+        <>
+          <div className="kam-txn-search">
+            <SearchIcon />
+            <input
+              type="text"
+              placeholder="Search by ID, payment method, status, or gateway..."
+              value={txnSearch}
+              onChange={(e) => setTxnSearch(e.target.value)}
+            />
+          </div>
+
+          <div className="kam-card">
+            <table className="kam-txn-table">
+              <thead>
+                <tr>
+                  <th>Txn ID</th>
+                  <th>Timestamp</th>
+                  <th>Amount</th>
+                  <th>Method</th>
+                  <th>Status</th>
+                  <th>Gateway</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredTxns.map((txn) => (
+                  <tr key={txn.txnId} onClick={() => setSelectedTxn(txn)}>
+                    <td><span className="txn-id">{txn.txnId}</span></td>
+                    <td>{txn.timestamp.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })} {txn.timestamp.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })}</td>
+                    <td style={{ fontWeight: 600 }}>{formatINR(txn.amount)}</td>
+                    <td><span className="kam-badge neutral">{txn.paymentMethod.short}</span></td>
+                    <td><span className={`kam-txn-status ${txn.status}`}>{txn.status}</span></td>
+                    <td>{txn.routingDecision.selectedGatewayShort}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <div className="kam-txn-footer">
+              Showing {filteredTxns.length} of {transactions.length} transactions
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ── Transaction Routing Drawer ─────────────────────── */}
+      {selectedTxn && (
+        <>
+          <div className="kam-drawer-overlay" onClick={() => setSelectedTxn(null)} />
+          <div className="kam-drawer">
+            <div className="kam-drawer-header">
+              <h3>Routing Decision</h3>
+              <button className="kam-drawer-close" onClick={() => setSelectedTxn(null)}>
+                <XIcon />
+              </button>
+            </div>
+            <div className="kam-drawer-body">
+              {/* Transaction Info */}
+              <div className="kam-drawer-section">
+                <div className="kam-drawer-section-title">Transaction Details</div>
+                <div className="kam-drawer-info-grid">
+                  <div className="kam-drawer-info-item">
+                    <span className="label">Transaction ID</span>
+                    <span className="value">{selectedTxn.txnId}</span>
+                  </div>
+                  <div className="kam-drawer-info-item">
+                    <span className="label">Amount</span>
+                    <span className="value">{formatINR(selectedTxn.amount)}</span>
+                  </div>
+                  <div className="kam-drawer-info-item">
+                    <span className="label">Payment Method</span>
+                    <span className="value">{selectedTxn.paymentMethod.type}</span>
+                  </div>
+                  <div className="kam-drawer-info-item">
+                    <span className="label">Status</span>
+                    <span className="value"><span className={`kam-txn-status ${selectedTxn.status}`}>{selectedTxn.status}</span></span>
+                  </div>
+                  <div className="kam-drawer-info-item">
+                    <span className="label">Timestamp</span>
+                    <span className="value">{selectedTxn.timestamp.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })} {selectedTxn.timestamp.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Routing Decision */}
+              <div className="kam-drawer-section">
+                <div className="kam-drawer-section-title">Routing Decision</div>
+                <div className={`kam-routing-explanation ${merchant.srSensitive ? 'sr-locked' : selectedTxn.routingDecision.wasDePrioritized ? 'deprioritized' : 'normal'}`}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    {merchant.srSensitive ? (
+                      <><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></>
+                    ) : selectedTxn.routingDecision.wasDePrioritized ? (
+                      <><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></>
+                    ) : (
+                      <><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></>
+                    )}
+                  </svg>
+                  <div>{selectedTxn.routingDecision.reason}</div>
+                </div>
+              </div>
+
+              {/* Routing Pipeline */}
+              <div className="kam-drawer-section">
+                <div className="kam-drawer-section-title">Routing Pipeline — All Evaluated Terminals</div>
+                <div className="kam-pipeline-list">
+                  {selectedTxn.routingDecision.allEvaluated.map((item, i) => (
+                    <div
+                      key={i}
+                      className={`kam-pipeline-item ${item.status === 'selected' ? 'selected' : 'rejected'}`}
+                    >
+                      <div className="kam-pipeline-item-header">
+                        <span className="kam-pipeline-item-terminal">
+                          {item.terminalId} <span style={{ fontWeight: 400, color: 'var(--rzp-text-muted)', fontSize: 12 }}>({item.gatewayShort})</span>
+                        </span>
+                        <span className={`kam-pipeline-item-status ${item.status === 'selected' ? 'selected' : 'rejected'}`}>
+                          {item.status === 'selected' ? 'Selected' : 'Rejected'}
+                        </span>
+                      </div>
+                      <div className="kam-pipeline-item-metrics">
+                        <span>SR: <strong>{item.successRate}%</strong></span>
+                        <span>Cost: <strong>{'\u20B9'}{item.costPerTxn.toFixed(2)}</strong></span>
+                      </div>
+                      <div className="kam-pipeline-item-reason">{item.statusReason}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* ── Terminal Confirmation Modal ───────────────────────────── */}
       {confirmTerminal && (

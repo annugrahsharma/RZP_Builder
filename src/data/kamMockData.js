@@ -77,6 +77,9 @@ export const merchants = [
     ],
     status: 'active',
     routingRules: { selectRules: 3, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: false },
+    srSensitive: true,
+    srThreshold: null,
+    txnVolumeHistory: { currentMonth: 1250000, lastYearSameMonth: 1180000 },
     contactName: 'Deepinder Goyal',
     contactEmail: 'payments@zomato.com',
   },
@@ -109,6 +112,9 @@ export const merchants = [
     ],
     status: 'active',
     routingRules: { selectRules: 2, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: true },
+    srSensitive: true,
+    srThreshold: null,
+    txnVolumeHistory: { currentMonth: 1100000, lastYearSameMonth: 1050000 },
     contactName: 'Sriharsha Majety',
     contactEmail: 'finance@swiggy.in',
   },
@@ -135,6 +141,9 @@ export const merchants = [
     ],
     status: 'active',
     routingRules: { selectRules: 3, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: false },
+    srSensitive: false,
+    srThreshold: 95,
+    txnVolumeHistory: { currentMonth: 650000, lastYearSameMonth: 820000 },
     contactName: 'Kunal Shah',
     contactEmail: 'payments@cred.club',
   },
@@ -161,6 +170,9 @@ export const merchants = [
     ],
     status: 'active',
     routingRules: { selectRules: 3, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: false },
+    srSensitive: false,
+    srThreshold: 92,
+    txnVolumeHistory: { currentMonth: 980000, lastYearSameMonth: 950000 },
     contactName: 'Kalyan Krishnamurthy',
     contactEmail: 'payments@flipkart.com',
   },
@@ -186,6 +198,9 @@ export const merchants = [
     ],
     status: 'active',
     routingRules: { selectRules: 2, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: false },
+    srSensitive: false,
+    srThreshold: 92,
+    txnVolumeHistory: { currentMonth: 720000, lastYearSameMonth: 880000 },
     contactName: 'Hari Menon',
     contactEmail: 'finance@bigbasket.com',
   },
@@ -218,6 +233,9 @@ export const merchants = [
     ],
     status: 'active',
     routingRules: { selectRules: 1, rejectRules: 2, hasFallback: false, hasCardRestrictions: false, hasNetworkRestrictions: true },
+    srSensitive: false,
+    srThreshold: 91,
+    txnVolumeHistory: { currentMonth: 920000, lastYearSameMonth: 890000 },
     contactName: 'Nandita Sinha',
     contactEmail: 'payments@myntra.com',
   },
@@ -249,6 +267,9 @@ export const merchants = [
     ],
     status: 'active',
     routingRules: { selectRules: 2, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: false },
+    srSensitive: true,
+    srThreshold: null,
+    txnVolumeHistory: { currentMonth: 450000, lastYearSameMonth: 470000 },
     contactName: 'Ashish Hemrajani',
     contactEmail: 'finance@bookmyshow.com',
   },
@@ -280,6 +301,9 @@ export const merchants = [
     ],
     status: 'active',
     routingRules: { selectRules: 2, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: true },
+    srSensitive: false,
+    srThreshold: 93,
+    txnVolumeHistory: { currentMonth: 380000, lastYearSameMonth: 520000 },
     contactName: 'Rajesh Magow',
     contactEmail: 'payments@makemytrip.com',
   },
@@ -305,6 +329,9 @@ export const merchants = [
     ],
     status: 'active',
     routingRules: { selectRules: 1, rejectRules: 2, hasFallback: false, hasCardRestrictions: true, hasNetworkRestrictions: false },
+    srSensitive: false,
+    srThreshold: 90,
+    txnVolumeHistory: { currentMonth: 510000, lastYearSameMonth: 490000 },
     contactName: 'Falguni Nayar',
     contactEmail: 'finance@nykaa.com',
   },
@@ -330,6 +357,9 @@ export const merchants = [
     ],
     status: 'active',
     routingRules: { selectRules: 0, rejectRules: 1, hasFallback: false, hasCardRestrictions: false, hasNetworkRestrictions: false },
+    srSensitive: false,
+    srThreshold: 89,
+    txnVolumeHistory: { currentMonth: 290000, lastYearSameMonth: 410000 },
     contactName: 'Abhiraj Bhal',
     contactEmail: 'payments@urbancompany.com',
   },
@@ -357,6 +387,9 @@ export const merchants = [
     ],
     status: 'active',
     routingRules: { selectRules: 3, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: false },
+    srSensitive: true,
+    srThreshold: null,
+    txnVolumeHistory: { currentMonth: 1400000, lastYearSameMonth: 900000 },
     contactName: 'Aadit Palicha',
     contactEmail: 'finance@zeptonow.com',
   },
@@ -383,6 +416,9 @@ export const merchants = [
     ],
     status: 'active',
     routingRules: { selectRules: 2, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: false },
+    srSensitive: false,
+    srThreshold: 92,
+    txnVolumeHistory: { currentMonth: 600000, lastYearSameMonth: 580000 },
     contactName: 'Bhavish Aggarwal',
     contactEmail: 'payments@olacabs.com',
   },
@@ -410,6 +446,9 @@ export const merchants = [
     ],
     status: 'active',
     routingRules: { selectRules: 3, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: false },
+    srSensitive: true,
+    srThreshold: null,
+    txnVolumeHistory: { currentMonth: 2200000, lastYearSameMonth: 2100000 },
     contactName: 'Sameer Nigam',
     contactEmail: 'finance@phonepe.com',
   },
@@ -435,6 +474,9 @@ export const merchants = [
     ],
     status: 'active',
     routingRules: { selectRules: 1, rejectRules: 2, hasFallback: false, hasCardRestrictions: true, hasNetworkRestrictions: false },
+    srSensitive: false,
+    srThreshold: 88,
+    txnVolumeHistory: { currentMonth: 180000, lastYearSameMonth: 310000 },
     contactName: 'Vijay Shekhar',
     contactEmail: 'payments@paytmmall.com',
   },
@@ -460,6 +502,9 @@ export const merchants = [
     ],
     status: 'active',
     routingRules: { selectRules: 1, rejectRules: 1, hasFallback: false, hasCardRestrictions: false, hasNetworkRestrictions: false },
+    srSensitive: false,
+    srThreshold: 90,
+    txnVolumeHistory: { currentMonth: 220000, lastYearSameMonth: 260000 },
     contactName: 'Prashant Tandon',
     contactEmail: 'finance@1mg.com',
   },
@@ -814,6 +859,252 @@ export function detectRoutingConflicts(merchant) {
   }
 
   return conflicts
+}
+
+// ── Retention Risk ──────────────────────
+export function computeRetentionRisk(merchants) {
+  return merchants
+    .map((m) => {
+      const curr = m.txnVolumeHistory?.currentMonth || 0
+      const prev = m.txnVolumeHistory?.lastYearSameMonth || 0
+      if (prev === 0) return null
+      const yoyChange = Number((((curr - prev) / prev) * 100).toFixed(1))
+      if (yoyChange >= 0) return null
+      const absChange = Math.abs(yoyChange)
+      const riskLevel = absChange > 25 ? 'critical' : absChange > 15 ? 'high' : absChange > 5 ? 'medium' : null
+      if (!riskLevel) return null
+      return {
+        merchantId: m.id,
+        merchantName: m.name,
+        mid: m.mid,
+        currentVolume: curr,
+        lastYearVolume: prev,
+        yoyChange,
+        riskLevel,
+        srSensitive: m.srSensitive,
+      }
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.yoyChange - b.yoyChange)
+}
+
+// ── NR Opportunity ──────────────────────
+export function computeNROpportunity(merchants) {
+  return merchants
+    .filter((m) => !m.srSensitive && m.routingStrategy === 'success_rate')
+    .map((m) => {
+      const currentRevenue = computeMerchantRevenue(m)
+      // Simulate: if switched to cost routing, find cheapest terminal
+      const cheapestTerminal = m.gatewayMetrics
+        .slice()
+        .sort((a, b) => a.costPerTxn - b.costPerTxn)[0]
+      if (!cheapestTerminal) return null
+      const currentGw = gateways.find((g) => g.id === m.currentGatewayId)
+      const currentTerm = currentGw?.terminals.find((t) => t.id === m.currentTerminalId)
+      const currentCost = currentTerm?.costPerTxn || 0
+      const saving = (currentCost - cheapestTerminal.costPerTxn) * m.monthlyTxnVolume
+      if (saving <= 0) return null
+      return {
+        merchantId: m.id,
+        merchantName: m.name,
+        mid: m.mid,
+        currentNR: currentRevenue.netRevenue,
+        potentialSaving: saving,
+        potentialNR: currentRevenue.netRevenue + saving,
+        currentCostPerTxn: currentCost,
+        cheapestCostPerTxn: cheapestTerminal.costPerTxn,
+        cheapestTerminalId: cheapestTerminal.terminalId,
+        suggestedAction: `Switch to cost routing via ${gateways.find((g) => g.id === cheapestTerminal.gatewayId)?.shortName || 'cheaper'} terminal`,
+      }
+    })
+    .filter(Boolean)
+    .sort((a, b) => b.potentialSaving - a.potentialSaving)
+}
+
+// ── Transaction Generator ───────────────
+
+// Simple deterministic hash for reproducible mock data
+function hashCode(str) {
+  let hash = 0
+  for (let i = 0; i < str.length; i++) {
+    const ch = str.charCodeAt(i)
+    hash = ((hash << 5) - hash) + ch
+    hash |= 0
+  }
+  return Math.abs(hash)
+}
+
+const PAYMENT_METHODS = [
+  { type: 'Visa Credit', short: 'CC' },
+  { type: 'Mastercard Credit', short: 'CC' },
+  { type: 'Visa Debit', short: 'DC' },
+  { type: 'RuPay Debit', short: 'DC' },
+  { type: 'UPI', short: 'UPI' },
+  { type: 'Net Banking', short: 'NB' },
+]
+
+export function generateMerchantTransactions(merchant) {
+  const txnCount = 30
+  const transactions = []
+  const avgTxnValue = merchant.monthlyGMV / merchant.monthlyTxnVolume
+
+  // Build terminal info from gatewayMetrics + gateways
+  const terminalInfos = merchant.gatewayMetrics.map((gm) => {
+    const gw = gateways.find((g) => g.id === gm.gatewayId)
+    const term = gw?.terminals.find((t) => t.id === gm.terminalId)
+    return {
+      gatewayId: gm.gatewayId,
+      terminalId: gm.terminalId,
+      displayTerminalId: term?.terminalId || gm.terminalId,
+      gatewayShort: gw?.shortName || 'Unknown',
+      successRate: gm.successRate,
+      costPerTxn: gm.costPerTxn,
+      txnShare: gm.txnShare,
+    }
+  })
+
+  // Find the preferred terminal (highest txnShare)
+  const preferred = terminalInfos.slice().sort((a, b) => b.txnShare - a.txnShare)[0]
+
+  for (let i = 0; i < txnCount; i++) {
+    const seed = hashCode(merchant.id + '-txn-' + i)
+    const txnId = 'pay_' + seed.toString(36).padStart(8, '0').slice(0, 8).toUpperCase()
+
+    // Timestamp: within last 7 days
+    const now = new Date(2026, 2, 11, 10, 0, 0) // March 11, 2026
+    const hoursAgo = (seed % 168) // up to 7 days * 24 hours
+    const timestamp = new Date(now.getTime() - hoursAgo * 3600000)
+
+    // Amount
+    const amountSeed = hashCode(merchant.id + '-amt-' + i)
+    const amount = Math.round(avgTxnValue * (0.3 + (amountSeed % 300) / 100))
+
+    // Payment method
+    const pmIdx = seed % PAYMENT_METHODS.length
+    const paymentMethod = PAYMENT_METHODS[pmIdx]
+
+    // Status: ~80% success, 10% failed, 10% refunded
+    const statusSeed = hashCode(merchant.id + '-st-' + i) % 10
+    const status = statusSeed < 8 ? 'success' : statusSeed < 9 ? 'failed' : 'refunded'
+
+    // Simulate routing decision
+    let routingDecision
+    const srVariation = ((hashCode(merchant.id + '-sr-' + i) % 80) - 40) / 10 // -4 to +4
+
+    if (merchant.srSensitive) {
+      // SR Sensitive: always pick highest SR
+      const sorted = terminalInfos.slice().sort((a, b) => b.successRate - a.successRate)
+      const selected = sorted[0]
+      routingDecision = {
+        selectedTerminalId: selected.displayTerminalId,
+        selectedGatewayShort: selected.gatewayShort,
+        selectedSR: selected.successRate,
+        selectedCost: selected.costPerTxn,
+        reason: 'Merchant is SR-sensitive. Routing locked to highest SR terminal.',
+        wasDePrioritized: false,
+        dePrioritizedTerminal: null,
+        allEvaluated: sorted.map((t, idx) => ({
+          terminalId: t.displayTerminalId,
+          gatewayShort: t.gatewayShort,
+          successRate: t.successRate,
+          costPerTxn: t.costPerTxn,
+          status: idx === 0 ? 'selected' : 'rejected_sr_sensitive_not_highest',
+          statusReason: idx === 0
+            ? 'Highest SR terminal — selected for SR-sensitive merchant'
+            : `SR ${t.successRate}% is lower than ${sorted[0].successRate}% (highest available)`,
+        })),
+      }
+    } else {
+      // Non-SR-sensitive: threshold-based routing
+      const threshold = merchant.srThreshold || 92
+
+      // Apply SR variation to simulate real-world fluctuation
+      const variedTerminals = terminalInfos.map((t) => ({
+        ...t,
+        effectiveSR: Number((t.successRate + (hashCode(t.terminalId + '-' + i) % 60 - 30) / 10).toFixed(1)),
+      }))
+
+      // Check if preferred terminal is above threshold
+      const preferredVaried = variedTerminals.find((t) => t.terminalId === preferred.terminalId)
+      const aboveThreshold = variedTerminals
+        .filter((t) => t.effectiveSR >= threshold)
+        .sort((a, b) => a.costPerTxn - b.costPerTxn) // cheapest first
+
+      let selected
+      let wasDePrioritized = false
+      let dePrioritizedTerminal = null
+
+      if (preferredVaried && preferredVaried.effectiveSR < threshold && aboveThreshold.length > 0) {
+        // Preferred terminal is below threshold — de-prioritize
+        wasDePrioritized = true
+        dePrioritizedTerminal = {
+          id: preferredVaried.displayTerminalId,
+          sr: preferredVaried.effectiveSR,
+          threshold,
+        }
+        selected = aboveThreshold[0] // cheapest above threshold
+      } else if (aboveThreshold.length > 0) {
+        // Preferred terminal is fine, use cheapest above threshold
+        selected = aboveThreshold[0]
+      } else {
+        // No terminal above threshold, use highest SR as fallback
+        selected = variedTerminals.slice().sort((a, b) => b.effectiveSR - a.effectiveSR)[0]
+      }
+
+      const reason = wasDePrioritized
+        ? `Terminal ${dePrioritizedTerminal.id} de-prioritized: SR ${dePrioritizedTerminal.sr}% below ${threshold}% threshold. Routed to ${selected.displayTerminalId}: SR ${selected.effectiveSR}%, Cost ₹${selected.costPerTxn.toFixed(2)} (cheapest above threshold)`
+        : `Terminal ${selected.displayTerminalId} selected: SR ${selected.effectiveSR}% meets ${threshold}% threshold, Cost ₹${selected.costPerTxn.toFixed(2)}`
+
+      routingDecision = {
+        selectedTerminalId: selected.displayTerminalId,
+        selectedGatewayShort: selected.gatewayShort,
+        selectedSR: selected.effectiveSR,
+        selectedCost: selected.costPerTxn,
+        reason,
+        wasDePrioritized,
+        dePrioritizedTerminal,
+        allEvaluated: variedTerminals.map((t) => {
+          let evalStatus, evalReason
+          if (t.terminalId === selected.terminalId) {
+            evalStatus = 'selected'
+            evalReason = wasDePrioritized
+              ? `Cheapest terminal above ${threshold}% threshold`
+              : `Meets ${threshold}% threshold at lowest cost`
+          } else if (t.effectiveSR < threshold) {
+            evalStatus = 'rejected_below_threshold'
+            evalReason = `SR ${t.effectiveSR}% is below ${threshold}% threshold`
+          } else {
+            evalStatus = 'rejected_higher_cost'
+            evalReason = `SR ${t.effectiveSR}% meets threshold but cost ₹${t.costPerTxn.toFixed(2)} is higher than selected (₹${selected.costPerTxn.toFixed(2)})`
+          }
+          return {
+            terminalId: t.displayTerminalId,
+            gatewayShort: t.gatewayShort,
+            successRate: t.effectiveSR,
+            costPerTxn: t.costPerTxn,
+            status: evalStatus,
+            statusReason: evalReason,
+          }
+        }),
+      }
+    }
+
+    transactions.push({
+      txnId,
+      timestamp,
+      amount,
+      paymentMethod,
+      status,
+      gatewayId: terminalInfos.find((t) => t.displayTerminalId === routingDecision.selectedTerminalId)?.gatewayId || merchant.currentGatewayId,
+      terminalId: terminalInfos.find((t) => t.displayTerminalId === routingDecision.selectedTerminalId)?.terminalId || merchant.currentTerminalId,
+      routingDecision,
+    })
+  }
+
+  // Sort by timestamp descending (most recent first)
+  transactions.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+
+  return transactions
 }
 
 // ---------------------------------------------------------------------------

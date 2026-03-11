@@ -10,6 +10,8 @@ import {
   computeTSPCompliance,
   computeNTFRisk,
   detectRoutingConflicts,
+  computeRetentionRisk,
+  computeNROpportunity,
 } from '../data/kamMockData'
 
 const KAMContext = createContext(null)
@@ -366,6 +368,54 @@ export function KAMProvider({ children }) {
   const monthlyHistory = useMemo(() => generateMonthlyHistory(merchants), [merchants])
   const [selectedMonth, setSelectedMonth] = useState(null)
 
+  // Retention Risk + NR Opportunity computed values
+  const retentionRisks = useMemo(() => computeRetentionRisk(merchants), [merchants])
+  const nrOpportunities = useMemo(() => computeNROpportunity(merchants, targetData), [merchants, targetData])
+
+  // SR Sensitivity mutations
+  const toggleSRSensitive = useCallback(
+    (merchantId) => {
+      setMerchants((prev) =>
+        prev.map((m) => {
+          if (m.id !== merchantId) return m
+          const newSensitive = !m.srSensitive
+          return {
+            ...m,
+            srSensitive: newSensitive,
+            srThreshold: newSensitive ? null : (m.srThreshold || 92),
+          }
+        })
+      )
+      const merchant = merchants.find((m) => m.id === merchantId)
+      const newState = !merchant?.srSensitive
+      addAuditEntry(
+        `${newState ? 'Flagged' : 'Unflagged'} ${merchant?.name || merchantId} as SR Sensitive`,
+        newState ? 'Routing locked to highest SR terminal' : 'Threshold-based routing enabled',
+        merchantId
+      )
+      showToast(`${merchant?.name} ${newState ? 'marked as' : 'removed from'} SR Sensitive`)
+    },
+    [merchants, addAuditEntry, showToast]
+  )
+
+  const updateSRThreshold = useCallback(
+    (merchantId, threshold) => {
+      setMerchants((prev) =>
+        prev.map((m) =>
+          m.id === merchantId ? { ...m, srThreshold: threshold } : m
+        )
+      )
+      const merchant = merchants.find((m) => m.id === merchantId)
+      addAuditEntry(
+        `Updated SR threshold for ${merchant?.name || merchantId} to ${threshold}%`,
+        `Terminals below ${threshold}% SR will be de-prioritized`,
+        merchantId
+      )
+      showToast(`SR threshold updated to ${threshold}% for ${merchant?.name}`)
+    },
+    [merchants, addAuditEntry, showToast]
+  )
+
   const toggleSort = useCallback(
     (field) => {
       if (sortField === field) {
@@ -421,6 +471,10 @@ export function KAMProvider({ children }) {
     auditLog,
     addAuditEntry,
     gateways,
+    retentionRisks,
+    nrOpportunities,
+    toggleSRSensitive,
+    updateSRThreshold,
   }
 
   return <KAMContext.Provider value={value}>{children}</KAMContext.Provider>

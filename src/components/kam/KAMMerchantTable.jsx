@@ -565,7 +565,17 @@ export default function KAMMerchantTable() {
                     {/* Merchant Name + MID */}
                     <td>
                       <div className="kam-merchant-info">
-                        <span className="name">{merchant.name}</span>
+                        <span className="name">
+                          {merchant.name}
+                          {merchant.srSensitive && (
+                            <span className="kam-badge-sr">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                              </svg>
+                              SR
+                            </span>
+                          )}
+                        </span>
                         <span className="mid">{merchant.mid}</span>
                       </div>
                     </td>

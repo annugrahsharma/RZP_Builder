@@ -782,6 +782,105 @@
   line-height: 1.4;
 }
 
+/* SR Sensitive Badge
+   ========================================================================== */
+
+.kam-badge-sr {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 7px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  background: rgba(82, 143, 240, 0.12);
+  color: var(--rzp-blue);
+  font-family: var(--font-secondary);
+  letter-spacing: 0.03em;
+  margin-left: 6px;
+  white-space: nowrap;
+  gap: 3px;
+}
+
+.kam-badge-sr svg {
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+}
+
+/* Retention Risk + NR Opportunity Rows
+   ========================================================================== */
+
+.kam-risk-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--rzp-border);
+  cursor: pointer;
+  transition: background 0.1s ease;
+  gap: 12px;
+}
+
+.kam-risk-row:hover {
+  background: var(--rzp-blue-light);
+}
+
+.kam-risk-row:last-child {
+  border-bottom: none;
+}
+
+.kam-risk-row .kam-merchant-info {
+  min-width: 120px;
+}
+
+.kam-risk-row .kam-merchant-info .name {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--rzp-text-primary);
+  display: block;
+}
+
+.kam-risk-row .kam-merchant-info .mid {
+  font-size: 11px;
+  color: var(--rzp-text-muted);
+  font-family: var(--font-secondary);
+}
+
+.kam-risk-stats {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex: 1;
+  justify-content: flex-end;
+  font-family: var(--font-secondary);
+  font-size: 13px;
+}
+
+.kam-risk-stats .stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+}
+
+.kam-risk-stats .stat-label {
+  font-size: 11px;
+  color: var(--rzp-text-muted);
+}
+
+.kam-risk-stats .stat-value {
+  font-weight: 600;
+  color: var(--rzp-text-primary);
+}
+
+.kam-risk-stats .stat-value.negative {
+  color: var(--rzp-danger);
+}
+
+.kam-risk-stats .stat-value.positive {
+  color: var(--rzp-success);
+}
+
 /* Loading Skeleton
    ========================================================================== */
 

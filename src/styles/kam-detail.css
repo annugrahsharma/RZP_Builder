@@ -719,3 +719,527 @@
   color: var(--rzp-text-primary);
   font-family: var(--font-secondary);
 }
+
+/* SR Sensitivity Card
+   ========================================================================== */
+
+.kam-sr-card {
+  background: var(--rzp-card-bg);
+  border-radius: 12px;
+  border: 1px solid var(--rzp-border);
+  padding: 20px var(--space-lg);
+  margin-bottom: var(--space-lg);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.kam-sr-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.kam-sr-card-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--rzp-text-primary);
+  font-family: var(--font-secondary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.kam-sr-card-title svg {
+  width: 18px;
+  height: 18px;
+  color: var(--rzp-blue);
+}
+
+.kam-sr-info-banner {
+  border-radius: 8px;
+  padding: 12px 16px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-family: var(--font-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.kam-sr-info-banner.locked {
+  background: rgba(82, 143, 240, 0.08);
+  border: 1px solid rgba(82, 143, 240, 0.2);
+  color: var(--rzp-blue);
+}
+
+.kam-sr-info-banner.threshold {
+  background: var(--rzp-bg);
+  border: 1px solid var(--rzp-border);
+  color: var(--rzp-text-secondary);
+}
+
+.kam-sr-info-banner svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.kam-sr-threshold-control {
+  margin-top: 16px;
+}
+
+.kam-sr-threshold-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-family: var(--font-secondary);
+}
+
+.kam-sr-threshold-label .label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--rzp-text-primary);
+}
+
+.kam-sr-threshold-label .value {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--rzp-blue);
+  font-family: var(--font-primary);
+}
+
+.kam-sr-slider {
+  width: 100%;
+  height: 6px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: #EDF2F7;
+  border-radius: 3px;
+  outline: none;
+}
+
+.kam-sr-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--rzp-blue);
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(82, 143, 240, 0.3);
+}
+
+.kam-sr-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--rzp-blue);
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 6px rgba(82, 143, 240, 0.3);
+}
+
+.kam-sr-slider-range {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--rzp-text-muted);
+  font-family: var(--font-secondary);
+}
+
+/* Toggle Switch (reuse existing kam-toggle pattern)
+   ========================================================================== */
+
+.kam-toggle {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.kam-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.kam-toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background: #CBD5E0;
+  border-radius: 12px;
+  transition: background 0.2s ease;
+}
+
+.kam-toggle-slider::before {
+  content: '';
+  position: absolute;
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.kam-toggle input:checked + .kam-toggle-slider {
+  background: var(--rzp-blue);
+}
+
+.kam-toggle input:checked + .kam-toggle-slider::before {
+  transform: translateX(20px);
+}
+
+/* Transaction Table
+   ========================================================================== */
+
+.kam-txn-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: var(--rzp-bg);
+  border: 1px solid var(--rzp-border);
+  border-radius: 8px;
+  margin-bottom: var(--space-md);
+}
+
+.kam-txn-search svg {
+  width: 16px;
+  height: 16px;
+  color: var(--rzp-text-muted);
+  flex-shrink: 0;
+}
+
+.kam-txn-search input {
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  font-family: var(--font-secondary);
+  color: var(--rzp-text-primary);
+  width: 100%;
+  outline: none;
+}
+
+.kam-txn-search input::placeholder {
+  color: var(--rzp-text-muted);
+}
+
+.kam-txn-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-secondary);
+}
+
+.kam-txn-table th {
+  text-align: left;
+  padding: 10px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--rzp-text-muted);
+  border-bottom: 2px solid var(--rzp-border);
+  white-space: nowrap;
+}
+
+.kam-txn-table td {
+  padding: 10px 12px;
+  font-size: 13px;
+  color: var(--rzp-text-primary);
+  border-bottom: 1px solid var(--rzp-border);
+  white-space: nowrap;
+}
+
+.kam-txn-table tr {
+  cursor: pointer;
+  transition: background 0.1s ease;
+}
+
+.kam-txn-table tbody tr:hover {
+  background: var(--rzp-blue-light);
+}
+
+.kam-txn-table .txn-id {
+  font-family: var(--font-primary);
+  font-weight: 500;
+  font-size: 12px;
+  color: var(--rzp-blue);
+}
+
+.kam-txn-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.kam-txn-status.success {
+  background: var(--rzp-success-light);
+  color: var(--rzp-success);
+}
+
+.kam-txn-status.failed {
+  background: var(--rzp-danger-light);
+  color: var(--rzp-danger);
+}
+
+.kam-txn-status.refunded {
+  background: var(--rzp-warning-light);
+  color: var(--rzp-warning);
+}
+
+.kam-txn-footer {
+  padding: 12px 0;
+  font-size: 12px;
+  color: var(--rzp-text-muted);
+  font-family: var(--font-secondary);
+  text-align: center;
+}
+
+/* Transaction Routing Drawer
+   ========================================================================== */
+
+.kam-drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 9000;
+  animation: kamFadeIn 0.15s ease;
+}
+
+@keyframes kamFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.kam-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 520px;
+  max-width: 90vw;
+  height: 100vh;
+  background: var(--rzp-card-bg);
+  z-index: 9001;
+  box-shadow: -8px 0 24px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  animation: kamDrawerIn 0.2s ease;
+}
+
+@keyframes kamDrawerIn {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+.kam-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--rzp-border);
+  flex-shrink: 0;
+}
+
+.kam-drawer-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--rzp-text-primary);
+  font-family: var(--font-secondary);
+}
+
+.kam-drawer-close {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--rzp-text-secondary);
+  transition: background 0.1s ease;
+}
+
+.kam-drawer-close:hover {
+  background: var(--rzp-bg);
+}
+
+.kam-drawer-close svg {
+  width: 18px;
+  height: 18px;
+}
+
+.kam-drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.kam-drawer-section {
+  margin-bottom: 24px;
+}
+
+.kam-drawer-section-title {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--rzp-text-muted);
+  font-family: var(--font-secondary);
+  margin-bottom: 12px;
+}
+
+.kam-drawer-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.kam-drawer-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.kam-drawer-info-item .label {
+  font-size: 11px;
+  color: var(--rzp-text-muted);
+  font-family: var(--font-secondary);
+}
+
+.kam-drawer-info-item .value {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--rzp-text-primary);
+  font-family: var(--font-secondary);
+}
+
+/* Routing Explanation Banner */
+.kam-routing-explanation {
+  border-radius: 8px;
+  padding: 14px 16px;
+  font-family: var(--font-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.kam-routing-explanation svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.kam-routing-explanation.normal {
+  background: var(--rzp-success-light);
+  border: 1px solid rgba(30, 166, 114, 0.2);
+  color: #166534;
+}
+
+.kam-routing-explanation.deprioritized {
+  background: #FFFBEB;
+  border: 1px solid #FDE68A;
+  color: #92400E;
+}
+
+.kam-routing-explanation.sr-locked {
+  background: rgba(82, 143, 240, 0.08);
+  border: 1px solid rgba(82, 143, 240, 0.2);
+  color: var(--rzp-blue);
+}
+
+/* Routing Pipeline */
+.kam-pipeline-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.kam-pipeline-item {
+  border-radius: 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--rzp-border);
+  background: #fff;
+  font-family: var(--font-secondary);
+  transition: border-color 0.1s ease;
+}
+
+.kam-pipeline-item.selected {
+  border-color: var(--rzp-success);
+  background: rgba(30, 166, 114, 0.04);
+}
+
+.kam-pipeline-item.rejected {
+  opacity: 0.7;
+}
+
+.kam-pipeline-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.kam-pipeline-item-terminal {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--rzp-text-primary);
+}
+
+.kam-pipeline-item-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.kam-pipeline-item-status.selected {
+  background: var(--rzp-success-light);
+  color: var(--rzp-success);
+}
+
+.kam-pipeline-item-status.rejected {
+  background: var(--rzp-danger-light);
+  color: var(--rzp-danger);
+}
+
+.kam-pipeline-item-metrics {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: var(--rzp-text-secondary);
+  margin-bottom: 4px;
+}
+
+.kam-pipeline-item-metrics strong {
+  color: var(--rzp-text-primary);
+  font-weight: 600;
+}
+
+.kam-pipeline-item-reason {
+  font-size: 12px;
+  color: var(--rzp-text-muted);
+  line-height: 1.4;
+  font-style: italic;
+}
