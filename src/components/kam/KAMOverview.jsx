@@ -1,11 +1,38 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useKAM } from '../../context/KAMContext'
 import { formatINR, formatNumber, computeMerchantRevenue } from '../../data/kamMockData'
 
+const MONTH_LABELS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+
 export default function KAMOverview() {
-  const { stats, targetData, allMerchants } = useKAM()
+  const { stats, targetData, allMerchants, monthlyHistory, selectedMonth, setSelectedMonth } = useKAM()
   const navigate = useNavigate()
+  const [hoveredMonth, setHoveredMonth] = useState(null)
+
+  // Group monthly history by year for heatmap rendering
+  const yearRows = useMemo(() => {
+    if (!monthlyHistory || monthlyHistory.length === 0) return []
+    const grouped = {}
+    monthlyHistory.forEach((m) => {
+      if (!grouped[m.year]) grouped[m.year] = []
+      grouped[m.year].push(m)
+    })
+    return Object.keys(grouped)
+      .sort()
+      .map((year) => ({
+        year: Number(year),
+        months: grouped[year],
+      }))
+  }, [monthlyHistory])
+
+  const handleCellClick = (entry) => {
+    if (selectedMonth && selectedMonth.year === entry.year && selectedMonth.month === entry.month) {
+      setSelectedMonth(null)
+    } else {
+      setSelectedMonth(entry)
+    }
+  }
 
   const merchantsNeedingAttention = useMemo(() => {
     return allMerchants
@@ -109,6 +136,112 @@ export default function KAMOverview() {
             </span>
           </div>
         </div>
+      </div>
+
+      {/* Monthly Performance Heatmap */}
+      <div className="kam-heatmap-card">
+        <div className="kam-heatmap-header">
+          <h3>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+              <line x1="16" y1="2" x2="16" y2="6" />
+              <line x1="8" y1="2" x2="8" y2="6" />
+              <line x1="3" y1="10" x2="21" y2="10" />
+            </svg>
+            Monthly Target Performance
+          </h3>
+          <div className="kam-heatmap-legend">
+            <div className="kam-heatmap-legend-item">
+              <div className="kam-heatmap-legend-dot green" />
+              <span>Achieved (&ge;90%)</span>
+            </div>
+            <div className="kam-heatmap-legend-item">
+              <div className="kam-heatmap-legend-dot yellow" />
+              <span>Close (70-89%)</span>
+            </div>
+            <div className="kam-heatmap-legend-item">
+              <div className="kam-heatmap-legend-dot red" />
+              <span>Missed (&lt;70%)</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="kam-heatmap-grid">
+          {/* Month Labels */}
+          <div className="kam-heatmap-month-labels">
+            <div /> {/* spacer for year column */}
+            {MONTH_LABELS.map((label) => (
+              <div key={label} className="kam-heatmap-month-label">{label}</div>
+            ))}
+          </div>
+
+          {/* Year Rows */}
+          {yearRows.map(({ year, months }) => (
+            <div key={year} className="kam-heatmap-row">
+              <div className="kam-heatmap-year">{year}</div>
+              {MONTH_LABELS.map((_, monthIdx) => {
+                const entry = months.find((m) => m.month === monthIdx + 1)
+                if (!entry) {
+                  return <div key={monthIdx} className="kam-heatmap-cell empty" />
+                }
+                const isHovered = hoveredMonth && hoveredMonth.year === entry.year && hoveredMonth.month === entry.month
+                const isSelected = selectedMonth && selectedMonth.year === entry.year && selectedMonth.month === entry.month
+                return (
+                  <div
+                    key={monthIdx}
+                    className={`kam-heatmap-cell ${entry.status}${entry.isCurrent ? ' current' : ''}${isSelected ? ' selected' : ''}`}
+                    onMouseEnter={() => setHoveredMonth(entry)}
+                    onMouseLeave={() => setHoveredMonth(null)}
+                    onClick={() => handleCellClick(entry)}
+                  >
+                    {isHovered && (
+                      <div className="kam-heatmap-tooltip">
+                        <div className="kam-heatmap-tooltip-month">{entry.monthFull}</div>
+                        <div className="kam-heatmap-tooltip-detail">
+                          {formatINR(entry.achieved)} / {formatINR(entry.target)}
+                        </div>
+                        <div className="kam-heatmap-tooltip-detail">
+                          <span className="kam-heatmap-tooltip-pct">{entry.percentage}%</span> of target
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          ))}
+        </div>
+
+        {/* Selected Month Detail Strip */}
+        {selectedMonth && (
+          <div className="kam-heatmap-selected">
+            <div className="kam-heatmap-selected-month">
+              <div className={`kam-heatmap-selected-dot ${selectedMonth.status}`}
+                   style={{ background: selectedMonth.status === 'green' ? '#1EA672' : selectedMonth.status === 'yellow' ? '#F5D623' : '#E74C3C' }} />
+              {selectedMonth.monthFull}
+              {selectedMonth.isCurrent && (
+                <span className="kam-badge info" style={{ fontSize: '10px', padding: '2px 8px' }}>Current</span>
+              )}
+            </div>
+            <div className="kam-heatmap-selected-stats">
+              <div className="kam-heatmap-selected-stat">
+                <span className="label">Achieved</span>
+                <span className="value">{formatINR(selectedMonth.achieved)}</span>
+              </div>
+              <div className="kam-heatmap-selected-stat">
+                <span className="label">Target</span>
+                <span className="value">{formatINR(selectedMonth.target)}</span>
+              </div>
+              <div className="kam-heatmap-selected-stat">
+                <span className="label">Achievement</span>
+                <span className="value">{selectedMonth.percentage}%</span>
+              </div>
+            </div>
+            <div className={`kam-heatmap-selected-badge ${selectedMonth.status}`}>
+              {selectedMonth.status === 'green' ? 'Target Achieved' : selectedMonth.status === 'yellow' ? 'Close to Target' : 'Target Missed'}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* 6 Metric Cards */}
