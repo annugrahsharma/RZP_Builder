@@ -10,6 +10,7 @@ import {
   getBackwardPricingBreakdown,
   generateMerchantTransactions,
   generateSRTimeSeries,
+  generateRecommendations,
 } from '../../data/kamMockData'
 
 // ---------------------------------------------------------------------------
@@ -614,6 +615,10 @@ export default function KAMMerchantDetail() {
   const [txnSearch, setTxnSearch] = useState('')
   const [selectedTxn, setSelectedTxn] = useState(null)
 
+  // ---- Recommendation state ----
+  const [approvedRecs, setApprovedRecs] = useState(new Set())
+  const [dismissedRecs, setDismissedRecs] = useState(new Set())
+
   // ---- Guard ----
   if (!merchant) {
     return (
@@ -669,6 +674,7 @@ export default function KAMMerchantDetail() {
   // Transaction data
   const transactions = useMemo(() => generateMerchantTransactions(merchant), [merchant])
   const srData = useMemo(() => generateSRTimeSeries(merchant), [merchant])
+  const recommendations = useMemo(() => generateRecommendations(merchant), [merchant])
 
   const filteredTxns = useMemo(() => {
     if (!txnSearch) return transactions
@@ -730,6 +736,34 @@ export default function KAMMerchantDetail() {
     showToast(`Terminal ${confirmTerminal.terminalId} disabled`, 'info')
     setConfirmTerminal(null)
   }, [confirmTerminal, merchant.name, merchantId, addAuditEntry, showToast])
+
+  // ---- Recommendation handlers ----
+  const handleApproveRec = useCallback(
+    (rec) => {
+      setApprovedRecs((prev) => new Set([...prev, rec.id]))
+
+      if (rec.action === 'enable_sr_sensitive') {
+        toggleSRSensitive(merchantId)
+      } else {
+        addAuditEntry(
+          `Approved AI recommendation: ${rec.title}`,
+          rec.description.length > 140 ? rec.description.substring(0, 140) + '…' : rec.description,
+          merchantId
+        )
+        showToast(`Recommendation approved: ${rec.title}`)
+      }
+    },
+    [merchantId, toggleSRSensitive, addAuditEntry, showToast]
+  )
+
+  const handleDismissRec = useCallback((recId) => {
+    setDismissedRecs((prev) => new Set([...prev, recId]))
+  }, [])
+
+  const visibleRecs = useMemo(
+    () => recommendations.filter((r) => !dismissedRecs.has(r.id)),
+    [recommendations, dismissedRecs]
+  )
 
   // ---- Status & category badge helpers ----
   const statusBadgeClass = merchant.status === 'active' ? 'success' : 'warning'
@@ -970,6 +1004,76 @@ export default function KAMMerchantDetail() {
           deltaType="positive"
         />
       </div>
+
+      {/* ── AI Recommended Actions ────────────────────────────────── */}
+      {visibleRecs.length > 0 && (
+        <div className="kam-recs-section">
+          <div className="kam-recs-header">
+            <div className="kam-recs-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="16" x2="12" y2="12" />
+                <line x1="12" y1="8" x2="12.01" y2="8" />
+              </svg>
+              AI Recommended Actions
+              <span className="kam-recs-ai-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                </svg>
+                AI
+              </span>
+            </div>
+            <span className="kam-recs-subtitle">
+              {visibleRecs.length} recommendation{visibleRecs.length !== 1 ? 's' : ''}
+            </span>
+          </div>
+          <div className="kam-recs-list">
+            {visibleRecs.map((rec) => (
+              <div
+                key={rec.id}
+                className={`kam-rec-card ${rec.type}${approvedRecs.has(rec.id) ? ' approved' : ''}`}
+              >
+                <div className="kam-rec-card-header">
+                  <span className={`kam-rec-badge ${rec.type}`}>
+                    {rec.type === 'critical' ? 'Critical' : rec.type === 'warning' ? 'Warning' : rec.type === 'opportunity' ? 'Opportunity' : 'Info'}
+                  </span>
+                  <span className="kam-rec-signal">{rec.signal}</span>
+                </div>
+                <div className="kam-rec-title">{rec.title}</div>
+                <div className="kam-rec-desc">{rec.description}</div>
+                <div className="kam-rec-impact">
+                  <strong>Impact: </strong>{rec.impact}
+                </div>
+                <div className="kam-rec-actions">
+                  {approvedRecs.has(rec.id) ? (
+                    <span className="kam-rec-approved-badge">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                      Approved
+                    </span>
+                  ) : (
+                    <>
+                      <button
+                        className="kam-rec-approve-btn"
+                        onClick={() => handleApproveRec(rec)}
+                      >
+                        Approve
+                      </button>
+                      <button
+                        className="kam-rec-dismiss-btn"
+                        onClick={() => handleDismissRec(rec.id)}
+                      >
+                        Dismiss
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       </>
       )}

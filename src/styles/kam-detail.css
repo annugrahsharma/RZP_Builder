@@ -1651,3 +1651,256 @@
     padding: 10px 16px 8px;
   }
 }
+
+/* ==========================================================================
+   AI Recommended Actions
+   ========================================================================== */
+
+.kam-recs-section {
+  margin-top: 24px;
+}
+
+.kam-recs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.kam-recs-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--rzp-text-primary);
+  font-family: var(--font-primary);
+}
+
+.kam-recs-title svg {
+  width: 18px;
+  height: 18px;
+  color: var(--rzp-blue);
+  flex-shrink: 0;
+}
+
+.kam-recs-subtitle {
+  font-size: 12px;
+  color: var(--rzp-text-muted);
+  font-family: var(--font-secondary);
+}
+
+.kam-recs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Rec Card */
+.kam-rec-card {
+  background: var(--rzp-bg-card);
+  border: 1px solid var(--rzp-border);
+  border-radius: 10px;
+  padding: 20px;
+  position: relative;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.kam-rec-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 12px;
+  bottom: 12px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+}
+
+.kam-rec-card.critical::before { background: #E53E3E; }
+.kam-rec-card.warning::before { background: #DD6B20; }
+.kam-rec-card.opportunity::before { background: #38A169; }
+.kam-rec-card.info::before { background: var(--rzp-blue); }
+
+.kam-rec-card:hover {
+  border-color: var(--rzp-border-hover, #c4c4c4);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.kam-rec-card.approved {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.kam-rec-card.approved::before {
+  background: #38A169;
+}
+
+/* Rec card header */
+.kam-rec-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.kam-rec-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: var(--font-secondary);
+}
+
+.kam-rec-badge.critical {
+  background: #FED7D7;
+  color: #C53030;
+}
+
+.kam-rec-badge.warning {
+  background: #FEEBC8;
+  color: #C05621;
+}
+
+.kam-rec-badge.opportunity {
+  background: #C6F6D5;
+  color: #276749;
+}
+
+.kam-rec-badge.info {
+  background: var(--rzp-blue-light);
+  color: var(--rzp-blue);
+}
+
+.kam-rec-signal {
+  font-size: 12px;
+  color: var(--rzp-text-muted);
+  font-family: var(--font-secondary);
+}
+
+/* Rec title */
+.kam-rec-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--rzp-text-primary);
+  font-family: var(--font-primary);
+  margin-bottom: 6px;
+  line-height: 1.4;
+}
+
+/* Rec description */
+.kam-rec-desc {
+  font-size: 13px;
+  color: var(--rzp-text-secondary);
+  font-family: var(--font-secondary);
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+
+/* Rec impact */
+.kam-rec-impact {
+  font-size: 12px;
+  color: var(--rzp-text-secondary);
+  font-family: var(--font-secondary);
+  margin-bottom: 14px;
+  padding: 8px 12px;
+  background: var(--rzp-bg-secondary, #f7f8fa);
+  border-radius: 6px;
+}
+
+.kam-rec-impact strong {
+  color: var(--rzp-text-primary);
+  font-weight: 600;
+}
+
+/* Rec actions */
+.kam-rec-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.kam-rec-approve-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-primary);
+  cursor: pointer;
+  background: var(--rzp-blue);
+  color: #fff;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.kam-rec-approve-btn:hover {
+  background: #3d7ce8;
+}
+
+.kam-rec-approve-btn:active {
+  transform: scale(0.97);
+}
+
+.kam-rec-dismiss-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border: 1px solid var(--rzp-border);
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: var(--font-secondary);
+  cursor: pointer;
+  background: transparent;
+  color: var(--rzp-text-secondary);
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.kam-rec-dismiss-btn:hover {
+  background: var(--rzp-bg-secondary, #f7f8fa);
+  border-color: var(--rzp-border-hover, #c4c4c4);
+}
+
+.kam-rec-approved-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-primary);
+  background: #C6F6D5;
+  color: #276749;
+}
+
+.kam-rec-approved-badge svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* AI label */
+.kam-recs-ai-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  background: linear-gradient(135deg, #EBF4FF 0%, #F0E6FF 100%);
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #6B46C1;
+  font-family: var(--font-secondary);
+  letter-spacing: 0.3px;
+}
+
+.kam-recs-ai-label svg {
+  width: 12px;
+  height: 12px;
+}

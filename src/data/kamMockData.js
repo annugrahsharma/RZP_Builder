@@ -945,6 +945,213 @@ function seededRandom(seed) {
   return ((s < 0 ? ~s + 1 : s) % 10000) / 10000
 }
 
+// ---------------------------------------------------------------------------
+// AI Recommended Actions generator
+// ---------------------------------------------------------------------------
+export function generateRecommendations(merchant) {
+  const recs = []
+
+  // 1. Churn risk: txn volume dropped YoY
+  const { currentMonth, lastYearSameMonth } = merchant.txnVolumeHistory || {}
+  if (currentMonth && lastYearSameMonth && lastYearSameMonth > 0) {
+    const yoyChange = ((currentMonth - lastYearSameMonth) / lastYearSameMonth) * 100
+    if (yoyChange < -15) {
+      const dropPct = Math.abs(yoyChange).toFixed(0)
+      if (!merchant.srSensitive) {
+        recs.push({
+          id: 'enable-sr-sensitivity',
+          type: 'critical',
+          title: 'Enable SR Sensitivity flag',
+          description: `Transaction volume has dropped ${dropPct}% compared to the same month last year, indicating potential churn risk. Enabling SR sensitivity locks routing to the highest success-rate terminal, improving payment reliability and merchant experience.`,
+          signal: `${dropPct}% YoY transaction decline`,
+          action: 'enable_sr_sensitive',
+          impact: 'Improve payment success rate, reduce failed transactions',
+        })
+      } else {
+        recs.push({
+          id: 'churn-risk-alert',
+          type: 'warning',
+          title: 'Monitor churn risk closely',
+          description: `Transaction volume has dropped ${dropPct}% compared to the same month last year. SR sensitivity is already enabled. Consider reaching out to the merchant to understand if there are integration or business issues driving the decline.`,
+          signal: `${dropPct}% YoY transaction decline`,
+          action: 'contact_merchant',
+          impact: 'Retain merchant, prevent further volume loss',
+        })
+      }
+    }
+  }
+
+  // 2. Low SR: success rate below 93% with no SR sensitivity
+  if (merchant.avgPaymentSuccessRate < 93 && !merchant.srSensitive) {
+    recs.push({
+      id: 'low-sr-action',
+      type: 'critical',
+      title: 'Investigate low success rate',
+      description: `Current success rate is ${merchant.avgPaymentSuccessRate}%, which is below the 93% threshold. This may lead to poor checkout experience and merchant dissatisfaction. Consider enabling SR sensitivity or reviewing terminal health.`,
+      signal: `SR at ${merchant.avgPaymentSuccessRate}% (below 93% benchmark)`,
+      action: 'review_terminals',
+      impact: 'Improve conversion rate by 2–4%',
+    })
+  }
+
+  // 3. Underutilised zero-cost terminal
+  const zeroCostTerminals = merchant.gatewayMetrics.filter((gm) => gm.costPerTxn === 0)
+  if (zeroCostTerminals.length > 0) {
+    const lowShare = zeroCostTerminals.filter((t) => t.txnShare < 15)
+    if (lowShare.length > 0) {
+      recs.push({
+        id: 'increase-zero-cost',
+        type: 'opportunity',
+        title: 'Increase zero-cost terminal traffic share',
+        description: `${lowShare.length} zero-cost terminal(s) are processing less than 15% of transactions. Routing more traffic through these terminals can reduce backward cost without impacting success rates (current SR: ${lowShare.map(t => t.successRate + '%').join(', ')}).`,
+        signal: `Zero-cost terminal(s) at ${lowShare.map(t => t.txnShare + '% share').join(', ')}`,
+        action: 'optimize_routing',
+        impact: `Save ₹${(lowShare.reduce((s, t) => s + (1.5 * merchant.monthlyTxnVolume * 0.15 / 100), 0) / 100000).toFixed(1)}L/month in backward cost`,
+      })
+    }
+  }
+
+  // 4. TSP compliance risk
+  if (merchant.dealType === 'tsp' && merchant.dealDetails) {
+    const tspTerminal = merchant.gatewayMetrics.find(
+      (gm) => gm.gatewayId === merchant.currentGatewayId
+    )
+    if (tspTerminal && tspTerminal.txnShare < 50) {
+      recs.push({
+        id: 'tsp-compliance',
+        type: 'warning',
+        title: 'TSP deal compliance at risk',
+        description: `The TSP-locked gateway is only receiving ${tspTerminal.txnShare}% of transactions, which may not meet the commitment threshold. Consider increasing routing share to avoid contract penalties.`,
+        signal: `TSP gateway at ${tspTerminal.txnShare}% share (target: >50%)`,
+        action: 'adjust_routing',
+        impact: 'Avoid TSP contract penalty, maintain deal terms',
+      })
+    }
+  }
+
+  // 5. High SR merchant not flagged as SR sensitive (opportunity)
+  if (merchant.avgPaymentSuccessRate >= 96 && !merchant.srSensitive) {
+    const yoyChange = currentMonth && lastYearSameMonth
+      ? ((currentMonth - lastYearSameMonth) / lastYearSameMonth) * 100
+      : 0
+    if (yoyChange >= 10) {
+      recs.push({
+        id: 'cost-optimise',
+        type: 'opportunity',
+        title: 'Switch to cost-optimised routing',
+        description: `This merchant has a strong SR of ${merchant.avgPaymentSuccessRate}% and transaction volume is growing ${yoyChange.toFixed(0)}% YoY. The high SR provides headroom to route through cheaper terminals without impacting payment reliability.`,
+        signal: `${merchant.avgPaymentSuccessRate}% SR with ${yoyChange.toFixed(0)}% volume growth`,
+        action: 'optimize_cost',
+        impact: 'Reduce backward cost while maintaining SR above 95%',
+      })
+    }
+  }
+
+  // 6. Terminal prioritization — cost vs SR tradeoff
+  if (merchant.gatewayMetrics.length >= 2) {
+    const sorted = [...merchant.gatewayMetrics].sort((a, b) => b.txnShare - a.txnShare)
+    const primary = sorted[0] // highest share terminal
+
+    const cheaperAlts = merchant.gatewayMetrics.filter(
+      (t) => t.costPerTxn < primary.costPerTxn && t.terminalId !== primary.terminalId
+    )
+
+    cheaperAlts.forEach((alt) => {
+      const srDiff = primary.successRate - alt.successRate
+      const costDiff = primary.costPerTxn - alt.costPerTxn
+
+      if (srDiff > 0 && srDiff <= 1.5 && costDiff >= 0.5) {
+        const primaryGw = gateways.find((g) => g.id === primary.gatewayId)
+        const primaryTermId = primaryGw?.terminals.find((t) => t.id === primary.terminalId)?.terminalId || primary.terminalId
+        const altGw = gateways.find((g) => g.id === alt.gatewayId)
+        const altTermId = altGw?.terminals.find((t) => t.id === alt.terminalId)?.terminalId || alt.terminalId
+
+        const srBps = Math.round(srDiff * 100) // basis points
+        const avgTxnValue = merchant.monthlyGMV / merchant.monthlyTxnVolume
+        const costBps = Math.round((costDiff / avgTxnValue) * 10000)
+        const monthlySaving = Math.round(costDiff * (primary.txnShare / 100) * merchant.monthlyTxnVolume)
+        const savingLakhs = (monthlySaving / 100000).toFixed(1)
+
+        recs.push({
+          id: `terminal-prioritize-${alt.terminalId}`,
+          type: 'opportunity',
+          title: `Prioritise ${altTermId} over ${primaryTermId}`,
+          description: `${primaryTermId} currently processes ${primary.txnShare}% of transactions at ₹${primary.costPerTxn.toFixed(2)}/txn. By shifting traffic to ${altTermId} (${alt.costPerTxn === 0 ? 'zero-cost' : '₹' + alt.costPerTxn.toFixed(2) + '/txn'}), you lose only ${srBps} bps in SR (${primary.successRate}% → ${alt.successRate}%) but save ${costBps} bps in backward cost. The SR tradeoff is minimal for a cost saving of ₹${savingLakhs}L/month.`,
+          signal: `${srBps} bps SR loss vs ${costBps} bps cost saving`,
+          action: 'prioritize_terminal',
+          impact: `Save ₹${savingLakhs}L/month in backward cost with minimal SR impact`,
+          meta: {
+            fromTerminal: primaryTermId,
+            toTerminal: altTermId,
+            srBps,
+            costBps,
+            savingLakhs,
+          },
+        })
+      }
+    })
+  }
+
+  // 7. Card network routing — route Visa CC to preferred gateway
+  const ccTerminals = merchant.gatewayMetrics.filter(
+    (t) => (t.supportedMethods || []).includes('CC')
+  )
+  if (ccTerminals.length >= 2 && merchant.monthlyGMV >= 500000000) {
+    const sortedCC = [...ccTerminals].sort((a, b) => a.costPerTxn - b.costPerTxn)
+    const cheapestCC = sortedCC[0]
+    const expensiveCC = sortedCC[sortedCC.length - 1]
+
+    if (cheapestCC.costPerTxn < expensiveCC.costPerTxn && cheapestCC.successRate >= 93) {
+      const ccGw = gateways.find((g) => g.id === cheapestCC.gatewayId)
+      const ccTermId = ccGw?.terminals.find((t) => t.id === cheapestCC.terminalId)?.terminalId || cheapestCC.terminalId
+      const ccGwName = ccGw?.name || 'gateway'
+
+      // Estimate Visa CC GMV share based on category
+      const visaSharePct = merchant.category === 'E-commerce' ? 38
+        : merchant.category === 'Fintech' ? 42
+        : merchant.category === 'Fashion' ? 35
+        : 30
+      const visaGMV = Math.round(merchant.monthlyGMV * visaSharePct / 100)
+      const visaGMVCr = (visaGMV / 10000000).toFixed(0)
+
+      const costPerTxnSaving = expensiveCC.costPerTxn - cheapestCC.costPerTxn
+      const avgTxnVal = merchant.monthlyGMV / merchant.monthlyTxnVolume
+      const nrImprovementBps = Math.round((costPerTxnSaving / avgTxnVal) * 10000)
+
+      recs.push({
+        id: 'visa-routing',
+        type: 'opportunity',
+        title: `Route Visa transactions to ${ccGwName}`,
+        description: `Estimated monthly Visa CC GMV is ~₹${visaGMVCr}Cr. Routing Visa transactions to ${ccTermId} (${cheapestCC.costPerTxn === 0 ? 'zero-cost' : '₹' + cheapestCC.costPerTxn.toFixed(2) + '/txn'}) at ${ccGwName} — where SR is at ${cheapestCC.successRate}% — will reduce backward cost on these transactions${cheapestCC.costPerTxn === 0 ? ' to zero' : ` by ₹${costPerTxnSaving.toFixed(2)}/txn`}. This helps meet GMV targets on ${ccGwName}, earns clawback benefits, and improves net revenue by ~${nrImprovementBps} bps.`,
+        signal: `₹${visaGMVCr}Cr/month Visa GMV, ${cheapestCC.successRate}% SR at ${ccGwName}`,
+        action: 'visa_card_routing',
+        impact: `Improve NR by ~${nrImprovementBps} bps, earn clawback on ₹${visaGMVCr}Cr Visa GMV`,
+        meta: {
+          gateway: ccGwName,
+          terminal: ccTermId,
+          visaGMVCr,
+          nrBps: nrImprovementBps,
+        },
+      })
+    }
+  }
+
+  // Ensure at least one recommendation for every merchant
+  if (recs.length === 0) {
+    recs.push({
+      id: 'routine-review',
+      type: 'info',
+      title: 'Routine health check',
+      description: `All metrics are within normal ranges. Current SR is ${merchant.avgPaymentSuccessRate}% and transaction volume is stable. Consider scheduling a quarterly review with the merchant to discuss growth opportunities.`,
+      signal: 'All metrics nominal',
+      action: 'schedule_review',
+      impact: 'Strengthen merchant relationship',
+    })
+  }
+
+  return recs
+}
+
 export function generateSRTimeSeries(merchant) {
   const days = 30
   const endDate = new Date(2026, 2, 10) // March 10, 2026
