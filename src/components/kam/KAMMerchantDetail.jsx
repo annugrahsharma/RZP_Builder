@@ -12,6 +12,7 @@ import {
   generateMerchantTransactions,
   generateSRTimeSeries,
   generateRecommendations,
+  generateSankeyData,
 } from '../../data/kamMockData'
 
 // ---------------------------------------------------------------------------
@@ -497,70 +498,42 @@ function SRLineChart({ srData }) {
 }
 
 // ---------------------------------------------------------------------------
-// SR Range Slider sub-component (dual-handle, min 10% delta)
+// SR Threshold Slider sub-component (single-handle)
 // ---------------------------------------------------------------------------
-const MIN_DELTA = 10
 const SR_MIN = 70
 const SR_MAX = 100
 
-function SRRangeSlider({ low, high, onChange }) {
-  const trackRef = React.useRef(null)
+function SRThresholdSlider({ value, onChange }) {
+  const pct = ((value - SR_MIN) / (SR_MAX - SR_MIN)) * 100
 
-  const pct = (v) => ((v - SR_MIN) / (SR_MAX - SR_MIN)) * 100
-
-  const handleLow = useCallback((e) => {
-    const val = Number(e.target.value)
-    const clamped = Math.min(val, high - MIN_DELTA)
-    onChange(clamped, high)
-  }, [high, onChange])
-
-  const handleHigh = useCallback((e) => {
-    const val = Number(e.target.value)
-    const clamped = Math.max(val, low + MIN_DELTA)
-    onChange(low, clamped)
-  }, [low, onChange])
-
-  const lowPct = pct(low)
-  const highPct = pct(high)
+  const handleChange = useCallback((e) => {
+    onChange(Number(e.target.value))
+  }, [onChange])
 
   return (
     <div className="kam-sr-range-control">
       <div className="kam-sr-range-labels">
         <div className="kam-sr-range-label">
-          <span className="label">Lower Threshold</span>
-          <span className="value low">{low}%</span>
-        </div>
-        <div className="kam-sr-range-label right">
-          <span className="label">Upper Threshold</span>
-          <span className="value high">{high}%</span>
+          <span className="label">SR Threshold</span>
+          <span className="value low">{value}%</span>
         </div>
       </div>
 
-      <div className="kam-sr-range-track-wrapper" ref={trackRef}>
+      <div className="kam-sr-range-track-wrapper">
         {/* Background track */}
         <div className="kam-sr-range-track" />
         {/* Colored zones */}
-        <div className="kam-sr-range-zone danger" style={{ left: 0, width: `${lowPct}%` }} />
-        <div className="kam-sr-range-zone ok" style={{ left: `${lowPct}%`, width: `${highPct - lowPct}%` }} />
-        <div className="kam-sr-range-zone optimal" style={{ left: `${highPct}%`, width: `${100 - highPct}%` }} />
-        {/* Invisible range inputs stacked */}
+        <div className="kam-sr-range-zone danger" style={{ left: 0, width: `${pct}%` }} />
+        <div className="kam-sr-range-zone eligible" style={{ left: `${pct}%`, width: `${100 - pct}%` }} />
+        {/* Single range input */}
         <input
           type="range"
           min={SR_MIN}
           max={SR_MAX}
           step={1}
-          value={low}
-          onChange={handleLow}
+          value={value}
+          onChange={handleChange}
           className="kam-sr-range-input low"
-        />
-        <input
-          type="range"
-          min={SR_MIN}
-          max={SR_MAX}
-          step={1}
-          value={high}
-          onChange={handleHigh}
-          className="kam-sr-range-input high"
         />
       </div>
 
@@ -573,15 +546,247 @@ function SRRangeSlider({ low, high, onChange }) {
 
       <div className="kam-sr-range-legend">
         <span className="kam-sr-range-legend-item danger">
-          <span className="dot" /> Below {low}% — de-prioritized
+          <span className="dot" /> Below {value}% — fallback
         </span>
-        <span className="kam-sr-range-legend-item ok">
-          <span className="dot" /> {low}%–{high}% — eligible
-        </span>
-        <span className="kam-sr-range-legend-item optimal">
-          <span className="dot" /> Above {high}% — preferred
+        <span className="kam-sr-range-legend-item eligible">
+          <span className="dot" /> Above {value}% — CBR eligible
         </span>
       </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Sankey Chart sub-component (pure SVG)
+// ---------------------------------------------------------------------------
+const SANKEY_CHART_H = 580
+const SANKEY_NODE_W = 130
+const SANKEY_NODE_GAP = 5
+const SANKEY_PAD_TOP = 40
+const SANKEY_PAD_BOTTOM = 10
+
+function computeSankeyLayout(data, width) {
+  const availH = SANKEY_CHART_H - SANKEY_PAD_TOP - SANKEY_PAD_BOTTOM
+  const colXs = [60, width / 2 - SANKEY_NODE_W / 2, width - SANKEY_NODE_W - 60]
+
+  // Group nodes by column
+  const columns = [[], [], []]
+  data.nodes.forEach((n) => columns[n.column].push({ ...n }))
+
+  // Compute node positions for each column
+  columns.forEach((col, ci) => {
+    const total = col.reduce((s, n) => s + n.value, 0)
+    const minH = 14
+    const gapSize = col.length > 8 ? 3 : SANKEY_NODE_GAP
+    const gaps = Math.max(0, col.length - 1) * gapSize
+    const usable = availH - gaps
+
+    // First pass: compute ideal heights
+    const heights = col.map((n) => Math.max(minH, (n.value / total) * usable))
+    // If total exceeds usable, scale down proportionally
+    const hTotal = heights.reduce((s, h) => s + h, 0)
+    if (hTotal > usable) {
+      const scale = usable / hTotal
+      heights.forEach((h, i) => { heights[i] = Math.max(minH * 0.7, h * scale) })
+    }
+
+    let y = SANKEY_PAD_TOP
+    col.forEach((n, i) => {
+      n.x = colXs[ci]
+      n.y = y
+      n.h = heights[i]
+      y += heights[i] + gapSize
+    })
+  })
+
+  // Flatten back to a map
+  const nodeMap = {}
+  columns.flat().forEach((n) => { nodeMap[n.id] = n })
+
+  // Compute link paths with stacking
+  // Track how much vertical space has been used on each side of each node
+  const sourceOffsets = {}
+  const targetOffsets = {}
+
+  const layoutLinks = data.links.map((l) => {
+    const src = nodeMap[l.source]
+    const tgt = nodeMap[l.target]
+    if (!src || !tgt) return null
+
+    const srcTotal = data.links.filter((x) => x.source === l.source).reduce((s, x) => s + x.value, 0)
+    const tgtTotal = data.links.filter((x) => x.target === l.target).reduce((s, x) => s + x.value, 0)
+
+    const linkW_src = (l.value / srcTotal) * src.h
+    const linkW_tgt = (l.value / tgtTotal) * tgt.h
+
+    if (!sourceOffsets[l.source]) sourceOffsets[l.source] = 0
+    if (!targetOffsets[l.target]) targetOffsets[l.target] = 0
+
+    const sy = src.y + sourceOffsets[l.source] + linkW_src / 2
+    const ty = tgt.y + targetOffsets[l.target] + linkW_tgt / 2
+
+    sourceOffsets[l.source] += linkW_src
+    targetOffsets[l.target] += linkW_tgt
+
+    const sx = src.x + SANKEY_NODE_W
+    const tx = tgt.x
+
+    const midX = (sx + tx) / 2
+
+    return {
+      ...l,
+      path: `M${sx},${sy - linkW_src / 2} C${midX},${sy - linkW_src / 2} ${midX},${ty - linkW_tgt / 2} ${tx},${ty - linkW_tgt / 2} L${tx},${ty + linkW_tgt / 2} C${midX},${ty + linkW_tgt / 2} ${midX},${sy + linkW_src / 2} ${sx},${sy + linkW_src / 2} Z`,
+      color: src.color,
+    }
+  }).filter(Boolean)
+
+  return { nodeMap, layoutLinks, columns }
+}
+
+function SankeyChart({ data }) {
+  const [svgWidth, setSvgWidth] = useState(700)
+  const [hoveredNode, setHoveredNode] = useState(null)
+  const [tooltip, setTooltip] = useState(null)
+
+  const containerRef = useCallback((node) => {
+    if (node) {
+      const ro = new ResizeObserver((entries) => {
+        for (const entry of entries) setSvgWidth(entry.contentRect.width)
+      })
+      ro.observe(node)
+      setSvgWidth(node.getBoundingClientRect().width)
+    }
+  }, [])
+
+  const layout = useMemo(() => computeSankeyLayout(data, svgWidth), [data, svgWidth])
+
+  const connectedLinks = useMemo(() => {
+    if (!hoveredNode) return new Set()
+    const ids = new Set()
+    data.links.forEach((l, i) => {
+      if (l.source === hoveredNode || l.target === hoveredNode) ids.add(i)
+    })
+    return ids
+  }, [hoveredNode, data.links])
+
+  const formatVol = (v) => {
+    if (v >= 1000000) return (v / 1000000).toFixed(1) + 'M'
+    if (v >= 1000) return (v / 1000).toFixed(0) + 'K'
+    return String(v)
+  }
+
+  const handleNodeEnter = useCallback((node, e) => {
+    setHoveredNode(node.id)
+    const rect = e.currentTarget.closest('svg').getBoundingClientRect()
+    setTooltip({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+      name: node.name,
+      value: node.value,
+      pct: ((node.value / data.totalTxn) * 100).toFixed(1),
+      gateway: node.gatewayShort || null,
+    })
+  }, [data.totalTxn])
+
+  const handleNodeLeave = useCallback(() => {
+    setHoveredNode(null)
+    setTooltip(null)
+  }, [])
+
+  const colHeaders = ['Payment Method', 'Network / Sub-type', 'Terminal']
+
+  return (
+    <div className="kam-sankey-container" ref={containerRef}>
+      <svg
+        className="kam-sankey-svg"
+        viewBox={`0 0 ${svgWidth} ${SANKEY_CHART_H}`}
+        preserveAspectRatio="xMidYMid meet"
+      >
+        {/* Column headers */}
+        {colHeaders.map((label, i) => {
+          const x = i === 0 ? 60 + SANKEY_NODE_W / 2 : i === 1 ? svgWidth / 2 : svgWidth - 60 - SANKEY_NODE_W / 2
+          return (
+            <text key={i} className="kam-sankey-col-header" x={x} y={20} textAnchor="middle">
+              {label}
+            </text>
+          )
+        })}
+
+        {/* Links */}
+        {layout.layoutLinks.map((l, i) => (
+          <path
+            key={i}
+            d={l.path}
+            fill={l.color}
+            className="kam-sankey-link"
+            opacity={hoveredNode ? (connectedLinks.has(i) ? 0.5 : 0.06) : 0.25}
+          />
+        ))}
+
+        {/* Nodes */}
+        {layout.columns.flat().map((node) => {
+          const isActive = !hoveredNode || hoveredNode === node.id ||
+            data.links.some((l) => (l.source === node.id && l.target === hoveredNode) || (l.target === node.id && l.source === hoveredNode))
+          const nodeOpacity = hoveredNode ? (isActive ? 1 : 0.3) : 1
+
+          return (
+            <g
+              key={node.id}
+              className="kam-sankey-node"
+              opacity={nodeOpacity}
+              onMouseEnter={(e) => handleNodeEnter(node, e)}
+              onMouseLeave={handleNodeLeave}
+            >
+              <rect
+                x={node.x}
+                y={node.y}
+                width={SANKEY_NODE_W}
+                height={node.h}
+                rx={4}
+                fill={node.color}
+              />
+              {node.h >= 22 && (
+                <text
+                  x={node.x + SANKEY_NODE_W / 2}
+                  y={node.y + node.h / 2 - (node.h >= 36 ? 5 : 0)}
+                  textAnchor="middle"
+                  dominantBaseline="central"
+                  className="kam-sankey-label"
+                >
+                  {node.name}
+                </text>
+              )}
+              {node.h >= 36 && (
+                <text
+                  x={node.x + SANKEY_NODE_W / 2}
+                  y={node.y + node.h / 2 + 10}
+                  textAnchor="middle"
+                  dominantBaseline="central"
+                  className="kam-sankey-value"
+                >
+                  {formatVol(node.value)} txns
+                </text>
+              )}
+            </g>
+          )
+        })}
+      </svg>
+
+      {/* Tooltip */}
+      {tooltip && (
+        <div
+          className="kam-sankey-tooltip"
+          style={{
+            left: tooltip.x + 12,
+            top: tooltip.y - 10,
+          }}
+        >
+          <div className="kam-sankey-tooltip-name">{tooltip.name}</div>
+          {tooltip.gateway && <div className="kam-sankey-tooltip-detail">Gateway: {tooltip.gateway}</div>}
+          <div className="kam-sankey-tooltip-detail">{formatVol(tooltip.value)} transactions</div>
+          <div className="kam-sankey-tooltip-detail">{tooltip.pct}% of total</div>
+        </div>
+      )}
     </div>
   )
 }
@@ -680,6 +885,7 @@ export default function KAMMerchantDetail() {
   const transactions = useMemo(() => generateMerchantTransactions(merchant), [merchant])
   const srData = useMemo(() => generateSRTimeSeries(merchant), [merchant])
   const recommendations = useMemo(() => generateRecommendations(merchant), [merchant])
+  const sankeyData = useMemo(() => generateSankeyData(merchant), [merchant])
 
   const filteredTxns = useMemo(() => {
     if (!txnSearch) return transactions
@@ -876,6 +1082,12 @@ export default function KAMMerchantDetail() {
           onClick={() => setActiveTab('config')}
         >
           Config
+        </button>
+        <button
+          className={`kam-detail-tab${activeTab === 'routing' ? ' active' : ''}`}
+          onClick={() => setActiveTab('routing')}
+        >
+          Routing
         </button>
       </div>
 
@@ -1130,10 +1342,9 @@ export default function KAMMerchantDetail() {
                 {' '}Terminals below threshold serve as fallback, sorted by success rate.
               </div>
             </div>
-            <SRRangeSlider
-              low={merchant.srThresholdLow ?? 85}
-              high={merchant.srThresholdHigh ?? 95}
-              onChange={(low, high) => updateSRThreshold(merchantId, low, high)}
+            <SRThresholdSlider
+              value={merchant.srThresholdLow ?? 85}
+              onChange={(val) => updateSRThreshold(merchantId, val)}
             />
 
             {/* ── Routing Priority Preview ──────────────────────── */}
@@ -1536,6 +1747,26 @@ export default function KAMMerchantDetail() {
             </div>
           </div>
         </>
+      )}
+
+      {activeTab === 'routing' && (
+      <>
+        <div className="kam-detail-card">
+          <div className="kam-card-header">
+            <span className="kam-card-title">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+              </svg>
+              Transaction Flow
+            </span>
+            <span className="kam-badge neutral">{formatNumber(merchant.monthlyTxnVolume)} txns/month</span>
+          </div>
+          <div style={{ fontSize: 13, color: 'var(--rzp-text-secondary)', fontFamily: 'var(--font-secondary)', marginBottom: 16, lineHeight: 1.5 }}>
+            Visualisation of how {merchant.name}&apos;s monthly transactions flow from payment methods through card networks and sub-types to individual terminals. Hover over any node to highlight its connected paths.
+          </div>
+          <SankeyChart data={sankeyData} />
+        </div>
+      </>
       )}
 
       {/* ── Transaction Routing Drawer ─────────────────────── */}

@@ -78,7 +78,7 @@ export const merchants = [
     status: 'active',
     routingRules: { selectRules: 3, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: false },
     srSensitive: true,
-    srThresholdLow: null, srThresholdHigh: null,
+    srThresholdLow: null,
     txnVolumeHistory: { currentMonth: 1250000, lastYearSameMonth: 1180000 },
     contactName: 'Deepinder Goyal',
     contactEmail: 'payments@zomato.com',
@@ -113,7 +113,7 @@ export const merchants = [
     status: 'active',
     routingRules: { selectRules: 2, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: true },
     srSensitive: true,
-    srThresholdLow: null, srThresholdHigh: null,
+    srThresholdLow: null,
     txnVolumeHistory: { currentMonth: 1100000, lastYearSameMonth: 1050000 },
     contactName: 'Sriharsha Majety',
     contactEmail: 'finance@swiggy.in',
@@ -142,7 +142,7 @@ export const merchants = [
     status: 'active',
     routingRules: { selectRules: 3, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: false },
     srSensitive: false,
-    srThresholdLow: 90, srThresholdHigh: 100,
+    srThresholdLow: 90,
     txnVolumeHistory: { currentMonth: 650000, lastYearSameMonth: 820000 },
     contactName: 'Kunal Shah',
     contactEmail: 'payments@cred.club',
@@ -171,7 +171,7 @@ export const merchants = [
     status: 'active',
     routingRules: { selectRules: 3, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: false },
     srSensitive: false,
-    srThresholdLow: 87, srThresholdHigh: 97,
+    srThresholdLow: 87,
     txnVolumeHistory: { currentMonth: 980000, lastYearSameMonth: 950000 },
     contactName: 'Kalyan Krishnamurthy',
     contactEmail: 'payments@flipkart.com',
@@ -199,7 +199,7 @@ export const merchants = [
     status: 'active',
     routingRules: { selectRules: 2, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: false },
     srSensitive: false,
-    srThresholdLow: 87, srThresholdHigh: 97,
+    srThresholdLow: 87,
     txnVolumeHistory: { currentMonth: 720000, lastYearSameMonth: 880000 },
     contactName: 'Hari Menon',
     contactEmail: 'finance@bigbasket.com',
@@ -234,7 +234,7 @@ export const merchants = [
     status: 'active',
     routingRules: { selectRules: 1, rejectRules: 2, hasFallback: false, hasCardRestrictions: false, hasNetworkRestrictions: true },
     srSensitive: false,
-    srThresholdLow: 86, srThresholdHigh: 96,
+    srThresholdLow: 86,
     txnVolumeHistory: { currentMonth: 920000, lastYearSameMonth: 890000 },
     contactName: 'Nandita Sinha',
     contactEmail: 'payments@myntra.com',
@@ -268,7 +268,7 @@ export const merchants = [
     status: 'active',
     routingRules: { selectRules: 2, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: false },
     srSensitive: true,
-    srThresholdLow: null, srThresholdHigh: null,
+    srThresholdLow: null,
     txnVolumeHistory: { currentMonth: 450000, lastYearSameMonth: 470000 },
     contactName: 'Ashish Hemrajani',
     contactEmail: 'finance@bookmyshow.com',
@@ -302,7 +302,7 @@ export const merchants = [
     status: 'active',
     routingRules: { selectRules: 2, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: true },
     srSensitive: false,
-    srThresholdLow: 88, srThresholdHigh: 98,
+    srThresholdLow: 88,
     txnVolumeHistory: { currentMonth: 380000, lastYearSameMonth: 520000 },
     contactName: 'Rajesh Magow',
     contactEmail: 'payments@makemytrip.com',
@@ -330,7 +330,7 @@ export const merchants = [
     status: 'active',
     routingRules: { selectRules: 1, rejectRules: 2, hasFallback: false, hasCardRestrictions: true, hasNetworkRestrictions: false },
     srSensitive: false,
-    srThresholdLow: 85, srThresholdHigh: 95,
+    srThresholdLow: 85,
     txnVolumeHistory: { currentMonth: 510000, lastYearSameMonth: 490000 },
     contactName: 'Falguni Nayar',
     contactEmail: 'finance@nykaa.com',
@@ -358,7 +358,7 @@ export const merchants = [
     status: 'active',
     routingRules: { selectRules: 0, rejectRules: 1, hasFallback: false, hasCardRestrictions: false, hasNetworkRestrictions: false },
     srSensitive: false,
-    srThresholdLow: 84, srThresholdHigh: 94,
+    srThresholdLow: 84,
     txnVolumeHistory: { currentMonth: 290000, lastYearSameMonth: 410000 },
     contactName: 'Abhiraj Bhal',
     contactEmail: 'payments@urbancompany.com',
@@ -388,7 +388,7 @@ export const merchants = [
     status: 'active',
     routingRules: { selectRules: 3, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: false },
     srSensitive: true,
-    srThresholdLow: null, srThresholdHigh: null,
+    srThresholdLow: null,
     txnVolumeHistory: { currentMonth: 1400000, lastYearSameMonth: 900000 },
     contactName: 'Aadit Palicha',
     contactEmail: 'finance@zeptonow.com',
@@ -417,7 +417,7 @@ export const merchants = [
     status: 'active',
     routingRules: { selectRules: 2, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: false },
     srSensitive: false,
-    srThresholdLow: 87, srThresholdHigh: 97,
+    srThresholdLow: 87,
     txnVolumeHistory: { currentMonth: 600000, lastYearSameMonth: 580000 },
     contactName: 'Bhavish Aggarwal',
     contactEmail: 'payments@olacabs.com',
@@ -447,7 +447,7 @@ export const merchants = [
     status: 'active',
     routingRules: { selectRules: 3, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: false },
     srSensitive: true,
-    srThresholdLow: null, srThresholdHigh: null,
+    srThresholdLow: null,
     txnVolumeHistory: { currentMonth: 2200000, lastYearSameMonth: 2100000 },
     contactName: 'Sameer Nigam',
     contactEmail: 'finance@phonepe.com',
@@ -475,7 +475,7 @@ export const merchants = [
     status: 'active',
     routingRules: { selectRules: 1, rejectRules: 2, hasFallback: false, hasCardRestrictions: true, hasNetworkRestrictions: false },
     srSensitive: false,
-    srThresholdLow: 83, srThresholdHigh: 93,
+    srThresholdLow: 83,
     txnVolumeHistory: { currentMonth: 180000, lastYearSameMonth: 310000 },
     contactName: 'Vijay Shekhar',
     contactEmail: 'payments@paytmmall.com',
@@ -503,7 +503,7 @@ export const merchants = [
     status: 'active',
     routingRules: { selectRules: 1, rejectRules: 1, hasFallback: false, hasCardRestrictions: false, hasNetworkRestrictions: false },
     srSensitive: false,
-    srThresholdLow: 85, srThresholdHigh: 95,
+    srThresholdLow: 85,
     txnVolumeHistory: { currentMonth: 220000, lastYearSameMonth: 260000 },
     contactName: 'Prashant Tandon',
     contactEmail: 'finance@1mg.com',
@@ -814,6 +814,147 @@ export function computeCBROrder(merchant) {
   fallback.forEach((e, i) => { e.rank = eligible.length + i + 1 })
 
   return { maxSR, thresholdLow, eligible, fallback }
+}
+
+// ── Sankey Data Generator ─────────────────
+const SANKEY_COLORS = {
+  CC: '#E65100',
+  DC: '#1565C0',
+  UPI: '#2E7D32',
+  NB: '#7B1FA2',
+  terminal: '#528FF0',
+}
+
+const SANKEY_SUBTYPES = {
+  CC: [
+    { id: 'visa-cc', name: 'Visa CC', weight: 55 },
+    { id: 'mc-cc', name: 'Mastercard CC', weight: 35 },
+    { id: 'rupay-cc', name: 'RuPay CC', weight: 10 },
+  ],
+  DC: [
+    { id: 'visa-dc', name: 'Visa DC', weight: 25 },
+    { id: 'rupay-dc', name: 'RuPay DC', weight: 65 },
+    { id: 'mc-dc', name: 'Mastercard DC', weight: 10 },
+  ],
+  UPI: [
+    { id: 'upi-collect', name: 'UPI Collect', weight: 40 },
+    { id: 'upi-intent', name: 'UPI Intent', weight: 60 },
+  ],
+  NB: [
+    { id: 'nb-sbi', name: 'SBI NB', weight: 35 },
+    { id: 'nb-hdfc', name: 'HDFC NB', weight: 30 },
+    { id: 'nb-other', name: 'Others NB', weight: 35 },
+  ],
+}
+
+export function generateSankeyData(merchant) {
+  const totalTxn = merchant.monthlyTxnVolume
+
+  // Determine which payment method categories are supported
+  const methodSet = new Set()
+  merchant.gatewayMetrics.forEach((gm) => {
+    if (gm.supportedMethods) gm.supportedMethods.forEach((m) => methodSet.add(m))
+  })
+  const activeMethods = ['CC', 'DC', 'UPI', 'NB'].filter((m) => methodSet.has(m))
+
+  // Seed-based payment method split (varies per merchant)
+  const seed0 = hashCode(merchant.id + '-sankey')
+  const rawWeights = activeMethods.map((m, i) => {
+    const base = m === 'CC' ? 30 : m === 'DC' ? 20 : m === 'UPI' ? 35 : 15
+    const jitter = (seededRandom(seed0 + i * 7) - 0.5) * 20
+    return Math.max(5, base + jitter)
+  })
+  const wTotal = rawWeights.reduce((s, w) => s + w, 0)
+
+  // Build column-0 nodes (Payment Methods)
+  const nodes = []
+  const links = []
+  const methodVolumes = {}
+
+  activeMethods.forEach((m, i) => {
+    const vol = Math.round(totalTxn * (rawWeights[i] / wTotal))
+    methodVolumes[m] = vol
+    nodes.push({ id: m, name: m === 'CC' ? 'Credit Cards' : m === 'DC' ? 'Debit Cards' : m === 'UPI' ? 'UPI' : 'Net Banking', column: 0, value: vol, color: SANKEY_COLORS[m] })
+  })
+
+  // Build column-1 nodes (Sub-types) + links from col-0 → col-1
+  const subtypeVolumes = {}
+
+  activeMethods.forEach((m) => {
+    const subs = SANKEY_SUBTYPES[m] || []
+    const mVol = methodVolumes[m]
+    // Apply seeded jitter to sub-type weights
+    const subSeed = hashCode(merchant.id + '-sub-' + m)
+    const jittered = subs.map((s, i) => {
+      const j = (seededRandom(subSeed + i * 3) - 0.5) * 15
+      return { ...s, w: Math.max(3, s.weight + j) }
+    })
+    const subTotal = jittered.reduce((s, x) => s + x.w, 0)
+
+    jittered.forEach((sub) => {
+      const vol = Math.round(mVol * (sub.w / subTotal))
+      if (vol <= 0) return
+      subtypeVolumes[sub.id] = vol
+      nodes.push({ id: sub.id, name: sub.name, column: 1, value: vol, color: SANKEY_COLORS[m] })
+      links.push({ source: m, target: sub.id, value: vol })
+    })
+  })
+
+  // Build column-2 nodes (Terminals) + links from col-1 → col-2
+  // Build terminal info
+  const termEntries = merchant.gatewayMetrics.map((gm) => {
+    const gw = gateways.find((g) => g.id === gm.gatewayId)
+    const term = gw?.terminals.find((t) => t.id === gm.terminalId)
+    return {
+      id: gm.terminalId,
+      displayId: term?.terminalId || gm.terminalId,
+      gatewayShort: gw?.shortName || '??',
+      txnShare: gm.txnShare,
+      supportedMethods: gm.supportedMethods || [],
+    }
+  })
+
+  // Distribute each subtype's volume across terminals that support its parent method
+  const terminalTotals = {}
+  const subtypeIds = Object.keys(subtypeVolumes)
+
+  subtypeIds.forEach((subId) => {
+    // Determine parent method
+    const parentMethod = Object.keys(SANKEY_SUBTYPES).find((m) =>
+      SANKEY_SUBTYPES[m].some((s) => s.id === subId)
+    )
+    if (!parentMethod) return
+
+    // Filter terminals that support this method
+    const eligible = termEntries.filter((t) => t.supportedMethods.includes(parentMethod))
+    if (eligible.length === 0) return
+
+    const subVol = subtypeVolumes[subId]
+    const shareTotal = eligible.reduce((s, t) => s + t.txnShare, 0)
+
+    eligible.forEach((t) => {
+      const vol = Math.round(subVol * (t.txnShare / shareTotal))
+      if (vol <= 0) return
+      terminalTotals[t.id] = (terminalTotals[t.id] || 0) + vol
+      links.push({ source: subId, target: t.id, value: vol })
+    })
+  })
+
+  // Add terminal nodes
+  termEntries.forEach((t) => {
+    if (terminalTotals[t.id]) {
+      nodes.push({
+        id: t.id,
+        name: t.displayId,
+        column: 2,
+        value: terminalTotals[t.id],
+        color: SANKEY_COLORS.terminal,
+        gatewayShort: t.gatewayShort,
+      })
+    }
+  })
+
+  return { nodes, links, totalTxn }
 }
 
 // ── NTF Risk ──────────────────────────────

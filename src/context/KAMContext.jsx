@@ -383,7 +383,6 @@ export function KAMProvider({ children }) {
             ...m,
             srSensitive: newSensitive,
             srThresholdLow: newSensitive ? null : (m.srThresholdLow ?? 85),
-            srThresholdHigh: newSensitive ? null : (m.srThresholdHigh ?? 95),
           }
         })
       )
@@ -400,19 +399,19 @@ export function KAMProvider({ children }) {
   )
 
   const updateSRThreshold = useCallback(
-    (merchantId, low, high) => {
+    (merchantId, value) => {
       setMerchants((prev) =>
         prev.map((m) =>
-          m.id === merchantId ? { ...m, srThresholdLow: low, srThresholdHigh: high } : m
+          m.id === merchantId ? { ...m, srThresholdLow: value } : m
         )
       )
       const merchant = merchants.find((m) => m.id === merchantId)
       addAuditEntry(
-        `Updated SR threshold for ${merchant?.name || merchantId} to ${low}% – ${high}%`,
-        `Terminals below ${low}% SR will be de-prioritized, above ${high}% preferred`,
+        `Updated SR threshold for ${merchant?.name || merchantId} to ${value}%`,
+        `Terminals below ${value}% SR will be de-prioritized`,
         merchantId
       )
-      showToast(`SR threshold updated to ${low}% – ${high}% for ${merchant?.name}`)
+      showToast(`SR threshold updated to ${value}% for ${merchant?.name}`)
     },
     [merchants, addAuditEntry, showToast]
   )
