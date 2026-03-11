@@ -72,6 +72,119 @@
   color: var(--rzp-text-secondary);
 }
 
+/* Deal Type Badges */
+.kam-badge.deal-tsp {
+  background: #FFF3E0;
+  color: #E65100;
+  gap: 4px;
+}
+
+.kam-badge.deal-offer {
+  background: #F3E5F5;
+  color: #7B1FA2;
+  gap: 4px;
+}
+
+.kam-badge.deal-tsp svg,
+.kam-badge.deal-offer svg {
+  width: 11px;
+  height: 11px;
+  flex-shrink: 0;
+}
+
+/* Zero-Cost Tag */
+.kam-zero-cost-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  background: rgba(30, 166, 114, 0.12);
+  color: #1EA672;
+  font-family: var(--font-secondary);
+  letter-spacing: 0.02em;
+  margin-left: 4px;
+  white-space: nowrap;
+}
+
+/* Deal Constraint Banner */
+.kam-deal-banner {
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-bottom: var(--space-md);
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  font-family: var(--font-secondary);
+}
+
+.kam-deal-banner.tsp {
+  background: #FFF8E1;
+  border: 1px solid #FFE082;
+}
+
+.kam-deal-banner.offer {
+  background: #F3E5F5;
+  border: 1px solid #CE93D8;
+}
+
+.kam-deal-banner.zero-cost-info {
+  background: rgba(30, 166, 114, 0.06);
+  border: 1px solid rgba(30, 166, 114, 0.2);
+}
+
+.kam-deal-banner-icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+}
+
+.kam-deal-banner-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.kam-deal-banner-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--rzp-text-primary);
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.kam-deal-banner-desc {
+  font-size: 13px;
+  color: var(--rzp-text-secondary);
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+.kam-deal-banner-meta {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--rzp-text-muted);
+}
+
+.kam-deal-banner-meta strong {
+  color: var(--rzp-text-primary);
+  font-weight: 600;
+}
+
+.kam-deal-banner-meta a {
+  color: var(--rzp-blue);
+  text-decoration: none;
+}
+
+.kam-deal-banner-meta a:hover {
+  text-decoration: underline;
+}
+
 /* Buttons
    ========================================================================== */
 

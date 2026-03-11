@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useKAM } from '../../context/KAMContext'
-import { formatINR, formatNumber, computeMerchantRevenue, gateways } from '../../data/kamMockData'
+import { formatINR, formatNumber, computeMerchantRevenue, gateways, isTerminalZeroCost } from '../../data/kamMockData'
 
 // ─── Sort Icon ────────────────────────────────────────────────────────────────
 
@@ -382,6 +382,8 @@ export default function KAMMerchantTable() {
     toggleSort,
     filterRouting,
     setFilterRouting,
+    filterDealType,
+    setFilterDealType,
     selectedIds,
     toggleSelect,
     selectAll,
@@ -485,6 +487,16 @@ export default function KAMMerchantTable() {
             <option value="success_rate">Success Rate Based</option>
             <option value="cost_based">Cost Based</option>
           </select>
+          <select
+            className="kam-select"
+            value={filterDealType}
+            onChange={(e) => setFilterDealType(e.target.value)}
+          >
+            <option value="all">All Deals</option>
+            <option value="tsp">TSP Deals</option>
+            <option value="offer_linked">Offer-Linked</option>
+            <option value="standard">Standard</option>
+          </select>
         </div>
       </div>
 
@@ -504,6 +516,7 @@ export default function KAMMerchantTable() {
               </th>
               {renderSortableHeader('Merchant', 'name')}
               <th>Category</th>
+              <th>Deal</th>
               {renderSortableHeader('Success Rate', 'successRate')}
               {renderSortableHeader('Txn Volume', 'txnVolume')}
               {renderSortableHeader('Forward Pricing', 'forwardPricing')}
@@ -517,7 +530,7 @@ export default function KAMMerchantTable() {
           <tbody>
             {merchants.length === 0 ? (
               <tr>
-                <td colSpan={11}>
+                <td colSpan={12}>
                   <div className="kam-empty-state">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                       <circle cx="11" cy="11" r="8" />
@@ -562,6 +575,31 @@ export default function KAMMerchantTable() {
                       <span className="kam-badge neutral">{merchant.category}</span>
                     </td>
 
+                    {/* Deal Type */}
+                    <td>
+                      {merchant.dealType === 'tsp' && (
+                        <span className="kam-badge deal-tsp">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                          </svg>
+                          TSP
+                        </span>
+                      )}
+                      {merchant.dealType === 'offer_linked' && (
+                        <span className="kam-badge deal-offer">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="20 12 20 22 4 22 4 12" />
+                            <rect x="2" y="7" width="20" height="5" />
+                            <line x1="12" y1="22" x2="12" y2="7" />
+                            <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z" />
+                            <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" />
+                          </svg>
+                          Offer
+                        </span>
+                      )}
+                    </td>
+
                     {/* Success Rate */}
                     <td>
                       <div className="kam-sr-indicator">
@@ -587,7 +625,12 @@ export default function KAMMerchantTable() {
                     <td>{merchant.forwardPricing}%</td>
 
                     {/* Cost/Txn */}
-                    <td>{'\u20B9'}{revenue.costPerTxn.toFixed(2)}</td>
+                    <td>
+                      <span>{'\u20B9'}{revenue.costPerTxn.toFixed(2)}</span>
+                      {isTerminalZeroCost(merchant.currentTerminalId) && (
+                        <span className="kam-zero-cost-tag">{'\u20B9'}0</span>
+                      )}
+                    </td>
 
                     {/* Net Revenue */}
                     <td style={{ fontWeight: 600 }}>{formatINR(revenue.netRevenue)}</td>
