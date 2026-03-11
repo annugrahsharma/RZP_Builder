@@ -1243,3 +1243,260 @@
   line-height: 1.4;
   font-style: italic;
 }
+
+/* ── SR Line Chart ───────────────────── */
+
+.kam-sr-chart-card {
+  background: var(--rzp-card-bg);
+  border-radius: 12px;
+  border: 1px solid var(--rzp-border);
+  padding: 0;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+}
+
+.kam-sr-chart-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 0;
+}
+
+.kam-sr-chart-card-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--rzp-text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.kam-sr-chart-card-title svg {
+  width: 18px;
+  height: 18px;
+  color: var(--rzp-blue);
+}
+
+.kam-sr-chart-period {
+  font-size: 12px;
+  color: var(--rzp-text-muted);
+  font-weight: 500;
+}
+
+.kam-sr-chart-body {
+  display: flex;
+  min-height: 320px;
+}
+
+.kam-sr-chart-sidebar {
+  width: 210px;
+  min-width: 210px;
+  border-right: 1px solid var(--rzp-border);
+  padding: 14px 0;
+  overflow-y: auto;
+  max-height: 340px;
+}
+
+.kam-sr-method-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--rzp-text-primary);
+  transition: background 0.15s ease;
+  user-select: none;
+}
+
+.kam-sr-method-item:hover {
+  background: var(--rzp-bg);
+}
+
+.kam-sr-method-item.overall {
+  font-weight: 600;
+  padding-bottom: 8px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--rzp-border);
+}
+
+.kam-sr-method-item input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  accent-color: var(--rzp-blue);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.kam-sr-color-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.kam-sr-method-label {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kam-sr-method-value {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--rzp-text-secondary);
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.kam-sr-method-expand {
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--rzp-text-muted);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.kam-sr-method-expand.open {
+  transform: rotate(90deg);
+}
+
+.kam-sr-method-expand svg {
+  width: 12px;
+  height: 12px;
+}
+
+.kam-sr-terminal-list {
+  overflow: hidden;
+  transition: max-height 0.25s ease;
+}
+
+.kam-sr-terminal-list.collapsed {
+  max-height: 0;
+}
+
+.kam-sr-terminal-list.expanded {
+  max-height: 300px;
+}
+
+.kam-sr-terminal-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 16px 5px 40px;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--rzp-text-secondary);
+  transition: background 0.15s ease;
+  user-select: none;
+}
+
+.kam-sr-terminal-item:hover {
+  background: var(--rzp-bg);
+}
+
+.kam-sr-terminal-item input[type="checkbox"] {
+  width: 12px;
+  height: 12px;
+  accent-color: var(--rzp-blue);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.kam-sr-chart-area {
+  flex: 1;
+  position: relative;
+  padding: 14px 16px 10px 0;
+  min-width: 0;
+}
+
+.kam-sr-chart-svg {
+  width: 100%;
+  height: 280px;
+  display: block;
+}
+
+.kam-sr-chart-tooltip {
+  position: absolute;
+  pointer-events: none;
+  background: #fff;
+  border: 1px solid var(--rzp-border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  font-size: 12px;
+  z-index: 10;
+  white-space: nowrap;
+  min-width: 130px;
+}
+
+.kam-sr-tooltip-date {
+  font-weight: 600;
+  color: var(--rzp-text-primary);
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+
+.kam-sr-tooltip-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 0;
+}
+
+.kam-sr-tooltip-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.kam-sr-tooltip-label {
+  color: var(--rzp-text-secondary);
+  flex: 1;
+}
+
+.kam-sr-tooltip-value {
+  font-weight: 600;
+  color: var(--rzp-text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Always use stacked layout since content area is typically <700px */
+.kam-sr-chart-body {
+  flex-direction: column;
+}
+
+.kam-sr-chart-sidebar {
+  width: 100%;
+  min-width: 100%;
+  border-right: none;
+  border-bottom: 1px solid var(--rzp-border);
+  max-height: none;
+  overflow: visible;
+  padding: 12px 16px 8px;
+}
+
+.kam-sr-method-item.overall {
+  border-bottom: none;
+  margin-bottom: 2px;
+  padding: 6px 0;
+}
+
+.kam-sr-method-item {
+  padding: 5px 0;
+}
+
+.kam-sr-terminal-item {
+  padding: 4px 0 4px 28px;
+}
+
+.kam-sr-chart-area {
+  padding: 10px 16px 10px 0;
+}

@@ -70,10 +70,10 @@ export const merchants = [
     currentTerminalId: 'term-hdfc-001',
     routingStrategy: 'success_rate',
     gatewayMetrics: [
-      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 96.2, costPerTxn: 1.80, txnShare: 45 },
-      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 94.8, costPerTxn: 0, txnShare: 20 },
-      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 95.1, costPerTxn: 1.70, txnShare: 25 },
-      { gatewayId: 'gw-axis', terminalId: 'term-axis-001', successRate: 93.8, costPerTxn: 1.50, txnShare: 10 },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 96.2, costPerTxn: 1.80, txnShare: 45, supportedMethods: ['CC', 'DC', 'UPI', 'NB'] },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 94.8, costPerTxn: 0, txnShare: 20, supportedMethods: ['CC', 'DC'] },
+      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 95.1, costPerTxn: 1.70, txnShare: 25, supportedMethods: ['CC', 'DC', 'NB'] },
+      { gatewayId: 'gw-axis', terminalId: 'term-axis-001', successRate: 93.8, costPerTxn: 1.50, txnShare: 10, supportedMethods: ['UPI', 'NB'] },
     ],
     status: 'active',
     routingRules: { selectRules: 3, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: false },
@@ -107,8 +107,8 @@ export const merchants = [
     currentTerminalId: 'term-hdfc-001',
     routingStrategy: 'success_rate',
     gatewayMetrics: [
-      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 96.2, costPerTxn: 1.80, txnShare: 70 },
-      { gatewayId: 'gw-icici', terminalId: 'term-icici-002', successRate: 93.4, costPerTxn: 1.45, txnShare: 30 },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 96.2, costPerTxn: 1.80, txnShare: 70, supportedMethods: ['CC', 'DC', 'UPI', 'NB'] },
+      { gatewayId: 'gw-icici', terminalId: 'term-icici-002', successRate: 93.4, costPerTxn: 1.45, txnShare: 30, supportedMethods: ['CC', 'DC', 'NB'] },
     ],
     status: 'active',
     routingRules: { selectRules: 2, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: true },
@@ -135,9 +135,9 @@ export const merchants = [
     currentTerminalId: 'term-hdfc-001',
     routingStrategy: 'success_rate',
     gatewayMetrics: [
-      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 96.2, costPerTxn: 1.80, txnShare: 60 },
-      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 94.8, costPerTxn: 0, txnShare: 20 },
-      { gatewayId: 'gw-axis', terminalId: 'term-axis-001', successRate: 93.8, costPerTxn: 1.50, txnShare: 20 },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 96.2, costPerTxn: 1.80, txnShare: 60, supportedMethods: ['CC', 'DC', 'UPI'] },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 94.8, costPerTxn: 0, txnShare: 20, supportedMethods: ['CC', 'DC'] },
+      { gatewayId: 'gw-axis', terminalId: 'term-axis-001', successRate: 93.8, costPerTxn: 1.50, txnShare: 20, supportedMethods: ['UPI', 'NB'] },
     ],
     status: 'active',
     routingRules: { selectRules: 3, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: false },
@@ -164,9 +164,9 @@ export const merchants = [
     currentTerminalId: 'term-icici-001',
     routingStrategy: 'success_rate',
     gatewayMetrics: [
-      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 95.1, costPerTxn: 1.70, txnShare: 50 },
-      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 94.8, costPerTxn: 0, txnShare: 30 },
-      { gatewayId: 'gw-axis', terminalId: 'term-axis-001', successRate: 93.8, costPerTxn: 1.50, txnShare: 20 },
+      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 95.1, costPerTxn: 1.70, txnShare: 50, supportedMethods: ['CC', 'DC', 'NB'] },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 94.8, costPerTxn: 0, txnShare: 30, supportedMethods: ['CC', 'DC', 'UPI'] },
+      { gatewayId: 'gw-axis', terminalId: 'term-axis-001', successRate: 93.8, costPerTxn: 1.50, txnShare: 20, supportedMethods: ['UPI', 'NB'] },
     ],
     status: 'active',
     routingRules: { selectRules: 3, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: false },
@@ -193,8 +193,8 @@ export const merchants = [
     currentTerminalId: 'term-icici-001',
     routingStrategy: 'success_rate',
     gatewayMetrics: [
-      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 95.1, costPerTxn: 1.70, txnShare: 60 },
-      { gatewayId: 'gw-rbl', terminalId: 'term-rbl-001', successRate: 90.3, costPerTxn: 1.10, txnShare: 40 },
+      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 95.1, costPerTxn: 1.70, txnShare: 60, supportedMethods: ['CC', 'DC', 'NB'] },
+      { gatewayId: 'gw-rbl', terminalId: 'term-rbl-001', successRate: 90.3, costPerTxn: 1.10, txnShare: 40, supportedMethods: ['CC', 'DC', 'UPI'] },
     ],
     status: 'active',
     routingRules: { selectRules: 2, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: false },
@@ -228,8 +228,8 @@ export const merchants = [
     currentTerminalId: 'term-axis-001',
     routingStrategy: 'cost_based',
     gatewayMetrics: [
-      { gatewayId: 'gw-axis', terminalId: 'term-axis-001', successRate: 93.8, costPerTxn: 1.50, txnShare: 55 },
-      { gatewayId: 'gw-rbl', terminalId: 'term-rbl-001', successRate: 90.3, costPerTxn: 1.10, txnShare: 45 },
+      { gatewayId: 'gw-axis', terminalId: 'term-axis-001', successRate: 93.8, costPerTxn: 1.50, txnShare: 55, supportedMethods: ['CC', 'DC', 'UPI', 'NB'] },
+      { gatewayId: 'gw-rbl', terminalId: 'term-rbl-001', successRate: 90.3, costPerTxn: 1.10, txnShare: 45, supportedMethods: ['CC', 'DC'] },
     ],
     status: 'active',
     routingRules: { selectRules: 1, rejectRules: 2, hasFallback: false, hasCardRestrictions: false, hasNetworkRestrictions: true },
@@ -262,8 +262,8 @@ export const merchants = [
     currentTerminalId: 'term-hdfc-001',
     routingStrategy: 'success_rate',
     gatewayMetrics: [
-      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 96.2, costPerTxn: 1.80, txnShare: 75 },
-      { gatewayId: 'gw-yes', terminalId: 'term-yes-001', successRate: 89.7, costPerTxn: 0, txnShare: 25 },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 96.2, costPerTxn: 1.80, txnShare: 75, supportedMethods: ['CC', 'DC', 'UPI', 'NB'] },
+      { gatewayId: 'gw-yes', terminalId: 'term-yes-001', successRate: 89.7, costPerTxn: 0, txnShare: 25, supportedMethods: ['UPI'] },
     ],
     status: 'active',
     routingRules: { selectRules: 2, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: false },
@@ -296,8 +296,8 @@ export const merchants = [
     currentTerminalId: 'term-hdfc-002',
     routingStrategy: 'success_rate',
     gatewayMetrics: [
-      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 94.8, costPerTxn: 0, txnShare: 60 },
-      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 95.1, costPerTxn: 1.70, txnShare: 40 },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 94.8, costPerTxn: 0, txnShare: 60, supportedMethods: ['CC', 'DC', 'UPI'] },
+      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 95.1, costPerTxn: 1.70, txnShare: 40, supportedMethods: ['CC', 'DC', 'NB'] },
     ],
     status: 'active',
     routingRules: { selectRules: 2, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: true },
@@ -324,8 +324,8 @@ export const merchants = [
     currentTerminalId: 'term-icici-002',
     routingStrategy: 'cost_based',
     gatewayMetrics: [
-      { gatewayId: 'gw-icici', terminalId: 'term-icici-002', successRate: 93.4, costPerTxn: 1.45, txnShare: 50 },
-      { gatewayId: 'gw-rbl', terminalId: 'term-rbl-001', successRate: 90.3, costPerTxn: 1.10, txnShare: 50 },
+      { gatewayId: 'gw-icici', terminalId: 'term-icici-002', successRate: 93.4, costPerTxn: 1.45, txnShare: 50, supportedMethods: ['CC', 'DC', 'NB'] },
+      { gatewayId: 'gw-rbl', terminalId: 'term-rbl-001', successRate: 90.3, costPerTxn: 1.10, txnShare: 50, supportedMethods: ['CC', 'DC', 'UPI'] },
     ],
     status: 'active',
     routingRules: { selectRules: 1, rejectRules: 2, hasFallback: false, hasCardRestrictions: true, hasNetworkRestrictions: false },
@@ -352,8 +352,8 @@ export const merchants = [
     currentTerminalId: 'term-axis-002',
     routingStrategy: 'cost_based',
     gatewayMetrics: [
-      { gatewayId: 'gw-axis', terminalId: 'term-axis-002', successRate: 91.5, costPerTxn: 0, txnShare: 60 },
-      { gatewayId: 'gw-yes', terminalId: 'term-yes-001', successRate: 89.7, costPerTxn: 0, txnShare: 40 },
+      { gatewayId: 'gw-axis', terminalId: 'term-axis-002', successRate: 91.5, costPerTxn: 0, txnShare: 60, supportedMethods: ['CC', 'DC', 'UPI', 'NB'] },
+      { gatewayId: 'gw-yes', terminalId: 'term-yes-001', successRate: 89.7, costPerTxn: 0, txnShare: 40, supportedMethods: ['UPI'] },
     ],
     status: 'active',
     routingRules: { selectRules: 0, rejectRules: 1, hasFallback: false, hasCardRestrictions: false, hasNetworkRestrictions: false },
@@ -380,10 +380,10 @@ export const merchants = [
     currentTerminalId: 'term-hdfc-001',
     routingStrategy: 'success_rate',
     gatewayMetrics: [
-      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 96.2, costPerTxn: 1.80, txnShare: 40 },
-      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 94.8, costPerTxn: 0, txnShare: 15 },
-      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 95.1, costPerTxn: 1.70, txnShare: 30 },
-      { gatewayId: 'gw-yes', terminalId: 'term-yes-001', successRate: 89.7, costPerTxn: 0, txnShare: 15 },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 96.2, costPerTxn: 1.80, txnShare: 40, supportedMethods: ['CC', 'DC', 'UPI', 'NB'] },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 94.8, costPerTxn: 0, txnShare: 15, supportedMethods: ['CC', 'DC'] },
+      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 95.1, costPerTxn: 1.70, txnShare: 30, supportedMethods: ['CC', 'DC', 'NB'] },
+      { gatewayId: 'gw-yes', terminalId: 'term-yes-001', successRate: 89.7, costPerTxn: 0, txnShare: 15, supportedMethods: ['UPI'] },
     ],
     status: 'active',
     routingRules: { selectRules: 3, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: false },
@@ -410,9 +410,9 @@ export const merchants = [
     currentTerminalId: 'term-icici-001',
     routingStrategy: 'success_rate',
     gatewayMetrics: [
-      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 95.1, costPerTxn: 1.70, txnShare: 45 },
-      { gatewayId: 'gw-axis', terminalId: 'term-axis-001', successRate: 93.8, costPerTxn: 1.50, txnShare: 35 },
-      { gatewayId: 'gw-rbl', terminalId: 'term-rbl-001', successRate: 90.3, costPerTxn: 1.10, txnShare: 20 },
+      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 95.1, costPerTxn: 1.70, txnShare: 45, supportedMethods: ['CC', 'DC', 'NB'] },
+      { gatewayId: 'gw-axis', terminalId: 'term-axis-001', successRate: 93.8, costPerTxn: 1.50, txnShare: 35, supportedMethods: ['CC', 'DC', 'UPI'] },
+      { gatewayId: 'gw-rbl', terminalId: 'term-rbl-001', successRate: 90.3, costPerTxn: 1.10, txnShare: 20, supportedMethods: ['UPI', 'NB'] },
     ],
     status: 'active',
     routingRules: { selectRules: 2, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: false },
@@ -439,10 +439,10 @@ export const merchants = [
     currentTerminalId: 'term-hdfc-001',
     routingStrategy: 'success_rate',
     gatewayMetrics: [
-      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 96.2, costPerTxn: 1.80, txnShare: 35 },
-      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 94.8, costPerTxn: 0, txnShare: 15 },
-      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 95.1, costPerTxn: 1.70, txnShare: 35 },
-      { gatewayId: 'gw-axis', terminalId: 'term-axis-002', successRate: 91.5, costPerTxn: 0, txnShare: 15 },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 96.2, costPerTxn: 1.80, txnShare: 35, supportedMethods: ['CC', 'DC', 'UPI', 'NB'] },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 94.8, costPerTxn: 0, txnShare: 15, supportedMethods: ['CC', 'DC'] },
+      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 95.1, costPerTxn: 1.70, txnShare: 35, supportedMethods: ['CC', 'DC', 'NB'] },
+      { gatewayId: 'gw-axis', terminalId: 'term-axis-002', successRate: 91.5, costPerTxn: 0, txnShare: 15, supportedMethods: ['UPI'] },
     ],
     status: 'active',
     routingRules: { selectRules: 3, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: false },
@@ -469,8 +469,8 @@ export const merchants = [
     currentTerminalId: 'term-rbl-001',
     routingStrategy: 'cost_based',
     gatewayMetrics: [
-      { gatewayId: 'gw-rbl', terminalId: 'term-rbl-001', successRate: 90.3, costPerTxn: 1.10, txnShare: 70 },
-      { gatewayId: 'gw-yes', terminalId: 'term-yes-001', successRate: 89.7, costPerTxn: 0, txnShare: 30 },
+      { gatewayId: 'gw-rbl', terminalId: 'term-rbl-001', successRate: 90.3, costPerTxn: 1.10, txnShare: 70, supportedMethods: ['CC', 'DC', 'NB'] },
+      { gatewayId: 'gw-yes', terminalId: 'term-yes-001', successRate: 89.7, costPerTxn: 0, txnShare: 30, supportedMethods: ['UPI'] },
     ],
     status: 'active',
     routingRules: { selectRules: 1, rejectRules: 2, hasFallback: false, hasCardRestrictions: true, hasNetworkRestrictions: false },
@@ -497,8 +497,8 @@ export const merchants = [
     currentTerminalId: 'term-yes-001',
     routingStrategy: 'cost_based',
     gatewayMetrics: [
-      { gatewayId: 'gw-yes', terminalId: 'term-yes-001', successRate: 89.7, costPerTxn: 0, txnShare: 60 },
-      { gatewayId: 'gw-rbl', terminalId: 'term-rbl-002', successRate: 88.9, costPerTxn: 0.95, txnShare: 40 },
+      { gatewayId: 'gw-yes', terminalId: 'term-yes-001', successRate: 89.7, costPerTxn: 0, txnShare: 60, supportedMethods: ['UPI', 'NB'] },
+      { gatewayId: 'gw-rbl', terminalId: 'term-rbl-002', successRate: 88.9, costPerTxn: 0.95, txnShare: 40, supportedMethods: ['CC', 'DC'] },
     ],
     status: 'active',
     routingRules: { selectRules: 1, rejectRules: 1, hasFallback: false, hasCardRestrictions: false, hasNetworkRestrictions: false },
@@ -921,7 +921,7 @@ export function computeNROpportunity(merchants) {
     .sort((a, b) => b.potentialSaving - a.potentialSaving)
 }
 
-// ── Transaction Generator ───────────────
+// ── Shared Helpers ──────────────────────
 
 // Simple deterministic hash for reproducible mock data
 function hashCode(str) {
@@ -933,6 +933,113 @@ function hashCode(str) {
   }
   return Math.abs(hash)
 }
+
+// ── SR Time-Series Generator ────────────
+
+const METHOD_LABELS = { CC: 'Credit Cards', DC: 'Debit Cards', UPI: 'UPI', NB: 'Net Banking' }
+
+function seededRandom(seed) {
+  // Simple xorshift-style PRNG from a seed number
+  let s = seed | 0
+  s ^= s << 13; s ^= s >> 17; s ^= s << 5
+  return ((s < 0 ? ~s + 1 : s) % 10000) / 10000
+}
+
+export function generateSRTimeSeries(merchant) {
+  const days = 30
+  const endDate = new Date(2026, 2, 10) // March 10, 2026
+  const dates = []
+  for (let d = 0; d < days; d++) {
+    const dt = new Date(endDate)
+    dt.setDate(dt.getDate() - (days - 1 - d))
+    dates.push(dt.toISOString().slice(0, 10))
+  }
+
+  // Build terminal info with display IDs
+  const terminalInfos = merchant.gatewayMetrics.map((gm) => {
+    const gw = gateways.find((g) => g.id === gm.gatewayId)
+    const term = gw?.terminals.find((t) => t.id === gm.terminalId)
+    return {
+      terminalId: gm.terminalId,
+      displayId: term?.terminalId || gm.terminalId,
+      gatewayShort: gw?.shortName || 'Unknown',
+      baseSR: gm.successRate,
+      txnShare: gm.txnShare,
+      supportedMethods: gm.supportedMethods || ['CC', 'DC', 'UPI', 'NB'],
+    }
+  })
+
+  // Determine which methods this merchant has across all terminals
+  const allMethods = new Set()
+  terminalInfos.forEach((t) => t.supportedMethods.forEach((m) => allMethods.add(m)))
+
+  // Decide if this merchant gets a SR dip event (deterministic)
+  const merchantSeed = hashCode(merchant.id + '-dip')
+  const hasDip = merchantSeed % 3 === 0 // ~33% of merchants
+  const dipStartDay = (merchantSeed % 20) + 3 // day 3-22
+  const dipDuration = 3 + (merchantSeed % 4) // 3-6 days
+  const dipTerminalIdx = merchantSeed % terminalInfos.length
+  const dipMagnitude = 3 + (merchantSeed % 5) // 3-7% drop
+
+  // Generate per-terminal, per-method, per-day SR
+  const byMethod = {}
+  const methodOrder = ['CC', 'DC', 'UPI', 'NB']
+
+  methodOrder.forEach((method) => {
+    if (!allMethods.has(method)) return
+
+    const terminalsForMethod = terminalInfos.filter((t) => t.supportedMethods.includes(method))
+    if (terminalsForMethod.length === 0) return
+
+    const terminals = {}
+    terminalsForMethod.forEach((term) => {
+      const dailySR = []
+      for (let d = 0; d < days; d++) {
+        const seed = hashCode(merchant.id + '-' + method + '-' + term.terminalId + '-' + d)
+        const noise = (seededRandom(seed) - 0.5) * 4 // ±2% noise
+        let sr = term.baseSR + noise
+
+        // Apply dip event
+        if (hasDip && term === terminalInfos[dipTerminalIdx] && d >= dipStartDay && d < dipStartDay + dipDuration) {
+          const dipProgress = (d - dipStartDay) / dipDuration
+          const dipCurve = Math.sin(dipProgress * Math.PI) // peaks in middle
+          sr -= dipMagnitude * dipCurve
+        }
+
+        dailySR.push(Math.round(Math.max(75, Math.min(100, sr)) * 10) / 10)
+      }
+      terminals[term.displayId] = dailySR
+    })
+
+    // Method-level SR = weighted average of terminal SRs
+    const methodSR = []
+    for (let d = 0; d < days; d++) {
+      let totalWeight = 0
+      let weightedSum = 0
+      terminalsForMethod.forEach((term) => {
+        const w = term.txnShare
+        weightedSum += terminals[term.displayId][d] * w
+        totalWeight += w
+      })
+      methodSR.push(Math.round((weightedSum / totalWeight) * 10) / 10)
+    }
+
+    byMethod[method] = { sr: methodSR, label: METHOD_LABELS[method], terminals }
+  })
+
+  // Overall SR = weighted average across all methods (equal weight per method for simplicity)
+  const activeMethodKeys = Object.keys(byMethod)
+  const overall = []
+  for (let d = 0; d < days; d++) {
+    let sum = 0
+    activeMethodKeys.forEach((m) => { sum += byMethod[m].sr[d] })
+    overall.push(Math.round((sum / activeMethodKeys.length) * 10) / 10)
+  }
+
+  return { dates, overall, byMethod }
+}
+
+// ── Transaction Generator ───────────────
 
 const PAYMENT_METHODS = [
   { type: 'Visa Credit', short: 'CC' },
