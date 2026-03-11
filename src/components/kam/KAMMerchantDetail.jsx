@@ -7,6 +7,7 @@ import {
   computeMerchantRevenue,
   isTerminalZeroCost,
   computeTSPCompliance,
+  computeCBROrder,
   getBackwardPricingBreakdown,
   generateMerchantTransactions,
   generateSRTimeSeries,
@@ -636,6 +637,10 @@ export default function KAMMerchantDetail() {
   // ---- Computed values ----
   const tspCompliance = useMemo(() => computeTSPCompliance(merchant), [merchant])
   const revenue = computeMerchantRevenue(merchant)
+  const cbrOrder = useMemo(() => {
+    if (merchant.srSensitive) return null
+    return computeCBROrder(merchant)
+  }, [merchant])
 
   // Build terminal rows from gatewayMetrics
   const terminals = useMemo(() => {
@@ -1120,7 +1125,9 @@ export default function KAMMerchantDetail() {
                 <line x1="12" y1="16" x2="12.01" y2="16" />
               </svg>
               <div>
-                Terminals with SR below the <strong>lower threshold</strong> will be de-prioritized. Terminals above the <strong>upper threshold</strong> are preferred for routing. A minimum 10% gap is enforced.
+                <strong>Cost-Based Routing active.</strong> Terminals above the lower threshold are CBR-eligible and sorted by cost (cheapest first).
+                {merchant.dealType === 'tsp' && ' TSP deal terminals receive priority within the eligible set.'}
+                {' '}Terminals below threshold serve as fallback, sorted by success rate.
               </div>
             </div>
             <SRRangeSlider
@@ -1128,9 +1135,161 @@ export default function KAMMerchantDetail() {
               high={merchant.srThresholdHigh ?? 95}
               onChange={(low, high) => updateSRThreshold(merchantId, low, high)}
             />
+
+            {/* ── Routing Priority Preview ──────────────────────── */}
+            {cbrOrder && (
+              <div className="kam-cbr-preview-card">
+                <div className="kam-cbr-preview-header">
+                  <div className="kam-cbr-preview-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="16 3 21 3 21 8" />
+                      <line x1="4" y1="20" x2="21" y2="3" />
+                      <polyline points="21 16 21 21 16 21" />
+                      <line x1="15" y1="15" x2="21" y2="21" />
+                      <line x1="4" y1="4" x2="9" y2="9" />
+                    </svg>
+                    Routing Priority Preview
+                  </div>
+                  <span className="kam-badge neutral">
+                    {cbrOrder.eligible.length + cbrOrder.fallback.length} terminals
+                  </span>
+                </div>
+
+                {/* Eligible Section */}
+                <div className="kam-cbr-section">
+                  <div className="kam-cbr-section-label">
+                    <span className="kam-cbr-section-dot eligible" />
+                    CBR Eligible — SR &ge; {cbrOrder.thresholdLow}%
+                    <span className="kam-badge success" style={{ marginLeft: 8, fontSize: 10, padding: '1px 6px' }}>
+                      {cbrOrder.eligible.length}
+                    </span>
+                  </div>
+                  {cbrOrder.eligible.length === 0 ? (
+                    <div className="kam-cbr-empty">
+                      No terminals meet the SR threshold of {cbrOrder.thresholdLow}%
+                    </div>
+                  ) : (
+                    <div className="kam-cbr-terminal-list">
+                      {cbrOrder.eligible.map((t) => (
+                        <div className="kam-cbr-terminal-row" key={t.terminalId}>
+                          <span className="kam-cbr-rank">#{t.rank}</span>
+                          <span className="kam-cbr-terminal-id">{t.terminalId}</span>
+                          <span className="kam-cbr-gateway">{t.gatewayShort}</span>
+                          <span className="kam-cbr-sr">{t.successRate}%</span>
+                          <span className="kam-cbr-cost">
+                            {'\u20B9'}{t.costPerTxn.toFixed(2)}
+                            {t.isZeroCost && <span className="kam-cbr-zero-tag">0-Cost</span>}
+                          </span>
+                          {t.hasGMVPriority && (
+                            <span className="kam-cbr-gmv-badge">
+                              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                              </svg>
+                              GMV Priority
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Fallback Section */}
+                {cbrOrder.fallback.length > 0 && (
+                  <div className="kam-cbr-section">
+                    <div className="kam-cbr-section-label">
+                      <span className="kam-cbr-section-dot fallback" />
+                      Fallback — SR &lt; {cbrOrder.thresholdLow}%
+                      <span className="kam-badge warning" style={{ marginLeft: 8, fontSize: 10, padding: '1px 6px' }}>
+                        {cbrOrder.fallback.length}
+                      </span>
+                    </div>
+                    <div className="kam-cbr-terminal-list">
+                      {cbrOrder.fallback.map((t) => (
+                        <div className="kam-cbr-terminal-row fallback" key={t.terminalId}>
+                          <span className="kam-cbr-rank">#{t.rank}</span>
+                          <span className="kam-cbr-terminal-id">{t.terminalId}</span>
+                          <span className="kam-cbr-gateway">{t.gatewayShort}</span>
+                          <span className="kam-cbr-sr">{t.successRate}%</span>
+                          <span className="kam-cbr-cost">
+                            {'\u20B9'}{t.costPerTxn.toFixed(2)}
+                            {t.isZeroCost && <span className="kam-cbr-zero-tag">0-Cost</span>}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </>
         )}
       </div>
+
+      {/* ── GMV Commitment Progress (TSP + non-SR-sensitive) ──── */}
+      {!merchant.srSensitive && tspCompliance && (
+        <div className="kam-cbr-gmv-card">
+          <div className="kam-cbr-gmv-header">
+            <div className="kam-cbr-gmv-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="1" x2="12" y2="23" />
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+              </svg>
+              GMV Commitment Progress
+            </div>
+            <span className={`kam-badge ${
+              tspCompliance.status === 'on_track' ? 'success'
+              : tspCompliance.status === 'at_risk' ? 'warning'
+              : 'danger'
+            }`}>
+              {tspCompliance.status === 'on_track' ? 'On Track'
+              : tspCompliance.status === 'at_risk' ? 'At Risk'
+              : 'Off Track'}
+            </span>
+          </div>
+
+          <div className="kam-cbr-gmv-details">
+            <div className="kam-cbr-gmv-row">
+              <span className="kam-cbr-gmv-label">Locked Gateway</span>
+              <span className="kam-cbr-gmv-value">{tspCompliance.lockedGatewayName}</span>
+            </div>
+            <div className="kam-cbr-gmv-row">
+              <span className="kam-cbr-gmv-label">Annual Commitment</span>
+              <span className="kam-cbr-gmv-value">{formatINR(tspCompliance.gmvCommitment)}</span>
+            </div>
+            <div className="kam-cbr-gmv-row">
+              <span className="kam-cbr-gmv-label">Projected Annual GMV</span>
+              <span className="kam-cbr-gmv-value">{formatINR(tspCompliance.projectedAnnualGMV)}</span>
+            </div>
+            <div className="kam-cbr-gmv-row">
+              <span className="kam-cbr-gmv-label">Current Traffic Share</span>
+              <span className="kam-cbr-gmv-value">{tspCompliance.actualTrafficPct}%</span>
+            </div>
+            <div className="kam-cbr-gmv-row">
+              <span className="kam-cbr-gmv-label">Required Traffic Share</span>
+              <span className="kam-cbr-gmv-value">{tspCompliance.suggestedTrafficPct}%</span>
+            </div>
+          </div>
+
+          <div className="kam-cbr-gmv-progress">
+            <div className="kam-cbr-gmv-progress-label">
+              <span>Progress</span>
+              <span>{Math.min(100, Math.round((tspCompliance.projectedAnnualGMV / tspCompliance.gmvCommitment) * 100))}%</span>
+            </div>
+            <div className="kam-cbr-gmv-progress-bar">
+              <div
+                className="kam-cbr-gmv-progress-fill"
+                style={{
+                  width: `${Math.min(100, (tspCompliance.projectedAnnualGMV / tspCompliance.gmvCommitment) * 100)}%`,
+                  background: tspCompliance.status === 'on_track' ? 'var(--rzp-success)'
+                    : tspCompliance.status === 'at_risk' ? '#FF9800'
+                    : '#E53E3E',
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Terminal Management ───────────────────────────────────── */}
       <div className="kam-detail-section" id="terminal-section">

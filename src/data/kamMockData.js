@@ -761,6 +761,61 @@ export function computeTSPCompliance(merchant) {
   }
 }
 
+// ── CBR Terminal Ordering ──────────────────
+export function computeCBROrder(merchant) {
+  const thresholdLow = merchant.srThresholdLow ?? 85
+
+  // Enrich terminal entries with gateway info
+  const entries = merchant.gatewayMetrics.map((gm) => {
+    const gw = gateways.find((g) => g.id === gm.gatewayId)
+    const term = gw?.terminals.find((t) => t.id === gm.terminalId)
+    return {
+      terminalId: term?.terminalId || gm.terminalId,
+      gatewayId: gm.gatewayId,
+      gatewayName: gw?.name || 'Unknown',
+      gatewayShort: gw?.shortName || '??',
+      successRate: gm.successRate,
+      costPerTxn: gm.costPerTxn,
+      isZeroCost: gm.costPerTxn === 0,
+      txnShare: gm.txnShare,
+      hasGMVPriority: false,
+    }
+  })
+
+  // Mark terminals on TSP locked gateway
+  const lockedGwId =
+    merchant.dealType === 'tsp' && merchant.dealDetails?.lockedGatewayId
+      ? merchant.dealDetails.lockedGatewayId
+      : null
+  if (lockedGwId) {
+    entries.forEach((e) => {
+      if (e.gatewayId === lockedGwId) e.hasGMVPriority = true
+    })
+  }
+
+  const maxSR = Math.max(...entries.map((e) => e.successRate))
+
+  // Split into eligible and fallback
+  const eligible = entries.filter((e) => e.successRate >= thresholdLow)
+  const fallback = entries.filter((e) => e.successRate < thresholdLow)
+
+  // Sort eligible: GMV priority first, then cost ascending, then SR descending
+  eligible.sort((a, b) => {
+    if (a.hasGMVPriority !== b.hasGMVPriority) return a.hasGMVPriority ? -1 : 1
+    if (a.costPerTxn !== b.costPerTxn) return a.costPerTxn - b.costPerTxn
+    return b.successRate - a.successRate
+  })
+
+  // Sort fallback by SR descending
+  fallback.sort((a, b) => b.successRate - a.successRate)
+
+  // Assign continuous ranks
+  eligible.forEach((e, i) => { e.rank = i + 1 })
+  fallback.forEach((e, i) => { e.rank = eligible.length + i + 1 })
+
+  return { maxSR, thresholdLow, eligible, fallback }
+}
+
 // ── NTF Risk ──────────────────────────────
 export function computeNTFRisk(merchant) {
   const rules = merchant.routingRules
