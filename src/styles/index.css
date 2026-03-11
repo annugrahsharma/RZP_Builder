@@ -73,6 +73,28 @@
   --radius-md: 10px;
   --radius-lg: 24px;
   --radius-full: 50%;
+
+  /* Razorpay KAM Dashboard */
+  --rzp-blue: #528FF0;
+  --rzp-blue-dark: #3D6FD4;
+  --rzp-blue-light: #E8F0FE;
+  --rzp-blue-hover: #4580E0;
+  --rzp-success: #1EA672;
+  --rzp-success-light: #E6F9F0;
+  --rzp-warning: #F5A623;
+  --rzp-warning-light: #FFF4E0;
+  --rzp-danger: #E74C3C;
+  --rzp-danger-light: #FDECEB;
+  --rzp-bg: #F7F8FA;
+  --rzp-sidebar-bg: #1B2B4B;
+  --rzp-sidebar-hover: #243656;
+  --rzp-sidebar-text: #A0AEC0;
+  --rzp-sidebar-active: #FFFFFF;
+  --rzp-card-bg: #FFFFFF;
+  --rzp-border: #E2E8F0;
+  --rzp-text-primary: #1A202C;
+  --rzp-text-secondary: #718096;
+  --rzp-text-muted: #A0AEC0;
 }
 
 * {

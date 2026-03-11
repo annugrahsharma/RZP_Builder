@@ -1,9 +1,14 @@
-import { HashRouter, Routes, Route } from 'react-router-dom'
+import { HashRouter, Routes, Route, Outlet } from 'react-router-dom'
 import Login from './components/Login'
 import Signup from './components/Signup'
 import Onboarding from './components/onboarding/Onboarding'
 import Dashboard from './components/dashboard/Dashboard'
 import { OnboardingProvider } from './context/OnboardingContext'
+import { KAMProvider } from './context/KAMContext'
+import KAMLayout from './components/kam/KAMLayout'
+import KAMOverview from './components/kam/KAMOverview'
+import KAMMerchantTable from './components/kam/KAMMerchantTable'
+import KAMMerchantDetail from './components/kam/KAMMerchantDetail'
 import './styles/App.css'
 
 // Wrapper component for onboarding with provider
@@ -15,20 +20,33 @@ function OnboardingWrapper() {
   )
 }
 
+function MobileLayout() {
+  return (
+    <div className="app-container">
+      <div className="mobile-frame">
+        <Outlet />
+      </div>
+    </div>
+  )
+}
+
 function App() {
   return (
     <HashRouter>
-      <div className="app-container">
-        <div className="mobile-frame">
-          <Routes>
-            <Route path="/" element={<Login />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/onboarding" element={<OnboardingWrapper />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-          </Routes>
-        </div>
-      </div>
+      <Routes>
+        <Route path="/kam" element={<KAMProvider><KAMLayout /></KAMProvider>}>
+          <Route index element={<KAMOverview />} />
+          <Route path="merchants" element={<KAMMerchantTable />} />
+          <Route path="merchant/:merchantId" element={<KAMMerchantDetail />} />
+        </Route>
+        <Route element={<MobileLayout />}>
+          <Route path="/" element={<Login />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/onboarding" element={<OnboardingWrapper />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+        </Route>
+      </Routes>
     </HashRouter>
   )
 }
