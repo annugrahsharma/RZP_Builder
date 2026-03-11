@@ -1,6 +1,5 @@
 import { HashRouter, Routes, Route, Outlet } from 'react-router-dom'
 import Login from './components/Login'
-import Signup from './components/Signup'
 import Onboarding from './components/onboarding/Onboarding'
 import Dashboard from './components/dashboard/Dashboard'
 import { OnboardingProvider } from './context/OnboardingContext'
@@ -42,7 +41,6 @@ function App() {
         <Route element={<MobileLayout />}>
           <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
           <Route path="/onboarding" element={<OnboardingWrapper />} />
           <Route path="/dashboard" element={<Dashboard />} />
         </Route>
