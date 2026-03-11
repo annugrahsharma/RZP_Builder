@@ -76,6 +76,7 @@ export const merchants = [
       { gatewayId: 'gw-axis', terminalId: 'term-axis-001', successRate: 93.8, costPerTxn: 1.50, txnShare: 10 },
     ],
     status: 'active',
+    routingRules: { selectRules: 3, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: false },
     contactName: 'Deepinder Goyal',
     contactEmail: 'payments@zomato.com',
   },
@@ -93,6 +94,7 @@ export const merchants = [
       expiresAt: 'Sep 2026',
       contact: 'pranavn.rattan@razorpay.com',
       lockedGatewayId: 'gw-hdfc',
+      tspCompliance: { requiredTrafficPct: 70 },
     },
     monthlyTxnVolume: 1100000,
     monthlyGMV: 385000000,
@@ -106,6 +108,7 @@ export const merchants = [
       { gatewayId: 'gw-icici', terminalId: 'term-icici-002', successRate: 93.4, costPerTxn: 1.45, txnShare: 30 },
     ],
     status: 'active',
+    routingRules: { selectRules: 2, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: true },
     contactName: 'Sriharsha Majety',
     contactEmail: 'finance@swiggy.in',
   },
@@ -131,6 +134,7 @@ export const merchants = [
       { gatewayId: 'gw-axis', terminalId: 'term-axis-001', successRate: 93.8, costPerTxn: 1.50, txnShare: 20 },
     ],
     status: 'active',
+    routingRules: { selectRules: 3, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: false },
     contactName: 'Kunal Shah',
     contactEmail: 'payments@cred.club',
   },
@@ -156,6 +160,7 @@ export const merchants = [
       { gatewayId: 'gw-axis', terminalId: 'term-axis-001', successRate: 93.8, costPerTxn: 1.50, txnShare: 20 },
     ],
     status: 'active',
+    routingRules: { selectRules: 3, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: false },
     contactName: 'Kalyan Krishnamurthy',
     contactEmail: 'payments@flipkart.com',
   },
@@ -180,6 +185,7 @@ export const merchants = [
       { gatewayId: 'gw-rbl', terminalId: 'term-rbl-001', successRate: 90.3, costPerTxn: 1.10, txnShare: 40 },
     ],
     status: 'active',
+    routingRules: { selectRules: 2, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: false },
     contactName: 'Hari Menon',
     contactEmail: 'finance@bigbasket.com',
   },
@@ -197,6 +203,7 @@ export const merchants = [
       expiresAt: 'Jun 2026',
       contact: 'pranavn.rattan@razorpay.com',
       lockedGatewayId: 'gw-hdfc',
+      tspCompliance: { requiredTrafficPct: 65 },
     },
     monthlyTxnVolume: 920000,
     monthlyGMV: 350000000,
@@ -210,6 +217,7 @@ export const merchants = [
       { gatewayId: 'gw-rbl', terminalId: 'term-rbl-001', successRate: 90.3, costPerTxn: 1.10, txnShare: 45 },
     ],
     status: 'active',
+    routingRules: { selectRules: 1, rejectRules: 2, hasFallback: false, hasCardRestrictions: false, hasNetworkRestrictions: true },
     contactName: 'Nandita Sinha',
     contactEmail: 'payments@myntra.com',
   },
@@ -240,6 +248,7 @@ export const merchants = [
       { gatewayId: 'gw-yes', terminalId: 'term-yes-001', successRate: 89.7, costPerTxn: 0, txnShare: 25 },
     ],
     status: 'active',
+    routingRules: { selectRules: 2, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: false },
     contactName: 'Ashish Hemrajani',
     contactEmail: 'finance@bookmyshow.com',
   },
@@ -270,6 +279,7 @@ export const merchants = [
       { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 95.1, costPerTxn: 1.70, txnShare: 40 },
     ],
     status: 'active',
+    routingRules: { selectRules: 2, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: true },
     contactName: 'Rajesh Magow',
     contactEmail: 'payments@makemytrip.com',
   },
@@ -294,6 +304,7 @@ export const merchants = [
       { gatewayId: 'gw-rbl', terminalId: 'term-rbl-001', successRate: 90.3, costPerTxn: 1.10, txnShare: 50 },
     ],
     status: 'active',
+    routingRules: { selectRules: 1, rejectRules: 2, hasFallback: false, hasCardRestrictions: true, hasNetworkRestrictions: false },
     contactName: 'Falguni Nayar',
     contactEmail: 'finance@nykaa.com',
   },
@@ -318,6 +329,7 @@ export const merchants = [
       { gatewayId: 'gw-yes', terminalId: 'term-yes-001', successRate: 89.7, costPerTxn: 0, txnShare: 40 },
     ],
     status: 'active',
+    routingRules: { selectRules: 0, rejectRules: 1, hasFallback: false, hasCardRestrictions: false, hasNetworkRestrictions: false },
     contactName: 'Abhiraj Bhal',
     contactEmail: 'payments@urbancompany.com',
   },
@@ -344,6 +356,7 @@ export const merchants = [
       { gatewayId: 'gw-yes', terminalId: 'term-yes-001', successRate: 89.7, costPerTxn: 0, txnShare: 15 },
     ],
     status: 'active',
+    routingRules: { selectRules: 3, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: false },
     contactName: 'Aadit Palicha',
     contactEmail: 'finance@zeptonow.com',
   },
@@ -369,6 +382,7 @@ export const merchants = [
       { gatewayId: 'gw-rbl', terminalId: 'term-rbl-001', successRate: 90.3, costPerTxn: 1.10, txnShare: 20 },
     ],
     status: 'active',
+    routingRules: { selectRules: 2, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: false },
     contactName: 'Bhavish Aggarwal',
     contactEmail: 'payments@olacabs.com',
   },
@@ -395,6 +409,7 @@ export const merchants = [
       { gatewayId: 'gw-axis', terminalId: 'term-axis-002', successRate: 91.5, costPerTxn: 0, txnShare: 15 },
     ],
     status: 'active',
+    routingRules: { selectRules: 3, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: false },
     contactName: 'Sameer Nigam',
     contactEmail: 'finance@phonepe.com',
   },
@@ -419,6 +434,7 @@ export const merchants = [
       { gatewayId: 'gw-yes', terminalId: 'term-yes-001', successRate: 89.7, costPerTxn: 0, txnShare: 30 },
     ],
     status: 'active',
+    routingRules: { selectRules: 1, rejectRules: 2, hasFallback: false, hasCardRestrictions: true, hasNetworkRestrictions: false },
     contactName: 'Vijay Shekhar',
     contactEmail: 'payments@paytmmall.com',
   },
@@ -443,6 +459,7 @@ export const merchants = [
       { gatewayId: 'gw-rbl', terminalId: 'term-rbl-002', successRate: 88.9, costPerTxn: 0.95, txnShare: 40 },
     ],
     status: 'active',
+    routingRules: { selectRules: 1, rejectRules: 1, hasFallback: false, hasCardRestrictions: false, hasNetworkRestrictions: false },
     contactName: 'Prashant Tandon',
     contactEmail: 'finance@1mg.com',
   },
@@ -585,6 +602,196 @@ export function getMonthlyTargetData(merchantList) {
     daysInMonth,
     projectedRevenue: achieved * (daysInMonth / daysElapsed),
   }
+}
+
+// ── Backward Pricing Schedule (granular per terminal) ──
+export const backwardPricingSchedule = {
+  'term-hdfc-001': [
+    { network: 'Visa', cardType: 'Credit', amountRange: '0-2K', costPerTxn: 1.60, isInternational: false },
+    { network: 'Visa', cardType: 'Credit', amountRange: '2K-10K', costPerTxn: 1.80, isInternational: false },
+    { network: 'Visa', cardType: 'Credit', amountRange: '10K+', costPerTxn: 2.10, isInternational: false },
+    { network: 'Visa', cardType: 'Debit', amountRange: '0-2K', costPerTxn: 0.90, isInternational: false },
+    { network: 'Visa', cardType: 'Debit', amountRange: '2K+', costPerTxn: 1.20, isInternational: false },
+    { network: 'Mastercard', cardType: 'Credit', amountRange: '0-2K', costPerTxn: 1.55, isInternational: false },
+    { network: 'Mastercard', cardType: 'Credit', amountRange: '2K+', costPerTxn: 1.75, isInternational: false },
+    { network: 'RuPay', cardType: 'Debit', amountRange: 'All', costPerTxn: 0.50, isInternational: false },
+    { network: 'Visa', cardType: 'Credit', amountRange: 'All', costPerTxn: 3.20, isInternational: true },
+  ],
+  'term-hdfc-002': [
+    { network: 'All', cardType: 'UPI', amountRange: 'All', costPerTxn: 0, isInternational: false },
+  ],
+  'term-icici-001': [
+    { network: 'Visa', cardType: 'Credit', amountRange: '0-2K', costPerTxn: 1.50, isInternational: false },
+    { network: 'Visa', cardType: 'Credit', amountRange: '2K+', costPerTxn: 1.70, isInternational: false },
+    { network: 'Mastercard', cardType: 'Credit', amountRange: 'All', costPerTxn: 1.65, isInternational: false },
+    { network: 'Visa', cardType: 'Debit', amountRange: 'All', costPerTxn: 0.85, isInternational: false },
+    { network: 'RuPay', cardType: 'Debit', amountRange: 'All', costPerTxn: 0.45, isInternational: false },
+    { network: 'Visa', cardType: 'Credit', amountRange: 'All', costPerTxn: 3.00, isInternational: true },
+  ],
+  'term-icici-002': [
+    { network: 'Visa', cardType: 'Credit', amountRange: 'All', costPerTxn: 1.45, isInternational: false },
+    { network: 'Mastercard', cardType: 'Credit', amountRange: 'All', costPerTxn: 1.40, isInternational: false },
+    { network: 'Visa', cardType: 'Debit', amountRange: 'All', costPerTxn: 0.80, isInternational: false },
+    { network: 'RuPay', cardType: 'Debit', amountRange: 'All', costPerTxn: 0.40, isInternational: false },
+  ],
+  'term-axis-001': [
+    { network: 'Visa', cardType: 'Credit', amountRange: '0-5K', costPerTxn: 1.35, isInternational: false },
+    { network: 'Visa', cardType: 'Credit', amountRange: '5K+', costPerTxn: 1.50, isInternational: false },
+    { network: 'Mastercard', cardType: 'Credit', amountRange: 'All', costPerTxn: 1.45, isInternational: false },
+    { network: 'Visa', cardType: 'Debit', amountRange: 'All', costPerTxn: 0.75, isInternational: false },
+    { network: 'RuPay', cardType: 'Debit', amountRange: 'All', costPerTxn: 0.35, isInternational: false },
+    { network: 'Visa', cardType: 'Credit', amountRange: 'All', costPerTxn: 2.80, isInternational: true },
+  ],
+  'term-axis-002': [
+    { network: 'All', cardType: 'UPI', amountRange: 'All', costPerTxn: 0, isInternational: false },
+  ],
+  'term-rbl-001': [
+    { network: 'Visa', cardType: 'Credit', amountRange: 'All', costPerTxn: 1.10, isInternational: false },
+    { network: 'Mastercard', cardType: 'Credit', amountRange: 'All', costPerTxn: 1.05, isInternational: false },
+    { network: 'Visa', cardType: 'Debit', amountRange: 'All', costPerTxn: 0.60, isInternational: false },
+    { network: 'RuPay', cardType: 'Debit', amountRange: 'All', costPerTxn: 0.30, isInternational: false },
+  ],
+  'term-rbl-002': [
+    { network: 'Visa', cardType: 'Credit', amountRange: 'All', costPerTxn: 0.95, isInternational: false },
+    { network: 'Mastercard', cardType: 'Credit', amountRange: 'All', costPerTxn: 0.90, isInternational: false },
+    { network: 'Visa', cardType: 'Debit', amountRange: 'All', costPerTxn: 0.55, isInternational: false },
+  ],
+  'term-yes-001': [
+    { network: 'All', cardType: 'UPI', amountRange: 'All', costPerTxn: 0, isInternational: false },
+  ],
+  'term-yes-002': [
+    { network: 'Visa', cardType: 'Credit', amountRange: 'All', costPerTxn: 0.85, isInternational: false },
+    { network: 'Mastercard', cardType: 'Credit', amountRange: 'All', costPerTxn: 0.80, isInternational: false },
+    { network: 'Visa', cardType: 'Debit', amountRange: 'All', costPerTxn: 0.50, isInternational: false },
+    { network: 'RuPay', cardType: 'Debit', amountRange: 'All', costPerTxn: 0.25, isInternational: false },
+  ],
+}
+
+export function getBackwardPricingBreakdown(terminalId) {
+  return backwardPricingSchedule[terminalId] || []
+}
+
+// ── TSP Compliance ────────────────────────
+export function computeTSPCompliance(merchant) {
+  if (merchant.dealType !== 'tsp' || !merchant.dealDetails) return null
+  const required = merchant.dealDetails.tspCompliance?.requiredTrafficPct
+  if (required == null) return null
+
+  const lockedGwId = merchant.dealDetails.lockedGatewayId
+  const actualPct = merchant.gatewayMetrics
+    .filter((gm) => gm.gatewayId === lockedGwId)
+    .reduce((sum, gm) => sum + gm.txnShare, 0)
+
+  const gap = actualPct - required
+  const status = gap >= 0 ? 'compliant' : gap >= -10 ? 'at_risk' : 'violation'
+
+  return {
+    requiredPct: required,
+    actualPct,
+    gap,
+    status,
+    lockedGatewayName: gateways.find((g) => g.id === lockedGwId)?.shortName || 'Unknown',
+  }
+}
+
+// ── NTF Risk ──────────────────────────────
+export function computeNTFRisk(merchant) {
+  const rules = merchant.routingRules
+  if (!rules) return { score: 0, level: 'low', factors: [] }
+
+  let score = 0
+  const factors = []
+
+  // Cost-driven reject without fallback (40-50% of NTF)
+  if (merchant.routingStrategy === 'cost_based' && rules.rejectRules > 0 && !rules.hasFallback) {
+    score += 40
+    factors.push('Cost-driven reject rules without fallback')
+  }
+
+  // Missing select rules (20-25%)
+  if (rules.selectRules === 0) {
+    score += 25
+    factors.push('No SELECT rules configured')
+  } else if (rules.selectRules < 2) {
+    score += 10
+    factors.push('Insufficient SELECT rule coverage')
+  }
+
+  // Network/card restrictions (15-20%)
+  if (rules.hasNetworkRestrictions) {
+    score += 15
+    factors.push('Network restrictions active')
+  }
+  if (rules.hasCardRestrictions) {
+    score += 15
+    factors.push('Card type restrictions active')
+  }
+
+  // Few gateway options
+  if (merchant.gatewayMetrics.length <= 2) {
+    score += 10
+    factors.push('Limited gateway diversity (\u22642 gateways)')
+  }
+
+  const level = score >= 50 ? 'critical' : score >= 30 ? 'high' : score >= 15 ? 'medium' : 'low'
+
+  return { score: Math.min(score, 100), level, factors }
+}
+
+// ── Routing Conflict Detection ────────────
+export function detectRoutingConflicts(merchant) {
+  const conflicts = []
+
+  // TSP deal but primary gateway doesn't match locked gateway
+  if (merchant.dealType === 'tsp' && merchant.dealDetails?.lockedGatewayId) {
+    if (merchant.currentGatewayId !== merchant.dealDetails.lockedGatewayId) {
+      const lockedGw = gateways.find((g) => g.id === merchant.dealDetails.lockedGatewayId)
+      conflicts.push({
+        type: 'tsp_gateway_mismatch',
+        severity: 'critical',
+        message: `Primary gateway is not ${lockedGw?.shortName || 'locked gateway'}. TSP deal requires routing via ${lockedGw?.shortName}.`,
+        recommendation: `Switch primary gateway to ${lockedGw?.shortName} to comply with TSP deal terms.`,
+      })
+    }
+  }
+
+  // Offer-linked deal but offer gateway not in active traffic
+  if (merchant.dealType === 'offer_linked' && merchant.dealDetails?.lockedGatewayId) {
+    const lockedGwId = merchant.dealDetails.lockedGatewayId
+    const hasLockedGwInMetrics = merchant.gatewayMetrics.some((gm) => gm.gatewayId === lockedGwId)
+    if (!hasLockedGwInMetrics) {
+      const lockedGw = gateways.find((g) => g.id === lockedGwId)
+      conflicts.push({
+        type: 'offer_gateway_missing',
+        severity: 'high',
+        message: `Offer requires routing via ${lockedGw?.shortName}, but no traffic is routed there.`,
+        recommendation: `Add ${lockedGw?.shortName} terminal to active routing to enable offer fulfillment.`,
+      })
+    }
+  }
+
+  // Cost-based routing on merchant with SR < 92%
+  if (merchant.routingStrategy === 'cost_based' && merchant.avgPaymentSuccessRate < 92) {
+    conflicts.push({
+      type: 'cost_routing_low_sr',
+      severity: 'medium',
+      message: `Cost-based routing active but success rate is ${merchant.avgPaymentSuccessRate}% (below 92% threshold).`,
+      recommendation: 'Consider switching to SR-based routing to improve payment reliability.',
+    })
+  }
+
+  // All gateways have sub-93% SR
+  const allSubOptimal = merchant.gatewayMetrics.every((gm) => gm.successRate < 93)
+  if (allSubOptimal && merchant.gatewayMetrics.length >= 2) {
+    conflicts.push({
+      type: 'no_optimal_gateway',
+      severity: 'medium',
+      message: 'All active gateways have sub-optimal success rates (<93%).',
+      recommendation: 'Request terminal procurement for a higher-SR gateway from TR team.',
+    })
+  }
+
+  return conflicts
 }
 
 // ---------------------------------------------------------------------------

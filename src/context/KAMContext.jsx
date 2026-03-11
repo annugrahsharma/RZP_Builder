@@ -7,6 +7,9 @@ import {
   getMonthlyTargetData,
   generateMonthlyHistory,
   computeZeroCostShare,
+  computeTSPCompliance,
+  computeNTFRisk,
+  detectRoutingConflicts,
 } from '../data/kamMockData'
 
 const KAMContext = createContext(null)
@@ -318,6 +321,47 @@ export function KAMProvider({ children }) {
 
   const stats = useMemo(() => computeAggregateStats(merchants), [merchants])
   const zeroCostShare = useMemo(() => computeZeroCostShare(merchants), [merchants])
+
+  const tspComplianceMap = useMemo(() => {
+    const map = {}
+    merchants.forEach((m) => {
+      const compliance = computeTSPCompliance(m)
+      if (compliance) map[m.id] = compliance
+    })
+    return map
+  }, [merchants])
+
+  const ntfRiskMap = useMemo(() => {
+    const map = {}
+    merchants.forEach((m) => {
+      map[m.id] = computeNTFRisk(m)
+    })
+    return map
+  }, [merchants])
+
+  const ntfStats = useMemo(() => {
+    const risks = Object.values(ntfRiskMap)
+    return {
+      critical: risks.filter((r) => r.level === 'critical').length,
+      high: risks.filter((r) => r.level === 'high').length,
+      medium: risks.filter((r) => r.level === 'medium').length,
+      low: risks.filter((r) => r.level === 'low').length,
+    }
+  }, [ntfRiskMap])
+
+  const routingConflictsMap = useMemo(() => {
+    const map = {}
+    merchants.forEach((m) => {
+      const conflicts = detectRoutingConflicts(m)
+      if (conflicts.length > 0) map[m.id] = conflicts
+    })
+    return map
+  }, [merchants])
+
+  const totalConflicts = useMemo(() => {
+    return Object.values(routingConflictsMap).reduce((sum, arr) => sum + arr.length, 0)
+  }, [routingConflictsMap])
+
   const targetData = useMemo(() => getMonthlyTargetData(merchants), [merchants])
   const monthlyHistory = useMemo(() => generateMonthlyHistory(merchants), [merchants])
   const [selectedMonth, setSelectedMonth] = useState(null)
@@ -339,6 +383,11 @@ export function KAMProvider({ children }) {
     allMerchants: merchants,
     stats,
     zeroCostShare,
+    tspComplianceMap,
+    ntfRiskMap,
+    ntfStats,
+    routingConflictsMap,
+    totalConflicts,
     targetData,
     monthlyHistory,
     selectedMonth,

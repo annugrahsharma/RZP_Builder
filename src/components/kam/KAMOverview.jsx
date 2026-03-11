@@ -6,7 +6,10 @@ import { formatINR, formatNumber, computeMerchantRevenue, isTerminalZeroCost } f
 const MONTH_LABELS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
 
 export default function KAMOverview() {
-  const { stats, zeroCostShare, targetData, allMerchants, monthlyHistory, selectedMonth, setSelectedMonth } = useKAM()
+  const {
+    stats, zeroCostShare, targetData, allMerchants, monthlyHistory, selectedMonth, setSelectedMonth,
+    tspComplianceMap, ntfStats, routingConflictsMap, totalConflicts,
+  } = useKAM()
   const navigate = useNavigate()
   const [hoveredMonth, setHoveredMonth] = useState(null)
 
@@ -365,7 +368,123 @@ export default function KAMOverview() {
             Txn volume on zero-cost terminals
           </div>
         </div>
+
+        {/* 7. NTF Risk */}
+        <div className="kam-metric-card">
+          <div className="metric-icon" style={{ background: 'var(--rzp-danger-light)' }}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--rzp-danger)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+          </div>
+          <div className="metric-label">NTF Risk</div>
+          <div className="metric-value">{ntfStats.critical + ntfStats.high}</div>
+          <div className="metric-delta negative">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+            {ntfStats.critical} critical, {ntfStats.high} high risk
+          </div>
+        </div>
       </div>
+
+      {/* TSP Deal Compliance */}
+      {Object.keys(tspComplianceMap).length > 0 && (
+        <div className="kam-card" style={{ marginBottom: 'var(--space-lg)' }}>
+          <div className="kam-card-header">
+            <h3 className="kam-card-title">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E65100" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+              TSP Deal Compliance
+            </h3>
+            <span className="kam-badge neutral">{Object.keys(tspComplianceMap).length} active deals</span>
+          </div>
+          {Object.entries(tspComplianceMap).map(([merchantId, compliance]) => {
+            const merchant = allMerchants.find((m) => m.id === merchantId)
+            if (!merchant) return null
+            const fillClass = compliance.status === 'violation' ? 'violation' : compliance.status === 'at_risk' ? 'at-risk' : ''
+            return (
+              <div
+                key={merchantId}
+                className="kam-tsp-compliance-row"
+                onClick={() => navigate(`/kam/merchant/${merchantId}`)}
+              >
+                <div className="kam-merchant-info">
+                  <span className="name">{merchant.name}</span>
+                  <span className="mid">{merchant.mid}</span>
+                </div>
+                <div className="kam-tsp-gauge">
+                  <div className="kam-tsp-gauge-bar">
+                    <div
+                      className={`kam-tsp-gauge-fill ${fillClass}`}
+                      style={{ width: `${Math.min(compliance.actualPct, 100)}%` }}
+                    />
+                    <div
+                      className="kam-tsp-gauge-threshold"
+                      style={{ left: `${compliance.requiredPct}%` }}
+                    />
+                  </div>
+                  <span className="kam-tsp-gauge-label">
+                    {compliance.actualPct}% / {compliance.requiredPct}% min via {compliance.lockedGatewayName}
+                  </span>
+                </div>
+                <span className={`kam-badge ${compliance.status === 'compliant' ? 'success' : compliance.status === 'at_risk' ? 'warning' : 'danger'}`}>
+                  {compliance.status === 'compliant' ? 'Compliant' : compliance.status === 'at_risk' ? 'At Risk' : 'Violation'}
+                </span>
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {/* Routing Alerts */}
+      {totalConflicts > 0 && (
+        <div className="kam-card" style={{ marginBottom: 'var(--space-lg)' }}>
+          <div className="kam-card-header">
+            <h3 className="kam-card-title">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--rzp-danger)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                <line x1="12" y1="9" x2="12" y2="13" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
+              Routing Alerts
+            </h3>
+            <span className="kam-badge danger">{totalConflicts} issues</span>
+          </div>
+          {Object.entries(routingConflictsMap)
+            .sort(([, a], [, b]) => {
+              const sevOrder = { critical: 0, high: 1, medium: 2, low: 3 }
+              return sevOrder[a[0].severity] - sevOrder[b[0].severity]
+            })
+            .map(([merchantId, conflicts]) => {
+              const merchant = allMerchants.find((m) => m.id === merchantId)
+              if (!merchant) return null
+              return (
+                <div
+                  key={merchantId}
+                  className="kam-alert-row"
+                  onClick={() => navigate(`/kam/merchant/${merchantId}`)}
+                >
+                  <div className="kam-alert-row-header">
+                    <span className="name">{merchant.name}</span>
+                    <span className={`kam-badge ${conflicts[0].severity === 'critical' ? 'danger' : conflicts[0].severity === 'high' ? 'warning' : 'info'}`}>
+                      {conflicts[0].severity}
+                    </span>
+                  </div>
+                  <div className="kam-alert-row-message">{conflicts[0].message}</div>
+                  {conflicts.length > 1 && (
+                    <div className="kam-alert-row-message" style={{ marginTop: 2, color: 'var(--rzp-text-muted)' }}>
+                      +{conflicts.length - 1} more issue{conflicts.length - 1 > 1 ? 's' : ''}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+        </div>
+      )}
 
       {/* Merchants Needing Attention */}
       <div className="kam-card">

@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react'
+import React, { useState, useMemo, useCallback } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useKAM } from '../../context/KAMContext'
 import {
@@ -7,6 +7,10 @@ import {
   computeMerchantRevenue,
   routingStrategies,
   isTerminalZeroCost,
+  computeTSPCompliance,
+  computeNTFRisk,
+  detectRoutingConflicts,
+  getBackwardPricingBreakdown,
 } from '../../data/kamMockData'
 
 // ---------------------------------------------------------------------------
@@ -180,6 +184,22 @@ const XIcon = () => (
   </svg>
 )
 
+const ShieldAlertIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    <line x1="12" y1="8" x2="12" y2="12" />
+    <line x1="12" y1="16" x2="12.01" y2="16" />
+  </svg>
+)
+
+const AlertCircleIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" />
+    <line x1="12" y1="8" x2="12" y2="12" />
+    <line x1="12" y1="16" x2="12.01" y2="16" />
+  </svg>
+)
+
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
@@ -211,6 +231,7 @@ export default function KAMMerchantDetail() {
   const [terminalStates, setTerminalStates] = useState({})
   const [confirmTerminal, setConfirmTerminal] = useState(null)
   const [showDealWarning, setShowDealWarning] = useState(false)
+  const [expandedTerminal, setExpandedTerminal] = useState(null)
 
   // ---- Guard ----
   if (!merchant) {
@@ -227,6 +248,9 @@ export default function KAMMerchantDetail() {
   }
 
   // ---- Computed values ----
+  const ntfRisk = useMemo(() => computeNTFRisk(merchant), [merchant])
+  const tspCompliance = useMemo(() => computeTSPCompliance(merchant), [merchant])
+  const routingConflicts = useMemo(() => detectRoutingConflicts(merchant), [merchant])
   const revenue = computeMerchantRevenue(merchant)
   const projectedSavings = Math.abs(threshold) * 0.316
   const hasModelChanged = selectedModel !== merchant.routingStrategy
@@ -442,6 +466,30 @@ export default function KAMMerchantDetail() {
                 Constraint: {merchant.dealDetails.constraint}
               </div>
             )}
+            {tspCompliance && (
+              <div style={{ margin: '8px 0 12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div className="kam-tsp-gauge" style={{ margin: 0, maxWidth: 280 }}>
+                    <div className="kam-tsp-gauge-bar">
+                      <div
+                        className={`kam-tsp-gauge-fill ${tspCompliance.status === 'violation' ? 'violation' : tspCompliance.status === 'at_risk' ? 'at-risk' : ''}`}
+                        style={{ width: `${Math.min(tspCompliance.actualPct, 100)}%` }}
+                      />
+                      <div className="kam-tsp-gauge-threshold" style={{ left: `${tspCompliance.requiredPct}%` }} />
+                    </div>
+                    <span className="kam-tsp-gauge-label">{tspCompliance.actualPct}% / {tspCompliance.requiredPct}% min</span>
+                  </div>
+                  <span className={`kam-badge ${tspCompliance.status === 'compliant' ? 'success' : tspCompliance.status === 'at_risk' ? 'warning' : 'danger'}`}>
+                    {tspCompliance.status === 'compliant' ? 'Compliant' : tspCompliance.status === 'at_risk' ? 'At Risk' : 'Violation'}
+                  </span>
+                </div>
+                {tspCompliance.status === 'violation' && (
+                  <div style={{ fontSize: 12, color: 'var(--rzp-danger)', fontWeight: 600, marginTop: 6 }}>
+                    Traffic via {tspCompliance.lockedGatewayName} is {tspCompliance.gap}% below required minimum. Immediate action needed.
+                  </div>
+                )}
+              </div>
+            )}
             <div className="kam-deal-banner-meta">
               {merchant.dealDetails.expiresAt && (
                 <span>Expires: <strong>{merchant.dealDetails.expiresAt}</strong></span>
@@ -485,6 +533,53 @@ export default function KAMMerchantDetail() {
               )}
             </div>
           </div>
+        </div>
+      )}
+
+      {/* ── Routing Conflict Warnings ──────────────────────────────── */}
+      {routingConflicts.length > 0 && (
+        <div className="kam-conflicts-section">
+          {routingConflicts.map((conflict, i) => (
+            <div key={i} className={`kam-conflict-banner ${conflict.severity}`}>
+              <WarningIcon />
+              <div className="kam-conflict-banner-content">
+                <div className="kam-conflict-message">{conflict.message}</div>
+                <div className="kam-conflict-recommendation">{conflict.recommendation}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* ── NTF Risk Assessment ───────────────────────────────────── */}
+      {ntfRisk.score > 0 && (
+        <div className="kam-card" style={{ marginBottom: 'var(--space-md)' }}>
+          <div className="kam-card-header">
+            <span className="kam-card-title">
+              <ShieldAlertIcon />
+              NTF Risk Assessment
+            </span>
+            <span className={`kam-badge ${ntfRisk.level === 'critical' ? 'danger' : ntfRisk.level === 'high' ? 'warning' : ntfRisk.level === 'medium' ? 'info' : 'success'}`}>
+              {ntfRisk.level.charAt(0).toUpperCase() + ntfRisk.level.slice(1)} Risk
+            </span>
+          </div>
+          <div className="kam-ntf-score-bar">
+            <div className="kam-ntf-score-track">
+              <div className="kam-ntf-score-fill" style={{ width: `${ntfRisk.score}%` }} />
+            </div>
+            <span className="kam-ntf-score-label">{ntfRisk.score}/100</span>
+          </div>
+          {ntfRisk.factors.length > 0 && (
+            <div className="kam-ntf-factors">
+              <div className="kam-ntf-factors-title">Risk Factors</div>
+              {ntfRisk.factors.map((f, i) => (
+                <div key={i} className="kam-ntf-factor-item">
+                  <AlertCircleIcon />
+                  <span>{f}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -706,12 +801,13 @@ export default function KAMMerchantDetail() {
                   <th>Txn Share</th>
                   <th>Cost/Txn</th>
                   <th>Status</th>
+                  <th style={{ width: 40 }}></th>
                 </tr>
               </thead>
               <tbody>
                 {filteredTerminals.length === 0 ? (
                   <tr>
-                    <td colSpan={8} style={{ textAlign: 'center', padding: 32, color: 'var(--rzp-text-muted)' }}>
+                    <td colSpan={9} style={{ textAlign: 'center', padding: 32, color: 'var(--rzp-text-muted)' }}>
                       No terminals match your search.
                     </td>
                   </tr>
@@ -719,59 +815,116 @@ export default function KAMMerchantDetail() {
                   filteredTerminals.map((t) => {
                     const active = isTerminalActive(t.key)
                     const srOptimal = t.successRate >= 93
+                    const isExpanded = expandedTerminal === t.key
+                    const pricingData = getBackwardPricingBreakdown(t.internalTermId)
                     return (
-                      <tr key={t.key} style={{ opacity: active ? 1 : 0.5 }}>
-                        <td>
-                          <span style={{ fontFamily: 'monospace', fontWeight: 600, fontSize: 13 }}>
-                            {t.terminalId}
-                          </span>
-                        </td>
-                        <td>{t.provider}</td>
-                        <td>
-                          <span className={`kam-method-badge ${t.method.toLowerCase()}`}>
-                            {t.method}
-                          </span>
-                        </td>
-                        <td>
-                          <span style={{ fontWeight: 600 }}>{t.successRate}%</span>
-                          {' '}
-                          <span className={`kam-badge ${srOptimal ? 'success' : 'warning'}`} style={{ fontSize: 10 }}>
-                            {srOptimal ? 'Optimal' : 'Sub-optimal'}
-                          </span>
-                        </td>
-                        <td style={{ fontFamily: 'var(--font-secondary)' }}>
-                          {formatLakhs(t.dailyVolume)}
-                        </td>
-                        <td>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <div className="kam-progress-bar" style={{ width: 60, height: 6 }}>
-                              <div
-                                className="kam-progress-fill"
-                                style={{
-                                  width: `${t.txnShare}%`,
-                                  background: 'var(--rzp-blue)',
-                                }}
-                              />
-                            </div>
-                            <span style={{ fontSize: 12, color: 'var(--rzp-text-secondary)' }}>
-                              {t.txnShare}%
+                      <React.Fragment key={t.key}>
+                        <tr style={{ opacity: active ? 1 : 0.5 }}>
+                          <td>
+                            <span style={{ fontFamily: 'monospace', fontWeight: 600, fontSize: 13 }}>
+                              {t.terminalId}
                             </span>
-                          </div>
-                        </td>
-                        <td style={{ fontFamily: 'monospace', fontSize: 13 }}>
-                          {'\u20B9'}{t.costPerTxn.toFixed(2)}
-                          {isTerminalZeroCost(t.internalTermId) && (
-                            <span className="kam-zero-cost-tag">0-Cost</span>
-                          )}
-                        </td>
-                        <td>
-                          <button
-                            className={`kam-toggle${active ? ' active' : ''}`}
-                            onClick={() => handleTerminalToggle(t)}
-                            aria-label={`Toggle terminal ${t.terminalId}`}
-                          />
-                        </td>
-                      </tr>
+                          </td>
+                          <td>{t.provider}</td>
+                          <td>
+                            <span className={`kam-method-badge ${t.method.toLowerCase()}`}>
+                              {t.method}
+                            </span>
+                          </td>
+                          <td>
+                            <span style={{ fontWeight: 600 }}>{t.successRate}%</span>
+                            {' '}
+                            <span className={`kam-badge ${srOptimal ? 'success' : 'warning'}`} style={{ fontSize: 10 }}>
+                              {srOptimal ? 'Optimal' : 'Sub-optimal'}
+                            </span>
+                          </td>
+                          <td style={{ fontFamily: 'var(--font-secondary)' }}>
+                            {formatLakhs(t.dailyVolume)}
+                          </td>
+                          <td>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                              <div className="kam-progress-bar" style={{ width: 60, height: 6 }}>
+                                <div
+                                  className="kam-progress-fill"
+                                  style={{
+                                    width: `${t.txnShare}%`,
+                                    background: 'var(--rzp-blue)',
+                                  }}
+                                />
+                              </div>
+                              <span style={{ fontSize: 12, color: 'var(--rzp-text-secondary)' }}>
+                                {t.txnShare}%
+                              </span>
+                            </div>
+                          </td>
+                          <td style={{ fontFamily: 'monospace', fontSize: 13 }}>
+                            {'\u20B9'}{t.costPerTxn.toFixed(2)}
+                            {isTerminalZeroCost(t.internalTermId) && (
+                              <span className="kam-zero-cost-tag">0-Cost</span>
+                            )}
+                          </td>
+                          <td>
+                            <button
+                              className={`kam-toggle${active ? ' active' : ''}`}
+                              onClick={() => handleTerminalToggle(t)}
+                              aria-label={`Toggle terminal ${t.terminalId}`}
+                            />
+                          </td>
+                          <td>
+                            {pricingData.length > 0 && (
+                              <button
+                                className="kam-btn kam-btn-ghost kam-btn-sm"
+                                onClick={() => setExpandedTerminal(isExpanded ? null : t.key)}
+                                style={{ padding: 4 }}
+                                aria-label="Toggle pricing details"
+                              >
+                                <svg
+                                  width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                  stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                                  style={{ transition: 'transform 0.2s', transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                                >
+                                  <polyline points="6 9 12 15 18 9" />
+                                </svg>
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                        {isExpanded && pricingData.length > 0 && (
+                          <tr className="kam-pricing-expanded-row">
+                            <td colSpan={9} style={{ padding: 0 }}>
+                              <div className="kam-pricing-breakdown">
+                                <div className="kam-pricing-breakdown-title">Backward Pricing Schedule</div>
+                                <table className="kam-pricing-table">
+                                  <thead>
+                                    <tr>
+                                      <th>Network</th>
+                                      <th>Card Type</th>
+                                      <th>Amount Range</th>
+                                      <th>Cost/Txn</th>
+                                      <th>International</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {pricingData.map((tier, i) => (
+                                      <tr key={i}>
+                                        <td><span className="kam-network-badge">{tier.network}</span></td>
+                                        <td>{tier.cardType}</td>
+                                        <td>{tier.amountRange}</td>
+                                        <td style={{ fontFamily: 'monospace', fontWeight: 600 }}>
+                                          {tier.costPerTxn === 0
+                                            ? <span className="kam-zero-cost-tag">0-Cost</span>
+                                            : `\u20B9${tier.costPerTxn.toFixed(2)}`}
+                                        </td>
+                                        <td>{tier.isInternational ? 'Yes' : '\u2014'}</td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </React.Fragment>
                     )
                   })
                 )}
