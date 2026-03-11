@@ -1,0 +1,364 @@
+/* ==========================================================================
+   KAM Dashboard - Modals
+   Dialog windows, forms, radio groups, and gateway options
+   ========================================================================== */
+
+/* Modal Overlay
+   ========================================================================== */
+
+.kam-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: kamOverlayIn 0.2s ease;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+/* Modal Container
+   ========================================================================== */
+
+.kam-modal {
+  background: #fff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.2);
+  animation: kamModalIn 0.25s ease;
+}
+
+.kam-modal.wide {
+  max-width: 640px;
+}
+
+/* Modal Header */
+.kam-modal-header {
+  padding: var(--space-lg) var(--space-lg) 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.kam-modal-header h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--rzp-text-primary);
+  font-family: var(--font-primary);
+  line-height: 1.3;
+}
+
+.kam-modal-header p {
+  font-size: 14px;
+  color: var(--rzp-text-secondary);
+  font-family: var(--font-secondary);
+  margin-top: 4px;
+}
+
+.kam-modal-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--rzp-text-muted);
+  transition: background 0.15s ease, color 0.15s ease;
+  flex-shrink: 0;
+  margin-left: 12px;
+}
+
+.kam-modal-close:hover {
+  background: var(--rzp-bg);
+  color: var(--rzp-text-primary);
+}
+
+.kam-modal-close svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Modal Body */
+.kam-modal-body {
+  padding: 20px var(--space-lg);
+}
+
+/* Modal Footer */
+.kam-modal-footer {
+  padding: var(--space-md) var(--space-lg) var(--space-lg);
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+}
+
+/* Radio Group
+   ========================================================================== */
+
+.kam-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.kam-radio-card {
+  border: 2px solid var(--rzp-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.kam-radio-card:hover {
+  border-color: var(--rzp-text-muted);
+}
+
+.kam-radio-card.selected {
+  border-color: var(--rzp-blue);
+  background: var(--rzp-blue-light);
+}
+
+.kam-radio-card .radio-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--rzp-border);
+  flex-shrink: 0;
+  margin-top: 2px;
+  position: relative;
+  transition: border-color 0.15s ease;
+}
+
+.kam-radio-card:hover .radio-dot {
+  border-color: var(--rzp-text-muted);
+}
+
+.kam-radio-card.selected .radio-dot {
+  border-color: var(--rzp-blue);
+}
+
+.kam-radio-card.selected .radio-dot::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  background: var(--rzp-blue);
+  border-radius: 50%;
+}
+
+.kam-radio-card .radio-content {
+  flex: 1;
+}
+
+.kam-radio-card .radio-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--rzp-text-primary);
+  font-family: var(--font-secondary);
+  line-height: 1.3;
+}
+
+.kam-radio-card .radio-desc {
+  font-size: 13px;
+  color: var(--rzp-text-secondary);
+  font-family: var(--font-secondary);
+  margin-top: 2px;
+  line-height: 1.4;
+}
+
+/* Form Group
+   ========================================================================== */
+
+.kam-form-group {
+  margin-bottom: var(--space-md);
+}
+
+.kam-form-group:last-child {
+  margin-bottom: 0;
+}
+
+.kam-form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--rzp-text-primary);
+  font-family: var(--font-secondary);
+  margin-bottom: 6px;
+}
+
+.kam-form-group label .required {
+  color: var(--rzp-danger);
+  margin-left: 2px;
+}
+
+.kam-form-group select,
+.kam-form-group textarea,
+.kam-form-group input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--rzp-border);
+  font-size: 14px;
+  font-family: var(--font-secondary);
+  color: var(--rzp-text-primary);
+  background: #fff;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.kam-form-group select:focus,
+.kam-form-group textarea:focus,
+.kam-form-group input:focus {
+  border-color: var(--rzp-blue);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(82, 143, 240, 0.1);
+}
+
+.kam-form-group select::placeholder,
+.kam-form-group textarea::placeholder,
+.kam-form-group input::placeholder {
+  color: var(--rzp-text-muted);
+}
+
+.kam-form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.5;
+}
+
+.kam-form-group select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23718096' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+  cursor: pointer;
+}
+
+.kam-form-hint {
+  font-size: 12px;
+  color: var(--rzp-text-muted);
+  margin-top: 4px;
+  font-family: var(--font-secondary);
+}
+
+.kam-form-error {
+  font-size: 12px;
+  color: var(--rzp-danger);
+  margin-top: 4px;
+  font-family: var(--font-secondary);
+}
+
+/* Gateway Option
+   ========================================================================== */
+
+.kam-gateway-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 4px;
+  cursor: pointer;
+  transition: background 0.1s ease;
+}
+
+.kam-gateway-option:hover {
+  background: var(--rzp-bg);
+}
+
+.kam-gateway-option:last-child {
+  margin-bottom: 0;
+}
+
+.kam-gateway-option .gw-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.kam-gateway-option .gw-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--rzp-text-primary);
+  font-family: var(--font-secondary);
+}
+
+.kam-gateway-option .gw-desc {
+  font-size: 12px;
+  color: var(--rzp-text-secondary);
+  font-family: var(--font-secondary);
+  margin-top: 1px;
+}
+
+.kam-gateway-option .gw-stats {
+  display: flex;
+  gap: var(--space-md);
+  font-size: 12px;
+  color: var(--rzp-text-secondary);
+  font-family: var(--font-secondary);
+}
+
+.kam-gateway-option .gw-stats strong {
+  font-weight: 600;
+  color: var(--rzp-text-primary);
+}
+
+/* Confirmation Modal Helpers */
+.kam-confirm-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--space-md);
+}
+
+.kam-confirm-icon.warning {
+  background: var(--rzp-warning-light);
+  color: var(--rzp-warning);
+}
+
+.kam-confirm-icon.danger {
+  background: var(--rzp-danger-light);
+  color: var(--rzp-danger);
+}
+
+.kam-confirm-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* Animations
+   ========================================================================== */
+
+@keyframes kamOverlayIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes kamModalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}

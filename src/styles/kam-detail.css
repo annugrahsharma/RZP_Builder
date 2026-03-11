@@ -1,0 +1,654 @@
+/* ==========================================================================
+   KAM Dashboard - Merchant Detail
+   Individual merchant view with Doppler, sliders, terminals, audit trail
+   ========================================================================== */
+
+/* Back Link
+   ========================================================================== */
+
+.kam-detail-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--rzp-text-secondary);
+  text-decoration: none;
+  font-size: 14px;
+  font-family: var(--font-secondary);
+  margin-bottom: 20px;
+  font-weight: 500;
+  transition: color 0.15s ease;
+}
+
+.kam-detail-back:hover {
+  color: var(--rzp-blue);
+}
+
+.kam-detail-back svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Detail Header
+   ========================================================================== */
+
+.kam-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 28px;
+}
+
+.kam-detail-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.kam-detail-title h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--rzp-text-primary);
+  font-family: var(--font-primary);
+}
+
+.kam-detail-title .mid {
+  font-size: 14px;
+  color: var(--rzp-text-muted);
+  font-weight: 400;
+  font-family: var(--font-secondary);
+}
+
+.kam-detail-actions {
+  display: flex;
+  gap: var(--space-sm);
+  flex-shrink: 0;
+}
+
+/* Detail Metrics
+   ========================================================================== */
+
+.kam-detail-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-md);
+  margin-bottom: 28px;
+}
+
+@media (max-width: 1024px) {
+  .kam-detail-metrics {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .kam-detail-metrics {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Detail Section
+   ========================================================================== */
+
+.kam-detail-section {
+  margin-bottom: 28px;
+}
+
+.kam-detail-section:last-child {
+  margin-bottom: 0;
+}
+
+.kam-detail-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-md);
+}
+
+.kam-detail-section-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--rzp-text-primary);
+  font-family: var(--font-secondary);
+}
+
+/* Doppler Card
+   ========================================================================== */
+
+.kam-doppler-card {
+  background: var(--rzp-card-bg);
+  border-radius: 12px;
+  border: 1px solid var(--rzp-border);
+  padding: var(--space-lg);
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.kam-doppler-models {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: var(--space-lg);
+}
+
+.kam-doppler-model {
+  border: 2px solid var(--rzp-border);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.15s ease;
+}
+
+.kam-doppler-model:hover {
+  border-color: var(--rzp-text-muted);
+  transform: translateY(-1px);
+}
+
+.kam-doppler-model.active {
+  border-color: var(--rzp-blue);
+  background: var(--rzp-blue-light);
+}
+
+.kam-doppler-model .model-icon {
+  font-size: 28px;
+  margin-bottom: var(--space-sm);
+  line-height: 1;
+}
+
+.kam-doppler-model .model-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--rzp-text-primary);
+  font-family: var(--font-secondary);
+}
+
+.kam-doppler-model .model-desc {
+  font-size: 12px;
+  color: var(--rzp-text-secondary);
+  font-family: var(--font-secondary);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+/* Slider Container
+   ========================================================================== */
+
+.kam-slider-container {
+  padding: 20px var(--space-lg);
+  background: #F8FAFC;
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-md);
+}
+
+.kam-slider-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.kam-slider-header .label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--rzp-text-primary);
+  font-family: var(--font-secondary);
+}
+
+.kam-slider-header .value {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--rzp-blue);
+  font-family: var(--font-secondary);
+}
+
+/* Range Slider */
+.kam-slider input[type="range"] {
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  height: 6px;
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+  background: linear-gradient(90deg, var(--rzp-danger), var(--rzp-warning), var(--rzp-success));
+}
+
+.kam-slider input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--rzp-blue);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.kam-slider input[type="range"]::-webkit-slider-thumb:hover {
+  box-shadow: 0 2px 8px rgba(82, 143, 240, 0.3);
+  transform: scale(1.1);
+}
+
+.kam-slider input[type="range"]::-webkit-slider-thumb:active {
+  transform: scale(1.15);
+}
+
+.kam-slider input[type="range"]::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--rzp-blue);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+}
+
+/* Slider Labels */
+.kam-slider-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--space-sm);
+}
+
+.kam-slider-labels span {
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font-secondary);
+}
+
+.kam-slider-labels .red {
+  color: var(--rzp-danger);
+}
+
+.kam-slider-labels .green {
+  color: var(--rzp-success);
+}
+
+/* Slider Values */
+.kam-slider-values {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--rzp-card-bg);
+  border-radius: 8px;
+  border: 1px solid var(--rzp-border);
+  margin-top: 12px;
+}
+
+.kam-slider-values .val-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.kam-slider-values .val-label {
+  font-size: 12px;
+  color: var(--rzp-text-secondary);
+  font-family: var(--font-secondary);
+  font-weight: 500;
+}
+
+.kam-slider-values .val {
+  font-size: 20px;
+  font-weight: 700;
+  font-family: var(--font-primary);
+  line-height: 1.3;
+}
+
+.kam-slider-values .val.threshold {
+  color: var(--rzp-warning);
+}
+
+.kam-slider-values .val.savings {
+  color: var(--rzp-success);
+}
+
+/* Terminal Table
+   ========================================================================== */
+
+.kam-terminal-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.kam-terminal-table th {
+  text-align: left;
+  padding: 10px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--rzp-text-secondary);
+  font-family: var(--font-secondary);
+  border-bottom: 2px solid var(--rzp-border);
+  white-space: nowrap;
+}
+
+.kam-terminal-table td {
+  padding: 12px 16px;
+  font-size: 14px;
+  font-family: var(--font-secondary);
+  border-bottom: 1px solid var(--rzp-border);
+  color: var(--rzp-text-primary);
+}
+
+.kam-terminal-table tr:last-child td {
+  border-bottom: none;
+}
+
+.kam-terminal-table tr {
+  transition: background 0.1s ease;
+}
+
+.kam-terminal-table tr:hover td {
+  background: #F8FAFC;
+}
+
+/* Toggle Switch
+   ========================================================================== */
+
+.kam-toggle {
+  width: 44px;
+  height: 24px;
+  border-radius: 12px;
+  background: var(--rzp-border);
+  border: none;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.2s ease;
+  flex-shrink: 0;
+}
+
+.kam-toggle.active {
+  background: var(--rzp-blue);
+}
+
+.kam-toggle::after {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  top: 3px;
+  left: 3px;
+  transition: left 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.kam-toggle.active::after {
+  left: 23px;
+}
+
+.kam-toggle:hover::after {
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.25);
+}
+
+/* Payment Method Badge
+   ========================================================================== */
+
+.kam-method-badge {
+  display: inline-flex;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: var(--font-secondary);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.kam-method-badge.upi {
+  background: #E8F5E9;
+  color: #2E7D32;
+}
+
+.kam-method-badge.cc {
+  background: #FFF3E0;
+  color: #E65100;
+}
+
+.kam-method-badge.dc {
+  background: #E3F2FD;
+  color: #1565C0;
+}
+
+.kam-method-badge.nb {
+  background: #F3E5F5;
+  color: #7B1FA2;
+}
+
+.kam-method-badge.wallet {
+  background: #FFF8E1;
+  color: #F9A825;
+}
+
+.kam-method-badge.emi {
+  background: #E0F2F1;
+  color: #00695C;
+}
+
+/* Audit Timeline
+   ========================================================================== */
+
+.kam-audit-timeline {
+  position: relative;
+  padding-left: var(--space-lg);
+}
+
+.kam-audit-timeline::before {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--rzp-border);
+}
+
+.kam-audit-entry {
+  position: relative;
+  margin-bottom: var(--space-md);
+  padding: var(--space-md);
+  background: #F8FAFC;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--rzp-border);
+  transition: box-shadow 0.15s ease;
+}
+
+.kam-audit-entry:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.kam-audit-entry:last-child {
+  margin-bottom: 0;
+}
+
+.kam-audit-entry::before {
+  content: '';
+  position: absolute;
+  left: -20px;
+  top: 20px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--rzp-blue);
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 2px var(--rzp-blue-light);
+}
+
+.kam-audit-entry .audit-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.kam-audit-entry .audit-time {
+  font-size: 12px;
+  color: var(--rzp-text-muted);
+  font-family: monospace;
+}
+
+.kam-audit-entry .audit-user {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--rzp-text-secondary);
+  font-family: var(--font-secondary);
+}
+
+.kam-audit-entry .audit-action {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--rzp-text-primary);
+  font-family: var(--font-secondary);
+  line-height: 1.4;
+}
+
+.kam-audit-entry .audit-reason {
+  font-size: 13px;
+  color: var(--rzp-text-secondary);
+  font-family: var(--font-secondary);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+.kam-audit-entry .audit-tag {
+  display: inline-flex;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: 6px;
+}
+
+/* Warning Box
+   ========================================================================== */
+
+.kam-warning-box {
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: var(--rzp-warning-light);
+  border: 1px solid #FFE0A0;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  font-size: 13px;
+  font-family: var(--font-secondary);
+  color: #92400E;
+  line-height: 1.5;
+}
+
+.kam-warning-box svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--rzp-warning);
+}
+
+/* Reason Input
+   ========================================================================== */
+
+.kam-reason-input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--rzp-border);
+  font-size: 14px;
+  font-family: var(--font-secondary);
+  color: var(--rzp-text-primary);
+  resize: vertical;
+  min-height: 60px;
+  margin-top: 12px;
+  line-height: 1.5;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.kam-reason-input::placeholder {
+  color: var(--rzp-text-muted);
+}
+
+.kam-reason-input:focus {
+  border-color: var(--rzp-blue);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(82, 143, 240, 0.1);
+}
+
+/* Detail Tabs
+   ========================================================================== */
+
+.kam-detail-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid var(--rzp-border);
+  margin-bottom: var(--space-lg);
+}
+
+.kam-detail-tab {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--rzp-text-secondary);
+  font-family: var(--font-secondary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.15s ease;
+}
+
+.kam-detail-tab:hover {
+  color: var(--rzp-text-primary);
+}
+
+.kam-detail-tab.active {
+  color: var(--rzp-blue);
+  font-weight: 600;
+}
+
+.kam-detail-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--rzp-blue);
+  border-radius: 1px 1px 0 0;
+}
+
+/* Info Grid (for merchant details) */
+.kam-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.kam-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.kam-info-item .info-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--rzp-text-secondary);
+  font-family: var(--font-secondary);
+}
+
+.kam-info-item .info-value {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--rzp-text-primary);
+  font-family: var(--font-secondary);
+}
