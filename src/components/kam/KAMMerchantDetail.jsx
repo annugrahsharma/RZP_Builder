@@ -5,7 +5,6 @@ import {
   formatINR,
   formatNumber,
   computeMerchantRevenue,
-  routingStrategies,
   isTerminalZeroCost,
   computeTSPCompliance,
   getBackwardPricingBreakdown,
@@ -496,6 +495,96 @@ function SRLineChart({ srData }) {
 }
 
 // ---------------------------------------------------------------------------
+// SR Range Slider sub-component (dual-handle, min 10% delta)
+// ---------------------------------------------------------------------------
+const MIN_DELTA = 10
+const SR_MIN = 70
+const SR_MAX = 100
+
+function SRRangeSlider({ low, high, onChange }) {
+  const trackRef = React.useRef(null)
+
+  const pct = (v) => ((v - SR_MIN) / (SR_MAX - SR_MIN)) * 100
+
+  const handleLow = useCallback((e) => {
+    const val = Number(e.target.value)
+    const clamped = Math.min(val, high - MIN_DELTA)
+    onChange(clamped, high)
+  }, [high, onChange])
+
+  const handleHigh = useCallback((e) => {
+    const val = Number(e.target.value)
+    const clamped = Math.max(val, low + MIN_DELTA)
+    onChange(low, clamped)
+  }, [low, onChange])
+
+  const lowPct = pct(low)
+  const highPct = pct(high)
+
+  return (
+    <div className="kam-sr-range-control">
+      <div className="kam-sr-range-labels">
+        <div className="kam-sr-range-label">
+          <span className="label">Lower Threshold</span>
+          <span className="value low">{low}%</span>
+        </div>
+        <div className="kam-sr-range-label right">
+          <span className="label">Upper Threshold</span>
+          <span className="value high">{high}%</span>
+        </div>
+      </div>
+
+      <div className="kam-sr-range-track-wrapper" ref={trackRef}>
+        {/* Background track */}
+        <div className="kam-sr-range-track" />
+        {/* Colored zones */}
+        <div className="kam-sr-range-zone danger" style={{ left: 0, width: `${lowPct}%` }} />
+        <div className="kam-sr-range-zone ok" style={{ left: `${lowPct}%`, width: `${highPct - lowPct}%` }} />
+        <div className="kam-sr-range-zone optimal" style={{ left: `${highPct}%`, width: `${100 - highPct}%` }} />
+        {/* Invisible range inputs stacked */}
+        <input
+          type="range"
+          min={SR_MIN}
+          max={SR_MAX}
+          step={1}
+          value={low}
+          onChange={handleLow}
+          className="kam-sr-range-input low"
+        />
+        <input
+          type="range"
+          min={SR_MIN}
+          max={SR_MAX}
+          step={1}
+          value={high}
+          onChange={handleHigh}
+          className="kam-sr-range-input high"
+        />
+      </div>
+
+      <div className="kam-sr-range-scale">
+        <span>{SR_MIN}%</span>
+        <span>80%</span>
+        <span>90%</span>
+        <span>{SR_MAX}%</span>
+      </div>
+
+      <div className="kam-sr-range-legend">
+        <span className="kam-sr-range-legend-item danger">
+          <span className="dot" /> Below {low}% — de-prioritized
+        </span>
+        <span className="kam-sr-range-legend-item ok">
+          <span className="dot" /> {low}%–{high}% — eligible
+        </span>
+        <span className="kam-sr-range-legend-item optimal">
+          <span className="dot" /> Above {high}% — preferred
+        </span>
+      </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 export default function KAMMerchantDetail() {
@@ -503,8 +592,6 @@ export default function KAMMerchantDetail() {
   const navigate = useNavigate()
   const {
     getMerchantById,
-    changeRouting,
-    changeGateway,
     gateways,
     auditLog,
     addAuditEntry,
@@ -514,14 +601,6 @@ export default function KAMMerchantDetail() {
   } = useKAM()
 
   const merchant = getMerchantById(merchantId)
-
-  // ---- Doppler state ----
-  const [selectedModel, setSelectedModel] = useState(
-    merchant?.routingStrategy || 'success_rate'
-  )
-  const [threshold, setThreshold] = useState(-4.5)
-  const [reason, setReason] = useState('')
-  const [saving, setSaving] = useState(false)
 
   // ---- Terminal management state ----
   const [terminalSearch, setTerminalSearch] = useState('')
@@ -552,9 +631,6 @@ export default function KAMMerchantDetail() {
   // ---- Computed values ----
   const tspCompliance = useMemo(() => computeTSPCompliance(merchant), [merchant])
   const revenue = computeMerchantRevenue(merchant)
-  const projectedSavings = Math.abs(threshold) * 0.316
-  const hasModelChanged = selectedModel !== merchant.routingStrategy
-  const canSave = reason.trim().length > 0 && (hasModelChanged || selectedModel === 'cost_based')
 
   // Build terminal rows from gatewayMetrics
   const terminals = useMemo(() => {
@@ -654,35 +730,6 @@ export default function KAMMerchantDetail() {
     showToast(`Terminal ${confirmTerminal.terminalId} disabled`, 'info')
     setConfirmTerminal(null)
   }, [confirmTerminal, merchant.name, merchantId, addAuditEntry, showToast])
-
-  // ---- Save Doppler config ----
-  const handleSaveConfig = useCallback(() => {
-    if (!canSave) return
-    setSaving(true)
-    setTimeout(() => {
-      changeRouting(merchantId, selectedModel, reason)
-      if (selectedModel === 'cost_based') {
-        addAuditEntry(
-          `Set cost-delta threshold to ${threshold}% for ${merchant.name}`,
-          reason,
-          merchantId
-        )
-      }
-      setReason('')
-      setSaving(false)
-      showToast(`Routing configuration saved for ${merchant.name}`)
-    }, 400)
-  }, [
-    canSave,
-    changeRouting,
-    merchantId,
-    selectedModel,
-    reason,
-    threshold,
-    merchant.name,
-    addAuditEntry,
-    showToast,
-  ])
 
   // ---- Status & category badge helpers ----
   const statusBadgeClass = merchant.status === 'active' ? 'success' : 'warning'
@@ -969,159 +1016,16 @@ export default function KAMMerchantDetail() {
                 <line x1="12" y1="16" x2="12.01" y2="16" />
               </svg>
               <div>
-                Terminals with success rate below the threshold will be de-prioritized. Routing will pick the cheapest terminal above the threshold.
+                Terminals with SR below the <strong>lower threshold</strong> will be de-prioritized. Terminals above the <strong>upper threshold</strong> are preferred for routing. A minimum 10% gap is enforced.
               </div>
             </div>
-            <div className="kam-sr-threshold-control">
-              <div className="kam-sr-threshold-label">
-                <span className="label">SR Threshold</span>
-                <span className="value">{merchant.srThreshold || 92}%</span>
-              </div>
-              <input
-                type="range"
-                min="85"
-                max="98"
-                step="1"
-                value={merchant.srThreshold || 92}
-                onChange={(e) => updateSRThreshold(merchantId, Number(e.target.value))}
-                className="kam-sr-slider"
-              />
-              <div className="kam-sr-slider-range">
-                <span>85%</span>
-                <span>98%</span>
-              </div>
-            </div>
+            <SRRangeSlider
+              low={merchant.srThresholdLow ?? 85}
+              high={merchant.srThresholdHigh ?? 95}
+              onChange={(low, high) => updateSRThreshold(merchantId, low, high)}
+            />
           </>
         )}
-      </div>
-
-      {/* ── Doppler Routing Engine ───────────────────────────────── */}
-      <div className="kam-detail-section" id="doppler-section">
-        <div className="kam-detail-section-header">
-          <h3>
-            <LayersIcon style={{ display: 'inline', verticalAlign: '-3px', marginRight: 6 }} />
-            Doppler Routing Engine
-          </h3>
-          <span className="kam-badge info">
-            {merchant.routingStrategy === 'success_rate' ? 'SR Optimised' : 'Cost Optimised'}
-          </span>
-        </div>
-
-        <div className="kam-doppler-card">
-          {/* Model selection cards */}
-          <div className="kam-doppler-models">
-            <div
-              className={`kam-doppler-model${selectedModel === 'success_rate' ? ' active' : ''}`}
-              onClick={() => setSelectedModel('success_rate')}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => e.key === 'Enter' && setSelectedModel('success_rate')}
-            >
-              <div className="model-icon">
-                <LightningIcon />
-              </div>
-              <div className="model-name">SR Optimised</div>
-              <div className="model-desc">
-                Routes to gateways with the highest success rate. Maximises conversion.
-              </div>
-            </div>
-
-            <div
-              className={`kam-doppler-model${selectedModel === 'cost_based' ? ' active' : ''}`}
-              onClick={() => setSelectedModel('cost_based')}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => e.key === 'Enter' && setSelectedModel('cost_based')}
-            >
-              <div className="model-icon">
-                <DollarLargeIcon />
-              </div>
-              <div className="model-name">Cost Optimised</div>
-              <div className="model-desc">
-                Routes to the cheapest gateway. Reduces backward cost per transaction.
-              </div>
-            </div>
-          </div>
-
-          {/* Cost-Delta Threshold Slider (only for cost_based) */}
-          {selectedModel === 'cost_based' && (
-            <div className="kam-slider-container">
-              <div className="kam-slider-header">
-                <span className="label">Cost-Delta Threshold</span>
-                <span className="value">{threshold}%</span>
-              </div>
-
-              <div className="kam-slider">
-                <input
-                  type="range"
-                  min={-10}
-                  max={0}
-                  step={0.5}
-                  value={threshold}
-                  onChange={(e) => setThreshold(Number(e.target.value))}
-                />
-              </div>
-
-              <div className="kam-slider-labels">
-                <span className="red">-10%</span>
-                <span style={{ color: 'var(--rzp-text-muted)' }}>-5%</span>
-                <span className="green">0%</span>
-              </div>
-
-              <div className="kam-slider-values">
-                <div className="val-group">
-                  <span className="val-label">Current Threshold</span>
-                  <span className="val threshold">{threshold}%</span>
-                </div>
-                <div className="val-group">
-                  <span className="val-label">Projected Savings</span>
-                  <span className="val savings">{projectedSavings.toFixed(2)}%</span>
-                </div>
-              </div>
-
-              {threshold < -7 && (
-                <div className="kam-warning-box" style={{ marginTop: 12 }}>
-                  <WarningIcon />
-                  <span>
-                    Lower thresholds may route transactions through cheaper but less reliable
-                    terminals. Monitor success rates closely.
-                  </span>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Reason textarea */}
-          <div className="kam-form-group" style={{ marginTop: 16 }}>
-            <label>
-              Reason for change <span className="required">*</span>
-            </label>
-            <textarea
-              className="kam-reason-input"
-              placeholder="Describe why you are changing the routing configuration..."
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              rows={3}
-            />
-          </div>
-
-          {/* Save button */}
-          <button
-            className="kam-btn kam-btn-primary kam-btn-lg"
-            style={{ width: '100%', marginTop: 16 }}
-            disabled={!canSave || saving}
-            onClick={handleSaveConfig}
-          >
-            {saving ? (
-              <>Saving...</>
-            ) : (
-              <>
-                <SaveIcon />
-                Save Configuration
-              </>
-            )}
-          </button>
-        </div>
       </div>
 
       {/* ── Terminal Management ───────────────────────────────────── */}
