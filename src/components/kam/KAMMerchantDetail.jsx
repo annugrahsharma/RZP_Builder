@@ -213,10 +213,10 @@ const SR_COLORS = {
 }
 
 const METHOD_DISPLAY = {
-  CC: 'Credit Cards',
-  DC: 'Debit Cards',
+  CC: 'Credit',
+  DC: 'Debit',
   UPI: 'UPI',
-  NB: 'Net Banking',
+  NB: 'NB',
 }
 
 function SRLineChart({ srData }) {
@@ -352,7 +352,7 @@ function SRLineChart({ srData }) {
           <label className="kam-sr-method-item overall">
             <input type="checkbox" checked={selectedSeries.has('overall')} onChange={() => toggleSeries('overall')} />
             <span className="kam-sr-color-dot" style={{ background: SR_COLORS.overall }} />
-            <span className="kam-sr-method-label">All Methods</span>
+            <span className="kam-sr-method-label">All</span>
             <span className="kam-sr-method-value">{overall[overall.length - 1]}%</span>
           </label>
 
