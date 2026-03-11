@@ -1,12 +1,12 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useKAM } from '../../context/KAMContext'
-import { formatINR, formatNumber, computeMerchantRevenue } from '../../data/kamMockData'
+import { formatINR, formatNumber, computeMerchantRevenue, isTerminalZeroCost } from '../../data/kamMockData'
 
 const MONTH_LABELS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
 
 export default function KAMOverview() {
-  const { stats, targetData, allMerchants, monthlyHistory, selectedMonth, setSelectedMonth } = useKAM()
+  const { stats, zeroCostShare, targetData, allMerchants, monthlyHistory, selectedMonth, setSelectedMonth } = useKAM()
   const navigate = useNavigate()
   const [hoveredMonth, setHoveredMonth] = useState(null)
 
@@ -347,20 +347,22 @@ export default function KAMOverview() {
           </div>
         </div>
 
-        {/* 6. Backward Cost */}
+        {/* 6. 0-Cost Terminal Share */}
         <div className="kam-metric-card">
-          <div className="metric-icon" style={{ background: 'var(--rzp-danger-light)' }}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="var(--rzp-danger)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+          <div className="metric-icon" style={{ background: 'rgba(30, 166, 114, 0.12)' }}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#1EA672" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="2" y1="12" x2="22" y2="12" />
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
             </svg>
           </div>
-          <div className="metric-label">Backward Cost</div>
-          <div className="metric-value">{formatINR(stats.totalBackwardCost)}</div>
-          <div className="metric-delta negative">
+          <div className="metric-label">0-Cost Terminal Share</div>
+          <div className="metric-value">{zeroCostShare.toFixed(1)}%</div>
+          <div className="metric-delta positive">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="6 9 12 15 18 9" />
+              <polyline points="18 15 12 9 6 15" />
             </svg>
-            +3.1% vs last month
+            Txn volume on zero-cost terminals
           </div>
         </div>
       </div>
@@ -384,6 +386,7 @@ export default function KAMOverview() {
           <thead>
             <tr>
               <th>Merchant</th>
+              <th>Deal</th>
               <th>Routing</th>
               <th>Success Rate</th>
               <th>Backward Cost</th>
@@ -405,6 +408,29 @@ export default function KAMOverview() {
                   </div>
                 </td>
                 <td>
+                  {m.dealType === 'tsp' && (
+                    <span className="kam-badge deal-tsp">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                      </svg>
+                      TSP
+                    </span>
+                  )}
+                  {m.dealType === 'offer_linked' && (
+                    <span className="kam-badge deal-offer">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 12 20 22 4 22 4 12" />
+                        <rect x="2" y="7" width="20" height="5" />
+                        <line x1="12" y1="22" x2="12" y2="7" />
+                        <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z" />
+                        <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" />
+                      </svg>
+                      Offer
+                    </span>
+                  )}
+                </td>
+                <td>
                   <span className="kam-badge warning">Success Rate</span>
                 </td>
                 <td>{m.avgPaymentSuccessRate}%</td>
@@ -412,8 +438,20 @@ export default function KAMOverview() {
                   {formatINR(m.revenue.backwardCost)}
                 </td>
                 <td>{formatINR(m.revenue.netRevenue)}</td>
-                <td style={{ color: 'var(--rzp-success)', fontWeight: 600 }}>
-                  ~{formatINR(m.revenue.backwardCost * 0.25)}
+                <td>
+                  {(m.dealType === 'tsp' || m.dealType === 'offer_linked') ? (
+                    <span style={{ color: 'var(--rzp-text-muted)', fontSize: 12 }}>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: '-1px', marginRight: 3 }}>
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                      </svg>
+                      Locked
+                    </span>
+                  ) : (
+                    <span style={{ color: 'var(--rzp-success)', fontWeight: 600 }}>
+                      ~{formatINR(m.revenue.backwardCost * 0.25)}
+                    </span>
+                  )}
                 </td>
               </tr>
             ))}

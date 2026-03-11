@@ -6,6 +6,7 @@ import {
   computeAggregateStats,
   getMonthlyTargetData,
   generateMonthlyHistory,
+  computeZeroCostShare,
 } from '../data/kamMockData'
 
 const KAMContext = createContext(null)
@@ -20,6 +21,7 @@ export function KAMProvider({ children }) {
   const [sortField, setSortField] = useState('name')
   const [sortDirection, setSortDirection] = useState('asc')
   const [filterRouting, setFilterRouting] = useState('all')
+  const [filterDealType, setFilterDealType] = useState('all')
   const [filterStatus, setFilterStatus] = useState('all')
 
   // Selection
@@ -254,6 +256,11 @@ export function KAMProvider({ children }) {
       list = list.filter((m) => m.routingStrategy === filterRouting)
     }
 
+    // Filter deal type
+    if (filterDealType !== 'all') {
+      list = list.filter((m) => m.dealType === filterDealType)
+    }
+
     // Filter status
     if (filterStatus !== 'all') {
       list = list.filter((m) => m.status === filterStatus)
@@ -302,7 +309,7 @@ export function KAMProvider({ children }) {
     })
 
     return list
-  }, [merchants, searchQuery, sortField, sortDirection, filterRouting, filterStatus])
+  }, [merchants, searchQuery, sortField, sortDirection, filterRouting, filterDealType, filterStatus])
 
   const getMerchantById = useCallback(
     (id) => merchants.find((m) => m.id === id),
@@ -310,6 +317,7 @@ export function KAMProvider({ children }) {
   )
 
   const stats = useMemo(() => computeAggregateStats(merchants), [merchants])
+  const zeroCostShare = useMemo(() => computeZeroCostShare(merchants), [merchants])
   const targetData = useMemo(() => getMonthlyTargetData(merchants), [merchants])
   const monthlyHistory = useMemo(() => generateMonthlyHistory(merchants), [merchants])
   const [selectedMonth, setSelectedMonth] = useState(null)
@@ -330,6 +338,7 @@ export function KAMProvider({ children }) {
     merchants: getFilteredSortedMerchants,
     allMerchants: merchants,
     stats,
+    zeroCostShare,
     targetData,
     monthlyHistory,
     selectedMonth,
@@ -341,6 +350,8 @@ export function KAMProvider({ children }) {
     toggleSort,
     filterRouting,
     setFilterRouting,
+    filterDealType,
+    setFilterDealType,
     filterStatus,
     setFilterStatus,
     selectedIds,

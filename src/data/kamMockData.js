@@ -9,8 +9,8 @@ export const gateways = [
     name: 'HDFC Bank',
     shortName: 'HDFC',
     terminals: [
-      { id: 'term-hdfc-001', terminalId: 'HDFC_T1', successRate: 96.2, costPerTxn: 1.80 },
-      { id: 'term-hdfc-002', terminalId: 'HDFC_T2', successRate: 94.8, costPerTxn: 1.65 },
+      { id: 'term-hdfc-001', terminalId: 'HDFC_T1', successRate: 96.2, costPerTxn: 1.80, isZeroCost: false },
+      { id: 'term-hdfc-002', terminalId: 'HDFC_T2', successRate: 94.8, costPerTxn: 0, isZeroCost: true },
     ],
   },
   {
@@ -18,8 +18,8 @@ export const gateways = [
     name: 'ICICI Bank',
     shortName: 'ICICI',
     terminals: [
-      { id: 'term-icici-001', terminalId: 'ICICI_T1', successRate: 95.1, costPerTxn: 1.70 },
-      { id: 'term-icici-002', terminalId: 'ICICI_T2', successRate: 93.4, costPerTxn: 1.45 },
+      { id: 'term-icici-001', terminalId: 'ICICI_T1', successRate: 95.1, costPerTxn: 1.70, isZeroCost: false },
+      { id: 'term-icici-002', terminalId: 'ICICI_T2', successRate: 93.4, costPerTxn: 1.45, isZeroCost: false },
     ],
   },
   {
@@ -27,8 +27,8 @@ export const gateways = [
     name: 'Axis Bank',
     shortName: 'Axis',
     terminals: [
-      { id: 'term-axis-001', terminalId: 'AXIS_T1', successRate: 93.8, costPerTxn: 1.50 },
-      { id: 'term-axis-002', terminalId: 'AXIS_T2', successRate: 91.5, costPerTxn: 1.25 },
+      { id: 'term-axis-001', terminalId: 'AXIS_T1', successRate: 93.8, costPerTxn: 1.50, isZeroCost: false },
+      { id: 'term-axis-002', terminalId: 'AXIS_T2', successRate: 91.5, costPerTxn: 0, isZeroCost: true },
     ],
   },
   {
@@ -36,8 +36,8 @@ export const gateways = [
     name: 'RBL Bank',
     shortName: 'RBL',
     terminals: [
-      { id: 'term-rbl-001', terminalId: 'RBL_T1', successRate: 90.3, costPerTxn: 1.10 },
-      { id: 'term-rbl-002', terminalId: 'RBL_T2', successRate: 88.9, costPerTxn: 0.95 },
+      { id: 'term-rbl-001', terminalId: 'RBL_T1', successRate: 90.3, costPerTxn: 1.10, isZeroCost: false },
+      { id: 'term-rbl-002', terminalId: 'RBL_T2', successRate: 88.9, costPerTxn: 0.95, isZeroCost: false },
     ],
   },
   {
@@ -45,8 +45,8 @@ export const gateways = [
     name: 'Yes Bank',
     shortName: 'Yes',
     terminals: [
-      { id: 'term-yes-001', terminalId: 'YES_T1', successRate: 89.7, costPerTxn: 0.95 },
-      { id: 'term-yes-002', terminalId: 'YES_T2', successRate: 88.2, costPerTxn: 0.85 },
+      { id: 'term-yes-001', terminalId: 'YES_T1', successRate: 89.7, costPerTxn: 0, isZeroCost: true },
+      { id: 'term-yes-002', terminalId: 'YES_T2', successRate: 88.2, costPerTxn: 0.85, isZeroCost: false },
     ],
   },
 ]
@@ -58,6 +58,10 @@ export const merchants = [
     name: 'Zomato',
     mid: 'MID_ZOM_001',
     category: 'Food & Delivery',
+    mcc: '5812',
+    mccLabel: 'Restaurants',
+    dealType: 'standard',
+    dealDetails: null,
     monthlyTxnVolume: 1250000,
     monthlyGMV: 437500000,
     avgPaymentSuccessRate: 95.8,
@@ -66,7 +70,8 @@ export const merchants = [
     currentTerminalId: 'term-hdfc-001',
     routingStrategy: 'success_rate',
     gatewayMetrics: [
-      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 96.2, costPerTxn: 1.80, txnShare: 65 },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 96.2, costPerTxn: 1.80, txnShare: 45 },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 94.8, costPerTxn: 0, txnShare: 20 },
       { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 95.1, costPerTxn: 1.70, txnShare: 25 },
       { gatewayId: 'gw-axis', terminalId: 'term-axis-001', successRate: 93.8, costPerTxn: 1.50, txnShare: 10 },
     ],
@@ -79,6 +84,16 @@ export const merchants = [
     name: 'Swiggy',
     mid: 'MID_SWG_002',
     category: 'Food & Delivery',
+    mcc: '5812',
+    mccLabel: 'Restaurants',
+    dealType: 'tsp',
+    dealDetails: {
+      description: 'HDFC has given special CC rates for Swiggy based on combined CC+UPI acquiring volume.',
+      constraint: 'Min 70% traffic via HDFC terminals',
+      expiresAt: 'Sep 2026',
+      contact: 'pranavn.rattan@razorpay.com',
+      lockedGatewayId: 'gw-hdfc',
+    },
     monthlyTxnVolume: 1100000,
     monthlyGMV: 385000000,
     avgPaymentSuccessRate: 94.5,
@@ -99,6 +114,10 @@ export const merchants = [
     name: 'CRED',
     mid: 'MID_CRD_003',
     category: 'Fintech',
+    mcc: '6012',
+    mccLabel: 'Financial Institutions',
+    dealType: 'standard',
+    dealDetails: null,
     monthlyTxnVolume: 850000,
     monthlyGMV: 620000000,
     avgPaymentSuccessRate: 97.1,
@@ -107,7 +126,8 @@ export const merchants = [
     currentTerminalId: 'term-hdfc-001',
     routingStrategy: 'success_rate',
     gatewayMetrics: [
-      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 96.2, costPerTxn: 1.80, txnShare: 80 },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 96.2, costPerTxn: 1.80, txnShare: 60 },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 94.8, costPerTxn: 0, txnShare: 20 },
       { gatewayId: 'gw-axis', terminalId: 'term-axis-001', successRate: 93.8, costPerTxn: 1.50, txnShare: 20 },
     ],
     status: 'active',
@@ -119,6 +139,10 @@ export const merchants = [
     name: 'Flipkart',
     mid: 'MID_FLK_004',
     category: 'E-commerce',
+    mcc: '5311',
+    mccLabel: 'Department Stores',
+    dealType: 'standard',
+    dealDetails: null,
     monthlyTxnVolume: 2200000,
     monthlyGMV: 1320000000,
     avgPaymentSuccessRate: 94.2,
@@ -128,7 +152,7 @@ export const merchants = [
     routingStrategy: 'success_rate',
     gatewayMetrics: [
       { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 95.1, costPerTxn: 1.70, txnShare: 50 },
-      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 94.8, costPerTxn: 1.65, txnShare: 30 },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 94.8, costPerTxn: 0, txnShare: 30 },
       { gatewayId: 'gw-axis', terminalId: 'term-axis-001', successRate: 93.8, costPerTxn: 1.50, txnShare: 20 },
     ],
     status: 'active',
@@ -140,6 +164,10 @@ export const merchants = [
     name: 'BigBasket',
     mid: 'MID_BBK_005',
     category: 'Grocery',
+    mcc: '5411',
+    mccLabel: 'Grocery Stores',
+    dealType: 'standard',
+    dealDetails: null,
     monthlyTxnVolume: 680000,
     monthlyGMV: 238000000,
     avgPaymentSuccessRate: 93.1,
@@ -160,6 +188,16 @@ export const merchants = [
     name: 'Myntra',
     mid: 'MID_MYN_006',
     category: 'Fashion',
+    mcc: '5651',
+    mccLabel: 'Clothing Stores',
+    dealType: 'tsp',
+    dealDetails: {
+      description: 'HDFC has given special CC+DC rates for Myntra based on acquiring volume commitment via Midsign.',
+      constraint: 'Min 65% traffic via HDFC Midsign',
+      expiresAt: 'Jun 2026',
+      contact: 'pranavn.rattan@razorpay.com',
+      lockedGatewayId: 'gw-hdfc',
+    },
     monthlyTxnVolume: 920000,
     monthlyGMV: 350000000,
     avgPaymentSuccessRate: 92.8,
@@ -180,6 +218,16 @@ export const merchants = [
     name: 'BookMyShow',
     mid: 'MID_BMS_007',
     category: 'Entertainment',
+    mcc: '7922',
+    mccLabel: 'Entertainment',
+    dealType: 'offer_linked',
+    dealDetails: {
+      description: 'HDFC 10% cashback offer on CC for BookMyShow movie tickets. Requires routing via HDFC terminal.',
+      constraint: 'Offer traffic must route via HDFC_T1',
+      expiresAt: 'Apr 2026',
+      contact: 'simran.ranka@razorpay.com',
+      lockedGatewayId: 'gw-hdfc',
+    },
     monthlyTxnVolume: 450000,
     monthlyGMV: 180000000,
     avgPaymentSuccessRate: 96.3,
@@ -189,7 +237,7 @@ export const merchants = [
     routingStrategy: 'success_rate',
     gatewayMetrics: [
       { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 96.2, costPerTxn: 1.80, txnShare: 75 },
-      { gatewayId: 'gw-yes', terminalId: 'term-yes-001', successRate: 89.7, costPerTxn: 0.95, txnShare: 25 },
+      { gatewayId: 'gw-yes', terminalId: 'term-yes-001', successRate: 89.7, costPerTxn: 0, txnShare: 25 },
     ],
     status: 'active',
     contactName: 'Ashish Hemrajani',
@@ -200,6 +248,16 @@ export const merchants = [
     name: 'MakeMyTrip',
     mid: 'MID_MMT_008',
     category: 'Travel',
+    mcc: '4722',
+    mccLabel: 'Travel Agencies',
+    dealType: 'offer_linked',
+    dealDetails: {
+      description: 'Axis Bank EMI offer for travel bookings above 10K. Transaction must route via Axis terminal.',
+      constraint: 'EMI bookings must route via AXIS_T1',
+      expiresAt: 'May 2026',
+      contact: 'simran.ranka@razorpay.com',
+      lockedGatewayId: 'gw-axis',
+    },
     monthlyTxnVolume: 380000,
     monthlyGMV: 850000000,
     avgPaymentSuccessRate: 95.5,
@@ -208,7 +266,7 @@ export const merchants = [
     currentTerminalId: 'term-hdfc-002',
     routingStrategy: 'success_rate',
     gatewayMetrics: [
-      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 94.8, costPerTxn: 1.65, txnShare: 60 },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 94.8, costPerTxn: 0, txnShare: 60 },
       { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 95.1, costPerTxn: 1.70, txnShare: 40 },
     ],
     status: 'active',
@@ -220,6 +278,10 @@ export const merchants = [
     name: 'Nykaa',
     mid: 'MID_NYK_009',
     category: 'Beauty',
+    mcc: '5977',
+    mccLabel: 'Cosmetic Stores',
+    dealType: 'standard',
+    dealDetails: null,
     monthlyTxnVolume: 520000,
     monthlyGMV: 150000000,
     avgPaymentSuccessRate: 91.7,
@@ -240,6 +302,10 @@ export const merchants = [
     name: 'Urban Company',
     mid: 'MID_URC_010',
     category: 'Services',
+    mcc: '7299',
+    mccLabel: 'Miscellaneous Services',
+    dealType: 'standard',
+    dealDetails: null,
     monthlyTxnVolume: 310000,
     monthlyGMV: 85000000,
     avgPaymentSuccessRate: 90.4,
@@ -248,8 +314,8 @@ export const merchants = [
     currentTerminalId: 'term-axis-002',
     routingStrategy: 'cost_based',
     gatewayMetrics: [
-      { gatewayId: 'gw-axis', terminalId: 'term-axis-002', successRate: 91.5, costPerTxn: 1.25, txnShare: 60 },
-      { gatewayId: 'gw-yes', terminalId: 'term-yes-001', successRate: 89.7, costPerTxn: 0.95, txnShare: 40 },
+      { gatewayId: 'gw-axis', terminalId: 'term-axis-002', successRate: 91.5, costPerTxn: 0, txnShare: 60 },
+      { gatewayId: 'gw-yes', terminalId: 'term-yes-001', successRate: 89.7, costPerTxn: 0, txnShare: 40 },
     ],
     status: 'active',
     contactName: 'Abhiraj Bhal',
@@ -260,6 +326,10 @@ export const merchants = [
     name: 'Zepto',
     mid: 'MID_ZPT_011',
     category: 'Quick Commerce',
+    mcc: '5411',
+    mccLabel: 'Grocery Stores',
+    dealType: 'standard',
+    dealDetails: null,
     monthlyTxnVolume: 780000,
     monthlyGMV: 195000000,
     avgPaymentSuccessRate: 93.9,
@@ -268,9 +338,10 @@ export const merchants = [
     currentTerminalId: 'term-hdfc-001',
     routingStrategy: 'success_rate',
     gatewayMetrics: [
-      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 96.2, costPerTxn: 1.80, txnShare: 55 },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 96.2, costPerTxn: 1.80, txnShare: 40 },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 94.8, costPerTxn: 0, txnShare: 15 },
       { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 95.1, costPerTxn: 1.70, txnShare: 30 },
-      { gatewayId: 'gw-yes', terminalId: 'term-yes-002', successRate: 88.2, costPerTxn: 0.85, txnShare: 15 },
+      { gatewayId: 'gw-yes', terminalId: 'term-yes-001', successRate: 89.7, costPerTxn: 0, txnShare: 15 },
     ],
     status: 'active',
     contactName: 'Aadit Palicha',
@@ -281,6 +352,10 @@ export const merchants = [
     name: 'Ola',
     mid: 'MID_OLA_012',
     category: 'Mobility',
+    mcc: '4121',
+    mccLabel: 'Taxicabs & Rideshare',
+    dealType: 'standard',
+    dealDetails: null,
     monthlyTxnVolume: 1500000,
     monthlyGMV: 280000000,
     avgPaymentSuccessRate: 92.1,
@@ -302,6 +377,10 @@ export const merchants = [
     name: 'PhonePe',
     mid: 'MID_PPE_013',
     category: 'Fintech',
+    mcc: '6012',
+    mccLabel: 'Financial Institutions',
+    dealType: 'standard',
+    dealDetails: null,
     monthlyTxnVolume: 3200000,
     monthlyGMV: 960000000,
     avgPaymentSuccessRate: 96.8,
@@ -310,9 +389,10 @@ export const merchants = [
     currentTerminalId: 'term-hdfc-001',
     routingStrategy: 'success_rate',
     gatewayMetrics: [
-      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 96.2, costPerTxn: 1.80, txnShare: 50 },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 96.2, costPerTxn: 1.80, txnShare: 35 },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 94.8, costPerTxn: 0, txnShare: 15 },
       { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 95.1, costPerTxn: 1.70, txnShare: 35 },
-      { gatewayId: 'gw-axis', terminalId: 'term-axis-002', successRate: 91.5, costPerTxn: 1.25, txnShare: 15 },
+      { gatewayId: 'gw-axis', terminalId: 'term-axis-002', successRate: 91.5, costPerTxn: 0, txnShare: 15 },
     ],
     status: 'active',
     contactName: 'Sameer Nigam',
@@ -323,6 +403,10 @@ export const merchants = [
     name: 'Paytm Mall',
     mid: 'MID_PTM_014',
     category: 'E-commerce',
+    mcc: '5311',
+    mccLabel: 'Department Stores',
+    dealType: 'standard',
+    dealDetails: null,
     monthlyTxnVolume: 420000,
     monthlyGMV: 120000000,
     avgPaymentSuccessRate: 89.6,
@@ -332,7 +416,7 @@ export const merchants = [
     routingStrategy: 'cost_based',
     gatewayMetrics: [
       { gatewayId: 'gw-rbl', terminalId: 'term-rbl-001', successRate: 90.3, costPerTxn: 1.10, txnShare: 70 },
-      { gatewayId: 'gw-yes', terminalId: 'term-yes-002', successRate: 88.2, costPerTxn: 0.85, txnShare: 30 },
+      { gatewayId: 'gw-yes', terminalId: 'term-yes-001', successRate: 89.7, costPerTxn: 0, txnShare: 30 },
     ],
     status: 'active',
     contactName: 'Vijay Shekhar',
@@ -343,6 +427,10 @@ export const merchants = [
     name: '1mg',
     mid: 'MID_1MG_015',
     category: 'Healthcare',
+    mcc: '5912',
+    mccLabel: 'Drug Stores & Pharmacies',
+    dealType: 'standard',
+    dealDetails: null,
     monthlyTxnVolume: 290000,
     monthlyGMV: 75000000,
     avgPaymentSuccessRate: 91.2,
@@ -351,7 +439,7 @@ export const merchants = [
     currentTerminalId: 'term-yes-001',
     routingStrategy: 'cost_based',
     gatewayMetrics: [
-      { gatewayId: 'gw-yes', terminalId: 'term-yes-001', successRate: 89.7, costPerTxn: 0.95, txnShare: 60 },
+      { gatewayId: 'gw-yes', terminalId: 'term-yes-001', successRate: 89.7, costPerTxn: 0, txnShare: 60 },
       { gatewayId: 'gw-rbl', terminalId: 'term-rbl-002', successRate: 88.9, costPerTxn: 0.95, txnShare: 40 },
     ],
     status: 'active',
@@ -434,6 +522,33 @@ export function computeAggregateStats(merchantList) {
     totalForwardRevenue,
     avgCostPerTxn: Number(avgCostPerTxn.toFixed(2)),
   }
+}
+
+export function computeZeroCostShare(merchantList) {
+  let totalTxn = 0
+  let zeroCostTxn = 0
+  merchantList.forEach((m) => {
+    const vol = m.monthlyTxnVolume
+    m.gatewayMetrics.forEach((gm) => {
+      const share = vol * (gm.txnShare / 100)
+      totalTxn += share
+      // Find if this terminal is zero-cost
+      const gw = gateways.find((g) => g.id === gm.gatewayId)
+      const term = gw?.terminals.find((t) => t.id === gm.terminalId)
+      if (term?.isZeroCost) {
+        zeroCostTxn += share
+      }
+    })
+  })
+  return totalTxn > 0 ? Number(((zeroCostTxn / totalTxn) * 100).toFixed(1)) : 0
+}
+
+export function isTerminalZeroCost(terminalId) {
+  for (const gw of gateways) {
+    const term = gw.terminals.find((t) => t.id === terminalId)
+    if (term) return term.isZeroCost || false
+  }
+  return false
 }
 
 export function formatINR(amount) {

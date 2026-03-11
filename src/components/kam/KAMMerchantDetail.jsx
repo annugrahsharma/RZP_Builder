@@ -6,6 +6,7 @@ import {
   formatNumber,
   computeMerchantRevenue,
   routingStrategies,
+  isTerminalZeroCost,
 } from '../../data/kamMockData'
 
 // ---------------------------------------------------------------------------
@@ -209,6 +210,7 @@ export default function KAMMerchantDetail() {
   const [terminalSearch, setTerminalSearch] = useState('')
   const [terminalStates, setTerminalStates] = useState({})
   const [confirmTerminal, setConfirmTerminal] = useState(null)
+  const [showDealWarning, setShowDealWarning] = useState(false)
 
   // ---- Guard ----
   if (!merchant) {
@@ -361,9 +363,35 @@ export default function KAMMerchantDetail() {
             <span className="mid">{merchant.mid}</span>
             <span className="kam-badge neutral">{merchant.category}</span>
             <span className={`kam-badge ${statusBadgeClass}`}>{statusLabel}</span>
+            {merchant.dealType === 'tsp' && (
+              <span className="kam-badge deal-tsp">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+                TSP
+              </span>
+            )}
+            {merchant.dealType === 'offer_linked' && (
+              <span className="kam-badge deal-offer">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 12 20 22 4 22 4 12" />
+                  <rect x="2" y="7" width="20" height="5" />
+                  <line x1="12" y1="22" x2="12" y2="7" />
+                  <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z" />
+                  <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" />
+                </svg>
+                Offer
+              </span>
+            )}
           </div>
           <div style={{ marginTop: 6, fontSize: 13, color: 'var(--rzp-text-secondary)', fontFamily: 'var(--font-secondary)' }}>
             {merchant.contactName} &middot; {merchant.contactEmail}
+            {merchant.mcc && (
+              <span style={{ marginLeft: 12, color: 'var(--rzp-text-muted)' }}>
+                &middot; MCC {merchant.mcc} &middot; {merchant.mccLabel}
+              </span>
+            )}
           </div>
         </div>
         <div className="kam-detail-actions">
@@ -380,8 +408,12 @@ export default function KAMMerchantDetail() {
           <button
             className="kam-btn kam-btn-secondary"
             onClick={() => {
-              const el = document.getElementById('terminal-section')
-              el?.scrollIntoView({ behavior: 'smooth' })
+              if (merchant.dealType === 'tsp' || merchant.dealType === 'offer_linked') {
+                setShowDealWarning(true)
+              } else {
+                const el = document.getElementById('terminal-section')
+                el?.scrollIntoView({ behavior: 'smooth' })
+              }
             }}
           >
             <ServerIcon />
@@ -389,6 +421,72 @@ export default function KAMMerchantDetail() {
           </button>
         </div>
       </div>
+
+      {/* ── Deal Constraint Banner ────────────────────────────────── */}
+      {merchant.dealType === 'tsp' && merchant.dealDetails && (
+        <div className="kam-deal-banner tsp">
+          <div className="kam-deal-banner-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#E65100" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+          </div>
+          <div className="kam-deal-banner-content">
+            <div className="kam-deal-banner-title">
+              TSP Deal Active
+              <span className="kam-badge deal-tsp" style={{ fontSize: 10, padding: '1px 6px' }}>Routing Locked</span>
+            </div>
+            <div className="kam-deal-banner-desc">{merchant.dealDetails.description}</div>
+            {merchant.dealDetails.constraint && (
+              <div className="kam-deal-banner-desc" style={{ fontWeight: 600, color: 'var(--rzp-text-primary)', marginBottom: 4 }}>
+                Constraint: {merchant.dealDetails.constraint}
+              </div>
+            )}
+            <div className="kam-deal-banner-meta">
+              {merchant.dealDetails.expiresAt && (
+                <span>Expires: <strong>{merchant.dealDetails.expiresAt}</strong></span>
+              )}
+              {merchant.dealDetails.contact && (
+                <span>Contact: <a href={`mailto:${merchant.dealDetails.contact}`}>{merchant.dealDetails.contact}</a></span>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {merchant.dealType === 'offer_linked' && merchant.dealDetails && (
+        <div className="kam-deal-banner offer">
+          <div className="kam-deal-banner-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#7B1FA2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 12 20 22 4 22 4 12" />
+              <rect x="2" y="7" width="20" height="5" />
+              <line x1="12" y1="22" x2="12" y2="7" />
+              <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z" />
+              <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" />
+            </svg>
+          </div>
+          <div className="kam-deal-banner-content">
+            <div className="kam-deal-banner-title">
+              Offer-Linked Deal
+              <span className="kam-badge deal-offer" style={{ fontSize: 10, padding: '1px 6px' }}>Active</span>
+            </div>
+            <div className="kam-deal-banner-desc">{merchant.dealDetails.description}</div>
+            {merchant.dealDetails.constraint && (
+              <div className="kam-deal-banner-desc" style={{ fontWeight: 600, color: 'var(--rzp-text-primary)', marginBottom: 4 }}>
+                Constraint: {merchant.dealDetails.constraint}
+              </div>
+            )}
+            <div className="kam-deal-banner-meta">
+              {merchant.dealDetails.expiresAt && (
+                <span>Expires: <strong>{merchant.dealDetails.expiresAt}</strong></span>
+              )}
+              {merchant.dealDetails.contact && (
+                <span>Contact: <a href={`mailto:${merchant.dealDetails.contact}`}>{merchant.dealDetails.contact}</a></span>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Metric Cards (3x2) ───────────────────────────────────── */}
       <div className="kam-detail-metrics">
@@ -662,6 +760,9 @@ export default function KAMMerchantDetail() {
                         </td>
                         <td style={{ fontFamily: 'monospace', fontSize: 13 }}>
                           {'\u20B9'}{t.costPerTxn.toFixed(2)}
+                          {isTerminalZeroCost(t.internalTermId) && (
+                            <span className="kam-zero-cost-tag">0-Cost</span>
+                          )}
                         </td>
                         <td>
                           <button
@@ -749,6 +850,57 @@ export default function KAMMerchantDetail() {
               </button>
               <button className="kam-btn kam-btn-danger" onClick={confirmDisableTerminal}>
                 Confirm Disable
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Deal Warning Modal ─────────────────────────────────────── */}
+      {showDealWarning && (
+        <div className="kam-modal-overlay" onClick={() => setShowDealWarning(false)}>
+          <div className="kam-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 480 }}>
+            <div className="kam-modal-header">
+              <div>
+                <h3>Gateway Change Warning</h3>
+                <p>{merchant.name}</p>
+              </div>
+              <button className="kam-modal-close" onClick={() => setShowDealWarning(false)}>
+                <XIcon />
+              </button>
+            </div>
+            <div className="kam-modal-body">
+              <div className="kam-warning-box" style={{ marginBottom: 16 }}>
+                <WarningIcon />
+                <span>
+                  This merchant has an active <strong>{merchant.dealType === 'tsp' ? 'TSP deal' : 'offer-linked deal'}</strong>.
+                  Changing the primary gateway may void negotiated rates or break offer routing constraints.
+                </span>
+              </div>
+              {merchant.dealDetails?.constraint && (
+                <p style={{ fontSize: 13, fontFamily: 'var(--font-secondary)', color: 'var(--rzp-text-secondary)', lineHeight: 1.5, marginBottom: 8 }}>
+                  <strong>Current constraint:</strong> {merchant.dealDetails.constraint}
+                </p>
+              )}
+              {merchant.dealDetails?.contact && (
+                <p style={{ fontSize: 13, fontFamily: 'var(--font-secondary)', color: 'var(--rzp-text-secondary)', lineHeight: 1.5 }}>
+                  Please contact <a href={`mailto:${merchant.dealDetails.contact}`} style={{ color: 'var(--rzp-blue)' }}>{merchant.dealDetails.contact}</a> before making changes.
+                </p>
+              )}
+            </div>
+            <div className="kam-modal-footer">
+              <button className="kam-btn kam-btn-secondary" onClick={() => setShowDealWarning(false)}>
+                Cancel
+              </button>
+              <button
+                className="kam-btn kam-btn-danger"
+                onClick={() => {
+                  setShowDealWarning(false)
+                  const el = document.getElementById('terminal-section')
+                  el?.scrollIntoView({ behavior: 'smooth' })
+                }}
+              >
+                Proceed Anyway
               </button>
             </div>
           </div>
