@@ -2701,19 +2701,69 @@ function RulesTabContent({
                 <label>{ruleForm.type === 'conditional' ? 'Route to Terminals (priority order)' : 'Split Percentages'}</label>
                 {ruleForm.type === 'conditional' ? (
                   <div className="kam-rule-builder-terminals">
-                    {availableTerminals.map(t => (
-                      <div
-                        key={t.terminalId}
-                        className={`kam-rule-terminal-option${ruleForm.terminals.includes(t.terminalId) ? ' selected' : ''}`}
-                        onClick={() => toggleTerminal(t.terminalId)}
-                      >
-                        <span className="kam-rule-terminal-check">{ruleForm.terminals.includes(t.terminalId) ? '✓' : ''}</span>
-                        <span className="kam-rule-terminal-id">{t.displayId}</span>
-                        <span className="kam-rule-terminal-gw">{t.gatewayShort}</span>
-                        <span className="kam-rule-terminal-sr">SR {t.successRate}%</span>
-                        <span className="kam-rule-terminal-cost">₹{t.costPerTxn.toFixed(2)}</span>
+                    {/* Selected terminals — ranked list */}
+                    {ruleForm.terminals.length > 0 && (
+                      <div className="kam-rule-builder-ranked-list">
+                        {ruleForm.terminals.map((tid, idx) => {
+                          const t = availableTerminals.find(at => at.terminalId === tid)
+                          return (
+                            <div key={tid} className="kam-rule-ranked-item">
+                              <span className="kam-rule-ranked-pos">{idx + 1}</span>
+                              <span className="kam-rule-terminal-id">{t?.displayId || tid}</span>
+                              <span className="kam-rule-terminal-gw">{t?.gatewayShort || '??'}</span>
+                              <span className="kam-rule-terminal-sr">SR {t?.successRate || '?'}%</span>
+                              <span className="kam-rule-terminal-cost">₹{t?.costPerTxn?.toFixed(2) || '?'}</span>
+                              <div className="kam-rule-ranked-controls">
+                                <button
+                                  className="kam-rule-move-btn"
+                                  disabled={idx === 0}
+                                  onClick={() => setRuleForm(prev => {
+                                    const arr = [...prev.terminals]
+                                    ;[arr[idx - 1], arr[idx]] = [arr[idx], arr[idx - 1]]
+                                    return { ...prev, terminals: arr }
+                                  })}
+                                  title="Move up"
+                                >↑</button>
+                                <button
+                                  className="kam-rule-move-btn"
+                                  disabled={idx === ruleForm.terminals.length - 1}
+                                  onClick={() => setRuleForm(prev => {
+                                    const arr = [...prev.terminals]
+                                    ;[arr[idx], arr[idx + 1]] = [arr[idx + 1], arr[idx]]
+                                    return { ...prev, terminals: arr }
+                                  })}
+                                  title="Move down"
+                                >↓</button>
+                                <button
+                                  className="kam-rule-builder-remove-btn"
+                                  onClick={() => toggleTerminal(tid)}
+                                  title="Remove"
+                                >×</button>
+                              </div>
+                            </div>
+                          )
+                        })}
                       </div>
-                    ))}
+                    )}
+                    {/* Unselected terminals — add buttons */}
+                    {availableTerminals.filter(t => !ruleForm.terminals.includes(t.terminalId)).length > 0 && (
+                      <div className="kam-rule-builder-add-terminals">
+                        {availableTerminals
+                          .filter(t => !ruleForm.terminals.includes(t.terminalId))
+                          .map(t => (
+                            <button
+                              key={t.terminalId}
+                              className="kam-rule-add-terminal-btn"
+                              onClick={() => toggleTerminal(t.terminalId)}
+                            >
+                              + {t.displayId} <span className="muted">({t.gatewayShort})</span>
+                            </button>
+                          ))}
+                      </div>
+                    )}
+                    {ruleForm.terminals.length === 0 && (
+                      <p className="kam-rule-builder-hint">Click a terminal below to add it to the route. First terminal is highest priority.</p>
+                    )}
                   </div>
                 ) : (
                   <div className="kam-rule-builder-splits">

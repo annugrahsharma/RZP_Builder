@@ -2928,49 +2928,96 @@
 .kam-rule-builder-terminals {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
-.kam-rule-terminal-option {
+/* Ranked list — selected terminals with priority ordering */
+.kam-rule-builder-ranked-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.kam-rule-ranked-item {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 12px;
-  border: 1px solid var(--rzp-border);
+  padding: 8px 12px;
+  border: 1px solid var(--rzp-blue);
   border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.15s ease;
+  background: rgba(82, 143, 240, 0.04);
   font-family: var(--font-secondary);
   font-size: 13px;
 }
 
-.kam-rule-terminal-option:hover {
-  border-color: var(--rzp-blue);
-}
-
-.kam-rule-terminal-option.selected {
-  border-color: var(--rzp-blue);
-  background: rgba(82, 143, 240, 0.05);
-}
-
-.kam-rule-terminal-check {
-  width: 20px;
-  height: 20px;
-  border: 2px solid var(--rzp-border);
-  border-radius: 4px;
+.kam-rule-ranked-pos {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--rzp-blue);
+  color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 700;
-  color: var(--rzp-blue);
   flex-shrink: 0;
+  font-family: var(--font-primary);
 }
 
-.kam-rule-terminal-option.selected .kam-rule-terminal-check {
+.kam-rule-ranked-controls {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.kam-rule-ranked-controls .kam-rule-move-btn {
+  width: 24px;
+  height: 24px;
+  font-size: 12px;
+}
+
+.kam-rule-ranked-controls .kam-rule-builder-remove-btn {
+  margin-left: 4px;
+}
+
+/* Add terminal buttons — unselected terminals */
+.kam-rule-builder-add-terminals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-top: 4px;
+}
+
+.kam-rule-add-terminal-btn {
+  padding: 6px 12px;
+  border: 1px dashed var(--rzp-border);
+  border-radius: 6px;
+  background: none;
+  cursor: pointer;
+  font-family: var(--font-secondary);
+  font-size: 12px;
+  color: var(--rzp-text-secondary);
+  transition: all 0.15s ease;
+}
+
+.kam-rule-add-terminal-btn:hover {
   border-color: var(--rzp-blue);
-  background: var(--rzp-blue);
-  color: #fff;
+  color: var(--rzp-blue);
+  background: rgba(82, 143, 240, 0.04);
+}
+
+.kam-rule-add-terminal-btn .muted {
+  color: var(--rzp-text-muted);
+  font-size: 11px;
+}
+
+.kam-rule-builder-hint {
+  font-size: 12px;
+  color: var(--rzp-text-muted);
+  font-family: var(--font-secondary);
+  margin: 0 0 4px 0;
 }
 
 .kam-rule-terminal-id {
