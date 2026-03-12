@@ -845,7 +845,7 @@ export default function KAMMerchantDetail() {
   const [simForm, setSimForm] = useState({ payment_method: 'CC', card_network: 'Visa', card_type: 'credit', issuer_bank: 'HDFC', amount: 5000 })
   const [simResult, setSimResult] = useState(null)
   // Rule builder form state
-  const [ruleForm, setRuleForm] = useState({ name: '', type: 'conditional', conditions: [], conditionLogic: 'AND', terminals: [], splits: [] })
+  const [ruleForm, setRuleForm] = useState({ name: '', type: 'conditional', conditions: [], conditionLogic: 'AND', terminals: [], splits: [], srThreshold: 90, minPaymentCount: 100 })
 
   // ---- Guard ----
   if (!merchant) {
@@ -2089,10 +2089,12 @@ function RulesTabContent({
         conditionLogic: rule.conditionLogic,
         terminals: rule.action.type === 'route' ? [...rule.action.terminals] : [],
         splits: rule.action.type === 'split' ? rule.action.splits.map(s => ({ ...s })) : [],
+        srThreshold: rule.action.srThreshold || 90,
+        minPaymentCount: rule.action.minPaymentCount || 100,
       })
     } else {
       setEditingRule(null)
-      setRuleForm({ name: '', type: 'conditional', conditions: [], conditionLogic: 'AND', terminals: [], splits: [] })
+      setRuleForm({ name: '', type: 'conditional', conditions: [], conditionLogic: 'AND', terminals: [], splits: [], srThreshold: 90, minPaymentCount: 100 })
     }
     setShowRuleBuilder(true)
   }, [setEditingRule, setRuleForm, setShowRuleBuilder])
@@ -2133,6 +2135,8 @@ function RulesTabContent({
         type: ruleForm.type === 'volume_split' ? 'split' : 'route',
         terminals: actionTerminals,
         splits: actionSplits,
+        srThreshold: ruleForm.type === 'conditional' ? (ruleForm.srThreshold || 0) : 0,
+        minPaymentCount: ruleForm.type === 'conditional' ? (ruleForm.minPaymentCount || 0) : 0,
       },
       isDefault: false,
       createdAt: editingRule ? editingRule.createdAt : new Date().toISOString(),
@@ -2492,6 +2496,16 @@ function RulesTabContent({
                 )}
               </div>
 
+              {/* SR Threshold indicator */}
+              {rule.action.type === 'route' && rule.action.srThreshold > 0 && rule.action.terminals.length > 1 && (
+                <div className="kam-rule-threshold-indicator">
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                  </svg>
+                  Fallback if SR &lt; {rule.action.srThreshold}% (min {rule.action.minPaymentCount || 0} payments)
+                </div>
+              )}
+
               {/* Meta */}
               <div className="kam-rule-meta">
                 Created {new Date(rule.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })} by {rule.createdBy.split('@')[0]}
@@ -2581,7 +2595,8 @@ function RulesTabContent({
                     <div className="kam-rules-sim-terminals">
                       <span className="kam-rules-sim-label">Terminal Route:</span>
                       {simResult.terminals.map((t, i) => (
-                        <span key={t.terminalId} className="kam-rule-terminal-chip">
+                        <span key={t.terminalId} className={`kam-rule-terminal-chip${t.isActive === false ? ' skipped' : t.isActive === true ? ' active' : ''}`}>
+                          {t.isActive === true && '✓ '}{t.isActive === false && '✗ '}
                           {t.displayId} ({t.gatewayShort}) — SR {t.successRate}%, ₹{t.costPerTxn.toFixed(2)}
                           {t.percentage != null && ` · ${t.percentage}%`}
                         </span>
@@ -2763,6 +2778,48 @@ function RulesTabContent({
                     )}
                     {ruleForm.terminals.length === 0 && (
                       <p className="kam-rule-builder-hint">Click a terminal below to add it to the route. First terminal is highest priority.</p>
+                    )}
+                    {/* SR Threshold fallback controls */}
+                    {ruleForm.terminals.length > 1 && (
+                      <div className="kam-rule-builder-threshold">
+                        <div className="kam-rule-builder-threshold-header">
+                          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                            <line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" />
+                          </svg>
+                          <span>SR Threshold Fallback</span>
+                        </div>
+                        <p className="kam-rule-builder-threshold-desc">
+                          If a terminal's SR drops below the threshold (with enough payment data), traffic automatically falls to the next terminal in the stack.
+                        </p>
+                        <div className="kam-rule-builder-threshold-inputs">
+                          <div className="kam-rule-builder-threshold-field">
+                            <label>Min SR</label>
+                            <div className="kam-rule-builder-threshold-input-wrap">
+                              <input
+                                type="number"
+                                min="0"
+                                max="100"
+                                value={ruleForm.srThreshold}
+                                onChange={e => setRuleForm(p => ({ ...p, srThreshold: Number(e.target.value) || 0 }))}
+                              />
+                              <span className="kam-rule-builder-threshold-unit">%</span>
+                            </div>
+                          </div>
+                          <div className="kam-rule-builder-threshold-field">
+                            <label>Min Payments</label>
+                            <div className="kam-rule-builder-threshold-input-wrap">
+                              <input
+                                type="number"
+                                min="0"
+                                value={ruleForm.minPaymentCount}
+                                onChange={e => setRuleForm(p => ({ ...p, minPaymentCount: Number(e.target.value) || 0 }))}
+                              />
+                              <span className="kam-rule-builder-threshold-unit">txns</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     )}
                   </div>
                 ) : (

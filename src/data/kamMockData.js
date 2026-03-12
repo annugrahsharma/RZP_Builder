@@ -1707,14 +1707,14 @@ const SEED_RULES = {
         { field: 'amount', operator: 'greater_than', value: 5000 },
       ],
       conditionLogic: 'AND',
-      action: { type: 'route', terminals: ['term-hdfc-001', 'term-icici-001'], splits: [] },
+      action: { type: 'route', terminals: ['term-hdfc-001', 'term-icici-001'], splits: [], srThreshold: 90, minPaymentCount: 100 },
       isDefault: false, createdAt: '2026-02-10T10:30:00Z', createdBy: 'anugrah.sharma@razorpay.com',
     },
     {
       id: 'rule-merch-001-002', name: 'UPI → HDFC + Axis', type: 'conditional', enabled: true, priority: 2,
       conditions: [{ field: 'payment_method', operator: 'equals', value: 'UPI' }],
       conditionLogic: 'AND',
-      action: { type: 'route', terminals: ['term-hdfc-001', 'term-axis-001'], splits: [] },
+      action: { type: 'route', terminals: ['term-hdfc-001', 'term-axis-001'], splits: [], srThreshold: 88, minPaymentCount: 100 },
       isDefault: false, createdAt: '2026-02-10T10:35:00Z', createdBy: 'anugrah.sharma@razorpay.com',
     },
   ],
@@ -1738,7 +1738,7 @@ const SEED_RULES = {
         { field: 'amount', operator: 'greater_than', value: 5000 },
       ],
       conditionLogic: 'AND',
-      action: { type: 'route', terminals: ['term-hdfc-001'], splits: [] },
+      action: { type: 'route', terminals: ['term-hdfc-001'], splits: [], srThreshold: 92, minPaymentCount: 200 },
       isDefault: false, createdAt: '2026-01-20T14:15:00Z', createdBy: 'anugrah.sharma@razorpay.com',
     },
   ],
@@ -1748,14 +1748,14 @@ const SEED_RULES = {
       id: 'rule-merch-003-001', name: 'CC → HDFC Terminals', type: 'conditional', enabled: true, priority: 1,
       conditions: [{ field: 'payment_method', operator: 'equals', value: 'CC' }],
       conditionLogic: 'AND',
-      action: { type: 'route', terminals: ['term-hdfc-001', 'term-hdfc-002'], splits: [] },
+      action: { type: 'route', terminals: ['term-hdfc-001', 'term-hdfc-002'], splits: [], srThreshold: 93, minPaymentCount: 150 },
       isDefault: false, createdAt: '2026-02-05T09:00:00Z', createdBy: 'anugrah.sharma@razorpay.com',
     },
     {
       id: 'rule-merch-003-002', name: 'UPI → Axis', type: 'conditional', enabled: true, priority: 2,
       conditions: [{ field: 'payment_method', operator: 'equals', value: 'UPI' }],
       conditionLogic: 'AND',
-      action: { type: 'route', terminals: ['term-axis-001'], splits: [] },
+      action: { type: 'route', terminals: ['term-axis-001'], splits: [], srThreshold: 88, minPaymentCount: 100 },
       isDefault: false, createdAt: '2026-02-05T09:10:00Z', createdBy: 'anugrah.sharma@razorpay.com',
     },
   ],
@@ -1768,14 +1768,14 @@ const SEED_RULES = {
         { field: 'card_network', operator: 'equals', value: 'Mastercard' },
       ],
       conditionLogic: 'AND',
-      action: { type: 'route', terminals: ['term-icici-001'], splits: [] },
+      action: { type: 'route', terminals: ['term-icici-001'], splits: [], srThreshold: 91, minPaymentCount: 100 },
       isDefault: false, createdAt: '2026-02-01T11:00:00Z', createdBy: 'anugrah.sharma@razorpay.com',
     },
     {
       id: 'rule-merch-004-002', name: 'UPI → HDFC + Axis', type: 'conditional', enabled: true, priority: 2,
       conditions: [{ field: 'payment_method', operator: 'equals', value: 'UPI' }],
       conditionLogic: 'AND',
-      action: { type: 'route', terminals: ['term-hdfc-002', 'term-axis-001'], splits: [] },
+      action: { type: 'route', terminals: ['term-hdfc-002', 'term-axis-001'], splits: [], srThreshold: 90, minPaymentCount: 100 },
       isDefault: false, createdAt: '2026-02-01T11:15:00Z', createdBy: 'anugrah.sharma@razorpay.com',
     },
     {
@@ -1785,7 +1785,7 @@ const SEED_RULES = {
         { field: 'card_network', operator: 'equals', value: 'RuPay' },
       ],
       conditionLogic: 'AND',
-      action: { type: 'route', terminals: ['term-icici-001'], splits: [] },
+      action: { type: 'route', terminals: ['term-icici-001'], splits: [], srThreshold: 90, minPaymentCount: 100 },
       isDefault: false, createdAt: '2026-02-01T11:30:00Z', createdBy: 'anugrah.sharma@razorpay.com',
     },
   ],
@@ -1818,7 +1818,7 @@ const SEED_RULES = {
       id: 'rule-merch-007-001', name: 'CC → HDFC (Cashback Offer)', type: 'conditional', enabled: true, priority: 1,
       conditions: [{ field: 'payment_method', operator: 'equals', value: 'CC' }],
       conditionLogic: 'AND',
-      action: { type: 'route', terminals: ['term-hdfc-001'], splits: [] },
+      action: { type: 'route', terminals: ['term-hdfc-001'], splits: [], srThreshold: 90, minPaymentCount: 100 },
       isDefault: false, createdAt: '2026-02-20T10:00:00Z', createdBy: 'anugrah.sharma@razorpay.com',
     },
   ],
@@ -2149,10 +2149,13 @@ export function simulateTransaction(rules, transaction, merchant) {
       }
     })
   } else {
-    targetTerminals = action.terminals.map(tid => {
+    const allRouteTerminals = action.terminals.map(tid => {
       const gm = merchant.gatewayMetrics.find(g => g.terminalId === tid)
       const gw = gateways.find(g => g.id === gm?.gatewayId)
       const term = gw?.terminals.find(t => t.id === tid)
+      // Derive payment count from txnShare × merchant total volume
+      const totalVolume = merchant.txnVolumeHistory?.currentMonth || 0
+      const paymentCount = gm ? Math.round((gm.txnShare / 100) * totalVolume) : 0
       return {
         terminalId: tid,
         displayId: term?.terminalId || tid,
@@ -2160,8 +2163,38 @@ export function simulateTransaction(rules, transaction, merchant) {
         successRate: gm?.successRate || 0,
         costPerTxn: gm?.costPerTxn || 0,
         supportedMethods: gm?.supportedMethods || [],
+        paymentCount,
       }
     })
+
+    // Apply SR threshold fallback: pick the first terminal that meets threshold,
+    // or whose payment count is below minPaymentCount (insufficient data to judge)
+    const srThreshold = action.srThreshold || 0
+    const minPaymentCount = action.minPaymentCount || 0
+    let selectedTerminal = null
+
+    if (srThreshold > 0 && allRouteTerminals.length > 1) {
+      for (const t of allRouteTerminals) {
+        const hasEnoughData = t.paymentCount >= minPaymentCount
+        const srOk = t.successRate >= srThreshold
+        if (!hasEnoughData || srOk) {
+          selectedTerminal = t
+          break
+        }
+        warnings.push(`Terminal ${t.displayId} SR ${t.successRate}% is below threshold ${srThreshold}% (${t.paymentCount.toLocaleString('en-IN')} payments) — falling back to next`)
+      }
+      // If all terminals failed threshold, use last as best-effort
+      if (!selectedTerminal) {
+        selectedTerminal = allRouteTerminals[allRouteTerminals.length - 1]
+        warnings.push(`All terminals below SR threshold — using ${selectedTerminal.displayId} as last resort`)
+      }
+    }
+
+    // Return all terminals but mark which one is the active selection
+    targetTerminals = allRouteTerminals.map(t => ({
+      ...t,
+      isActive: selectedTerminal ? t.terminalId === selectedTerminal.terminalId : allRouteTerminals[0]?.terminalId === t.terminalId,
+    }))
   }
 
   // Warning: method not supported by target terminals

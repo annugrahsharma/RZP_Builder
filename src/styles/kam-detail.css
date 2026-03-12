@@ -3020,6 +3020,113 @@
   margin: 0 0 4px 0;
 }
 
+/* SR Threshold controls in Rule Builder */
+.kam-rule-builder-threshold {
+  margin-top: 8px;
+  padding: 12px;
+  background: rgba(255, 152, 0, 0.04);
+  border: 1px solid rgba(255, 152, 0, 0.2);
+  border-radius: 8px;
+}
+
+.kam-rule-builder-threshold-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-primary);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--rzp-text-primary);
+  margin-bottom: 4px;
+}
+
+.kam-rule-builder-threshold-header svg {
+  color: #f59e0b;
+}
+
+.kam-rule-builder-threshold-desc {
+  font-size: 11px;
+  font-family: var(--font-secondary);
+  color: var(--rzp-text-muted);
+  line-height: 1.4;
+  margin: 0 0 10px 0;
+}
+
+.kam-rule-builder-threshold-inputs {
+  display: flex;
+  gap: 16px;
+}
+
+.kam-rule-builder-threshold-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.kam-rule-builder-threshold-field label {
+  font-size: 11px;
+  font-family: var(--font-secondary);
+  font-weight: 500;
+  color: var(--rzp-text-secondary);
+}
+
+.kam-rule-builder-threshold-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.kam-rule-builder-threshold-input-wrap input {
+  width: 72px;
+  padding: 5px 8px;
+  border: 1px solid var(--rzp-border);
+  border-radius: 6px;
+  font-family: var(--font-secondary);
+  font-size: 13px;
+  text-align: right;
+}
+
+.kam-rule-builder-threshold-input-wrap input:focus {
+  outline: none;
+  border-color: var(--rzp-blue);
+}
+
+.kam-rule-builder-threshold-unit {
+  font-size: 11px;
+  color: var(--rzp-text-muted);
+  font-family: var(--font-secondary);
+}
+
+/* SR Threshold indicator on rule cards */
+.kam-rule-threshold-indicator {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-family: var(--font-secondary);
+  color: #f59e0b;
+  padding: 4px 0 0;
+}
+
+.kam-rule-threshold-indicator svg {
+  flex-shrink: 0;
+}
+
+/* Simulator: active/skipped terminal chips */
+.kam-rule-terminal-chip.active {
+  background: rgba(22, 163, 74, 0.1);
+  border-color: rgba(22, 163, 74, 0.3);
+  color: var(--rzp-success);
+}
+
+.kam-rule-terminal-chip.skipped {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: var(--rzp-border);
+  color: var(--rzp-text-muted);
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
 .kam-rule-terminal-id {
   font-weight: 600;
   font-family: var(--font-primary);
