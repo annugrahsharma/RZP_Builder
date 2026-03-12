@@ -1,0 +1,265 @@
+/* ==========================================================================
+   KAM Dashboard - Core Layout
+   Razorpay Key Account Manager Dashboard
+   ========================================================================== */
+
+/* Layout Grid
+   ========================================================================== */
+
+.kam-layout {
+  min-height: 100vh;
+  background: var(--rzp-bg);
+
+  /* Override SM design-system fonts with Razorpay-appropriate stack */
+  --font-primary: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-secondary: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Sidebar
+   ========================================================================== */
+
+.kam-sidebar {
+  width: 240px;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background: var(--rzp-sidebar-bg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 100;
+}
+
+.kam-sidebar-brand {
+  padding: var(--space-lg);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.kam-sidebar-brand h2 {
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  font-family: var(--font-primary);
+  line-height: 1.3;
+}
+
+.kam-sidebar-brand span {
+  color: var(--rzp-sidebar-text);
+  font-size: 12px;
+  font-family: var(--font-secondary);
+  display: block;
+  margin-top: 2px;
+}
+
+/* Sidebar Navigation
+   ========================================================================== */
+
+.kam-sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  gap: 2px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.kam-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  color: var(--rzp-sidebar-text);
+  text-decoration: none;
+  font-size: 14px;
+  font-family: var(--font-secondary);
+  font-weight: 500;
+  transition: background 0.15s ease, color 0.15s ease;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+}
+
+.kam-nav-item:hover {
+  background: var(--rzp-sidebar-hover);
+  color: #fff;
+}
+
+.kam-nav-item.active {
+  background: rgba(82, 143, 240, 0.15);
+  color: #fff;
+  font-weight: 600;
+  border-left: 3px solid var(--rzp-blue);
+}
+
+.kam-nav-item svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* Sidebar Profile
+   ========================================================================== */
+
+.kam-sidebar-profile {
+  padding: 16px 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.kam-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--rzp-blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  flex-shrink: 0;
+  font-family: var(--font-secondary);
+}
+
+.kam-sidebar-profile-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.kam-sidebar-profile-info .name {
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-secondary);
+  line-height: 1.3;
+}
+
+.kam-sidebar-profile-info .role {
+  color: var(--rzp-sidebar-text);
+  font-size: 11px;
+  font-family: var(--font-secondary);
+  line-height: 1.3;
+}
+
+/* Main Content Area
+   ========================================================================== */
+
+.kam-main {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  margin-left: 240px;
+}
+
+/* Top Bar
+   ========================================================================== */
+
+.kam-topbar {
+  height: 64px;
+  background: #fff;
+  border-bottom: 1px solid var(--rzp-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-xl);
+  flex-shrink: 0;
+}
+
+.kam-topbar h1 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--rzp-text-primary);
+  font-family: var(--font-primary);
+}
+
+.kam-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.kam-search-input {
+  width: 280px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--rzp-border);
+  padding: 0 12px 0 36px;
+  font-size: 13px;
+  font-family: var(--font-secondary);
+  background-color: var(--rzp-bg);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23A0AEC0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 12px center;
+  color: var(--rzp-text-primary);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.kam-search-input::placeholder {
+  color: var(--rzp-text-muted);
+}
+
+.kam-search-input:focus {
+  border-color: var(--rzp-blue);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(82, 143, 240, 0.1);
+}
+
+.kam-topbar-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--rzp-text-secondary);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.kam-topbar-icon:hover {
+  background: var(--rzp-bg);
+  color: var(--rzp-text-primary);
+}
+
+.kam-topbar-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Content Area
+   ========================================================================== */
+
+.kam-content {
+  flex: 1;
+  padding: var(--space-lg) var(--space-xl);
+  overflow-y: auto;
+}
+
+/* Page Header
+   ========================================================================== */
+
+.kam-page-header {
+  margin-bottom: var(--space-lg);
+}
+
+.kam-page-header h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--rzp-text-primary);
+  font-family: var(--font-primary);
+}
+
+.kam-page-header p {
+  font-size: 14px;
+  color: var(--rzp-text-secondary);
+  margin-top: 4px;
+  font-family: var(--font-secondary);
+}
