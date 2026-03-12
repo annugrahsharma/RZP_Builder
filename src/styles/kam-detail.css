@@ -2243,3 +2243,804 @@
   margin-bottom: var(--space-lg);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
+
+/* ==========================================================================
+   Rules Tab — NTF Banner, Commitment, Offer, Rule List, Builder, Simulator
+   ========================================================================== */
+
+/* ── NTF Guard Banner ────────────────────────────────────────────────────── */
+
+.kam-rules-ntf-banner {
+  background: #FFF4E5;
+  border: 1px solid #FFB74D;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+}
+
+.kam-rules-ntf-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  color: #E65100;
+  font-family: var(--font-primary);
+  font-size: 14px;
+}
+
+.kam-rules-ntf-header svg {
+  color: #E65100;
+  flex-shrink: 0;
+}
+
+.kam-rules-ntf-banner > p {
+  font-size: 13px;
+  font-family: var(--font-secondary);
+  color: #BF360C;
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+.kam-rules-ntf-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.kam-rules-ntf-list li {
+  font-size: 13px;
+  font-family: var(--font-secondary);
+  color: #BF360C;
+  padding: 4px 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.kam-rules-ntf-list li::before {
+  content: '•';
+  color: #E65100;
+  font-weight: 700;
+  margin-right: 4px;
+}
+
+/* ── GMV Commitment Card ─────────────────────────────────────────────────── */
+
+.kam-rules-commitment-card {
+  background: var(--rzp-card-bg);
+  border-radius: 12px;
+  border: 1px solid var(--rzp-border);
+  padding: 20px var(--space-lg);
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.kam-rules-commitment-body {
+  margin-top: 12px;
+}
+
+.kam-rules-commitment-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.kam-rules-commitment-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.kam-rules-commitment-metric .label {
+  font-size: 12px;
+  font-family: var(--font-secondary);
+  color: var(--rzp-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.kam-rules-commitment-metric .value {
+  font-size: 18px;
+  font-family: var(--font-primary);
+  font-weight: 600;
+  color: var(--rzp-text-primary);
+}
+
+.kam-rules-commitment-progress {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.kam-rules-progress-bar {
+  flex: 1;
+  height: 8px;
+  background: var(--rzp-bg-secondary);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.kam-rules-progress-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.kam-rules-progress-fill.on_track { background: var(--rzp-success); }
+.kam-rules-progress-fill.at_risk { background: var(--rzp-warning); }
+.kam-rules-progress-fill.off_track { background: var(--rzp-danger); }
+
+.kam-rules-progress-label {
+  font-size: 13px;
+  font-family: var(--font-secondary);
+  color: var(--rzp-text-secondary);
+  white-space: nowrap;
+}
+
+/* ── Offer Routing Card ──────────────────────────────────────────────────── */
+
+.kam-rules-offer-card {
+  background: var(--rzp-card-bg);
+  border-radius: 12px;
+  border: 1px solid var(--rzp-border);
+  padding: 20px var(--space-lg);
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+/* ── Rule List ───────────────────────────────────────────────────────────── */
+
+.kam-rules-add-btn {
+  font-size: 13px !important;
+  padding: 6px 14px !important;
+}
+
+.kam-rules-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ── Rule Card ───────────────────────────────────────────────────────────── */
+
+.kam-rule-card {
+  border: 1px solid var(--rzp-border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  background: var(--rzp-card-bg);
+  border-left: 4px solid var(--rzp-blue);
+  transition: opacity 0.2s ease, border-color 0.2s ease;
+}
+
+.kam-rule-card.volume-split {
+  border-left-color: #E65100;
+}
+
+.kam-rule-card.disabled {
+  opacity: 0.5;
+}
+
+.kam-rule-card.kam-rule-default {
+  border-left-color: var(--rzp-border);
+  background: var(--rzp-bg-secondary);
+}
+
+.kam-rule-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.kam-rule-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.kam-rule-priority {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 24px;
+  border-radius: 6px;
+  background: var(--rzp-blue);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font-primary);
+  padding: 0 6px;
+}
+
+.kam-rule-name {
+  font-size: 14px;
+  font-family: var(--font-primary);
+  font-weight: 600;
+  color: var(--rzp-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kam-rule-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.kam-rule-move-btn {
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--rzp-border);
+  border-radius: 6px;
+  background: var(--rzp-card-bg);
+  color: var(--rzp-text-secondary);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.kam-rule-move-btn:hover:not(:disabled) {
+  border-color: var(--rzp-blue);
+  color: var(--rzp-blue);
+}
+
+.kam-rule-move-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* Toggle switch */
+.kam-rule-toggle {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.kam-rule-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.kam-rule-toggle-slider {
+  position: absolute;
+  inset: 0;
+  background: #ccc;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.kam-rule-toggle-slider::before {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  left: 2px;
+  bottom: 2px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+}
+
+.kam-rule-toggle input:checked + .kam-rule-toggle-slider {
+  background: var(--rzp-success);
+}
+
+.kam-rule-toggle input:checked + .kam-rule-toggle-slider::before {
+  transform: translateX(16px);
+}
+
+.kam-rule-edit-btn,
+.kam-rule-delete-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--rzp-text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.kam-rule-edit-btn:hover {
+  background: rgba(82, 143, 240, 0.1);
+  color: var(--rzp-blue);
+}
+
+.kam-rule-delete-btn:hover {
+  background: rgba(220, 53, 69, 0.1);
+  color: var(--rzp-danger);
+}
+
+/* ── Conditions Display ──────────────────────────────────────────────────── */
+
+.kam-rule-conditions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.kam-rule-if,
+.kam-rule-then {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: var(--font-primary);
+  padding: 2px 8px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.kam-rule-if {
+  color: #1565C0;
+  background: #E3F2FD;
+}
+
+.kam-rule-then {
+  color: #2E7D32;
+  background: #E8F5E9;
+}
+
+.kam-rule-logic {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--rzp-text-muted);
+  font-family: var(--font-primary);
+}
+
+.kam-rule-condition-chip {
+  font-size: 13px;
+  font-family: var(--font-secondary);
+  color: var(--rzp-text-primary);
+  background: var(--rzp-bg-secondary);
+  padding: 3px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+/* ── Action Display ──────────────────────────────────────────────────────── */
+
+.kam-rule-action {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.kam-rule-terminal-chip {
+  font-size: 13px;
+  font-family: var(--font-secondary);
+  color: var(--rzp-text-primary);
+  background: #E3F2FD;
+  padding: 3px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.kam-rule-terminal-chip .muted {
+  color: var(--rzp-text-muted);
+  font-size: 12px;
+}
+
+.kam-rule-arrow {
+  color: var(--rzp-text-muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.kam-rule-split-dot {
+  color: var(--rzp-text-muted);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* ── Rule Meta ───────────────────────────────────────────────────────────── */
+
+.kam-rule-meta {
+  font-size: 12px;
+  font-family: var(--font-secondary);
+  color: var(--rzp-text-muted);
+}
+
+/* ── Transaction Simulator ───────────────────────────────────────────────── */
+
+.kam-rules-simulator {
+  cursor: default;
+}
+
+.kam-rules-sim-form {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--rzp-border);
+}
+
+.kam-rules-sim-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 120px;
+}
+
+.kam-rules-sim-field label {
+  font-size: 12px;
+  font-family: var(--font-secondary);
+  color: var(--rzp-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.kam-rules-sim-field select,
+.kam-rules-sim-field input {
+  height: 34px;
+  border: 1px solid var(--rzp-border);
+  border-radius: 8px;
+  padding: 0 10px;
+  font-size: 13px;
+  font-family: var(--font-secondary);
+  background: var(--rzp-card-bg);
+  color: var(--rzp-text-primary);
+}
+
+.kam-rules-sim-field select:focus,
+.kam-rules-sim-field input:focus {
+  outline: none;
+  border-color: var(--rzp-blue);
+  box-shadow: 0 0 0 2px rgba(82, 143, 240, 0.15);
+}
+
+.kam-rules-sim-result {
+  margin-top: 16px;
+  padding: 16px;
+  background: var(--rzp-bg-secondary);
+  border-radius: 10px;
+  border: 1px solid var(--rzp-border);
+}
+
+.kam-rules-sim-match,
+.kam-rules-sim-terminals {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.kam-rules-sim-label {
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font-primary);
+  color: var(--rzp-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.kam-rules-sim-value {
+  font-size: 14px;
+  font-family: var(--font-primary);
+  font-weight: 600;
+  color: var(--rzp-text-primary);
+}
+
+.kam-rules-sim-no-match {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-family: var(--font-secondary);
+  color: var(--rzp-danger);
+  font-weight: 600;
+}
+
+.kam-rules-sim-no-match svg {
+  color: var(--rzp-danger);
+}
+
+.kam-rules-sim-warnings {
+  margin-top: 10px;
+  border-top: 1px solid var(--rzp-border);
+  padding-top: 10px;
+}
+
+.kam-rules-sim-warning {
+  font-size: 13px;
+  font-family: var(--font-secondary);
+  color: #E65100;
+  padding: 2px 0;
+}
+
+/* ── Rule Builder Modal ──────────────────────────────────────────────────── */
+
+.kam-rule-builder-field {
+  margin-bottom: 20px;
+}
+
+.kam-rule-builder-field > label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-primary);
+  color: var(--rzp-text-primary);
+  margin-bottom: 8px;
+}
+
+.kam-rule-builder-field > input[type="text"] {
+  width: 100%;
+  height: 38px;
+  border: 1px solid var(--rzp-border);
+  border-radius: 8px;
+  padding: 0 12px;
+  font-size: 14px;
+  font-family: var(--font-secondary);
+  color: var(--rzp-text-primary);
+  background: var(--rzp-card-bg);
+  box-sizing: border-box;
+}
+
+.kam-rule-builder-field > input:focus {
+  outline: none;
+  border-color: var(--rzp-blue);
+  box-shadow: 0 0 0 2px rgba(82, 143, 240, 0.15);
+}
+
+/* Type Cards */
+.kam-rule-builder-type-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.kam-rule-type-card {
+  border: 2px solid var(--rzp-border);
+  border-radius: 10px;
+  padding: 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.kam-rule-type-card:hover {
+  border-color: var(--rzp-blue);
+}
+
+.kam-rule-type-card.selected {
+  border-color: var(--rzp-blue);
+  background: rgba(82, 143, 240, 0.05);
+}
+
+.kam-rule-type-card strong {
+  display: block;
+  font-size: 14px;
+  font-family: var(--font-primary);
+  color: var(--rzp-text-primary);
+  margin-bottom: 4px;
+}
+
+.kam-rule-type-card span {
+  font-size: 12px;
+  font-family: var(--font-secondary);
+  color: var(--rzp-text-secondary);
+}
+
+/* Logic Toggle */
+.kam-rule-builder-logic-toggle {
+  display: inline-flex;
+  border: 1px solid var(--rzp-border);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.kam-rule-builder-logic-toggle button {
+  padding: 4px 14px;
+  border: none;
+  background: var(--rzp-card-bg);
+  color: var(--rzp-text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font-primary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.kam-rule-builder-logic-toggle button.active {
+  background: var(--rzp-blue);
+  color: #fff;
+}
+
+/* Condition Rows */
+.kam-rule-builder-conditions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.kam-rule-builder-condition-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.kam-rule-builder-condition-row select,
+.kam-rule-builder-condition-row input {
+  height: 34px;
+  border: 1px solid var(--rzp-border);
+  border-radius: 8px;
+  padding: 0 10px;
+  font-size: 13px;
+  font-family: var(--font-secondary);
+  background: var(--rzp-card-bg);
+  color: var(--rzp-text-primary);
+  flex: 1;
+  min-width: 0;
+}
+
+.kam-rule-builder-condition-row select:focus,
+.kam-rule-builder-condition-row input:focus {
+  outline: none;
+  border-color: var(--rzp-blue);
+}
+
+.kam-rule-builder-remove-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--rzp-text-muted);
+  font-size: 18px;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.kam-rule-builder-remove-btn:hover {
+  background: rgba(220, 53, 69, 0.1);
+  color: var(--rzp-danger);
+}
+
+/* Terminal Selection */
+.kam-rule-builder-terminals {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.kam-rule-terminal-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--rzp-border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: var(--font-secondary);
+  font-size: 13px;
+}
+
+.kam-rule-terminal-option:hover {
+  border-color: var(--rzp-blue);
+}
+
+.kam-rule-terminal-option.selected {
+  border-color: var(--rzp-blue);
+  background: rgba(82, 143, 240, 0.05);
+}
+
+.kam-rule-terminal-check {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--rzp-border);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--rzp-blue);
+  flex-shrink: 0;
+}
+
+.kam-rule-terminal-option.selected .kam-rule-terminal-check {
+  border-color: var(--rzp-blue);
+  background: var(--rzp-blue);
+  color: #fff;
+}
+
+.kam-rule-terminal-id {
+  font-weight: 600;
+  font-family: var(--font-primary);
+  color: var(--rzp-text-primary);
+}
+
+.kam-rule-terminal-gw {
+  color: var(--rzp-text-muted);
+  font-size: 12px;
+}
+
+.kam-rule-terminal-sr {
+  color: var(--rzp-success);
+  font-weight: 500;
+  margin-left: auto;
+}
+
+.kam-rule-terminal-cost {
+  color: var(--rzp-text-secondary);
+}
+
+/* Split Rows */
+.kam-rule-builder-splits {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.kam-rule-split-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border: 1px solid var(--rzp-border);
+  border-radius: 8px;
+  font-family: var(--font-secondary);
+  font-size: 13px;
+}
+
+.kam-rule-split-input {
+  width: 64px;
+  height: 30px;
+  border: 1px solid var(--rzp-border);
+  border-radius: 6px;
+  text-align: center;
+  font-size: 14px;
+  font-family: var(--font-primary);
+  font-weight: 600;
+  color: var(--rzp-text-primary);
+  background: var(--rzp-card-bg);
+  margin-left: auto;
+}
+
+.kam-rule-split-input:focus {
+  outline: none;
+  border-color: var(--rzp-blue);
+}
+
+.kam-rule-split-total {
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-primary);
+  color: var(--rzp-text-primary);
+  padding: 6px 0;
+}
+
+.kam-rule-builder-add-split {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}

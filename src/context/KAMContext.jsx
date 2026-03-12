@@ -12,13 +12,18 @@ import {
   detectRoutingConflicts,
   computeRetentionRisk,
   computeNROpportunity,
+  generateSeedRules,
 } from '../data/kamMockData'
 
 const KAMContext = createContext(null)
 
 export function KAMProvider({ children }) {
   const [merchants, setMerchants] = useState(() =>
-    initialMerchants.map((m) => ({ ...m, gatewayMetrics: [...m.gatewayMetrics] }))
+    initialMerchants.map((m) => ({
+      ...m,
+      gatewayMetrics: [...m.gatewayMetrics],
+      routingRulesV2: generateSeedRules(m),
+    }))
   )
 
   // Table state
@@ -416,6 +421,145 @@ export function KAMProvider({ children }) {
     [merchants, addAuditEntry, showToast]
   )
 
+  // ── Rule CRUD Mutations ──────────────────
+
+  const addRule = useCallback(
+    (merchantId, rule) => {
+      setMerchants((prev) =>
+        prev.map((m) => {
+          if (m.id !== merchantId) return m
+          const existingRules = m.routingRulesV2 || []
+          // Assign priority: one before default (999)
+          const nonDefault = existingRules.filter((r) => !r.isDefault)
+          const newPriority = nonDefault.length + 1
+          const newRule = { ...rule, priority: newPriority }
+          return { ...m, routingRulesV2: [...existingRules, newRule] }
+        })
+      )
+      const merchant = merchants.find((m) => m.id === merchantId)
+      addAuditEntry(
+        `Added routing rule "${rule.name}" for ${merchant?.name || merchantId}`,
+        `Type: ${rule.type === 'volume_split' ? 'Volume Split' : 'Conditional'}`,
+        merchantId
+      )
+      showToast(`Rule "${rule.name}" added`)
+    },
+    [merchants, addAuditEntry, showToast]
+  )
+
+  const updateRule = useCallback(
+    (merchantId, ruleId, updates) => {
+      setMerchants((prev) =>
+        prev.map((m) => {
+          if (m.id !== merchantId) return m
+          return {
+            ...m,
+            routingRulesV2: (m.routingRulesV2 || []).map((r) =>
+              r.id === ruleId ? { ...r, ...updates } : r
+            ),
+          }
+        })
+      )
+      const merchant = merchants.find((m) => m.id === merchantId)
+      const rule = merchant?.routingRulesV2?.find((r) => r.id === ruleId)
+      addAuditEntry(
+        `Updated routing rule "${rule?.name || ruleId}" for ${merchant?.name || merchantId}`,
+        'Rule configuration modified',
+        merchantId
+      )
+      showToast(`Rule "${rule?.name || 'rule'}" updated`)
+    },
+    [merchants, addAuditEntry, showToast]
+  )
+
+  const deleteRule = useCallback(
+    (merchantId, ruleId) => {
+      let deletedName = ''
+      setMerchants((prev) =>
+        prev.map((m) => {
+          if (m.id !== merchantId) return m
+          const rules = m.routingRulesV2 || []
+          const target = rules.find((r) => r.id === ruleId)
+          if (target?.isDefault) return m // cannot delete default
+          deletedName = target?.name || ruleId
+          const remaining = rules.filter((r) => r.id !== ruleId)
+          // Re-index priorities (keep default at 999)
+          let priority = 1
+          const reindexed = remaining.map((r) => {
+            if (r.isDefault) return r
+            return { ...r, priority: priority++ }
+          })
+          return { ...m, routingRulesV2: reindexed }
+        })
+      )
+      const merchant = merchants.find((m) => m.id === merchantId)
+      addAuditEntry(
+        `Deleted routing rule "${deletedName}" from ${merchant?.name || merchantId}`,
+        'Rule removed from active set',
+        merchantId
+      )
+      showToast(`Rule "${deletedName}" deleted`)
+    },
+    [merchants, addAuditEntry, showToast]
+  )
+
+  const toggleRuleEnabled = useCallback(
+    (merchantId, ruleId) => {
+      let newState = false
+      setMerchants((prev) =>
+        prev.map((m) => {
+          if (m.id !== merchantId) return m
+          return {
+            ...m,
+            routingRulesV2: (m.routingRulesV2 || []).map((r) => {
+              if (r.id !== ruleId) return r
+              newState = !r.enabled
+              return { ...r, enabled: newState }
+            }),
+          }
+        })
+      )
+      const merchant = merchants.find((m) => m.id === merchantId)
+      const rule = merchant?.routingRulesV2?.find((r) => r.id === ruleId)
+      addAuditEntry(
+        `${newState ? 'Enabled' : 'Disabled'} routing rule "${rule?.name || ruleId}" for ${merchant?.name || merchantId}`,
+        newState ? 'Rule is now active' : 'Rule is now inactive',
+        merchantId
+      )
+      showToast(`Rule "${rule?.name || 'rule'}" ${newState ? 'enabled' : 'disabled'}`)
+    },
+    [merchants, addAuditEntry, showToast]
+  )
+
+  const reorderRules = useCallback(
+    (merchantId, orderedIds) => {
+      setMerchants((prev) =>
+        prev.map((m) => {
+          if (m.id !== merchantId) return m
+          const rules = m.routingRulesV2 || []
+          const reordered = orderedIds.map((id, idx) => {
+            const rule = rules.find((r) => r.id === id)
+            if (!rule) return null
+            return { ...rule, priority: rule.isDefault ? 999 : idx + 1 }
+          }).filter(Boolean)
+          // Add any rules not in orderedIds (shouldn't happen, but safety)
+          rules.forEach((r) => {
+            if (!orderedIds.includes(r.id)) reordered.push(r)
+          })
+          return { ...m, routingRulesV2: reordered }
+        })
+      )
+      const merchant = merchants.find((m) => m.id === merchantId)
+      addAuditEntry(
+        `Reordered routing rules for ${merchant?.name || merchantId}`,
+        'Rule priorities updated',
+        merchantId
+      )
+      showToast('Rule priorities updated')
+    },
+    [merchants, addAuditEntry, showToast]
+  )
+
   const toggleSort = useCallback(
     (field) => {
       if (sortField === field) {
@@ -475,6 +619,11 @@ export function KAMProvider({ children }) {
     nrOpportunities,
     toggleSRSensitive,
     updateSRThreshold,
+    addRule,
+    updateRule,
+    deleteRule,
+    toggleRuleEnabled,
+    reorderRules,
   }
 
   return <KAMContext.Provider value={value}>{children}</KAMContext.Provider>

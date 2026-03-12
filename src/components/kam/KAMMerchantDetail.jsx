@@ -13,6 +13,14 @@ import {
   generateSRTimeSeries,
   generateRecommendations,
   generateSankeyData,
+  RULE_CONDITIONS,
+  RULE_OPERATOR_LABELS,
+  evaluateRules,
+  detectNTFGaps,
+  simulateTransaction,
+  getTerminalDisplayId,
+  getTerminalGatewayInfo,
+  gateways as gatewayData,
 } from '../../data/kamMockData'
 
 // ---------------------------------------------------------------------------
@@ -805,6 +813,11 @@ export default function KAMMerchantDetail() {
     showToast,
     toggleSRSensitive,
     updateSRThreshold,
+    addRule,
+    updateRule,
+    deleteRule,
+    toggleRuleEnabled,
+    reorderRules,
   } = useKAM()
 
   const merchant = getMerchantById(merchantId)
@@ -824,6 +837,15 @@ export default function KAMMerchantDetail() {
   // ---- Recommendation state ----
   const [approvedRecs, setApprovedRecs] = useState(new Set())
   const [dismissedRecs, setDismissedRecs] = useState(new Set())
+
+  // ---- Rules tab state ----
+  const [showRuleBuilder, setShowRuleBuilder] = useState(false)
+  const [editingRule, setEditingRule] = useState(null)
+  const [showSimulator, setShowSimulator] = useState(false)
+  const [simForm, setSimForm] = useState({ payment_method: 'CC', card_network: 'Visa', card_type: 'credit', issuer_bank: 'HDFC', amount: 5000 })
+  const [simResult, setSimResult] = useState(null)
+  // Rule builder form state
+  const [ruleForm, setRuleForm] = useState({ name: '', type: 'conditional', conditions: [], conditionLogic: 'AND', terminals: [], splits: [] })
 
   // ---- Guard ----
   if (!merchant) {
@@ -1088,6 +1110,12 @@ export default function KAMMerchantDetail() {
           onClick={() => setActiveTab('routing')}
         >
           Routing
+        </button>
+        <button
+          className={`kam-detail-tab${activeTab === 'rules' ? ' active' : ''}`}
+          onClick={() => setActiveTab('rules')}
+        >
+          Rules
         </button>
       </div>
 
@@ -1769,6 +1797,33 @@ export default function KAMMerchantDetail() {
       </>
       )}
 
+      {activeTab === 'rules' && (
+      <RulesTabContent
+        merchant={merchant}
+        gateways={gateways}
+        tspCompliance={tspCompliance}
+        addRule={addRule}
+        updateRule={updateRule}
+        deleteRule={deleteRule}
+        toggleRuleEnabled={toggleRuleEnabled}
+        reorderRules={reorderRules}
+        showToast={showToast}
+        addAuditEntry={addAuditEntry}
+        showRuleBuilder={showRuleBuilder}
+        setShowRuleBuilder={setShowRuleBuilder}
+        editingRule={editingRule}
+        setEditingRule={setEditingRule}
+        showSimulator={showSimulator}
+        setShowSimulator={setShowSimulator}
+        simForm={simForm}
+        setSimForm={setSimForm}
+        simResult={simResult}
+        setSimResult={setSimResult}
+        ruleForm={ruleForm}
+        setRuleForm={setRuleForm}
+      />
+      )}
+
       {/* ── Transaction Routing Drawer ─────────────────────── */}
       {selectedTxn && (
         <>
@@ -1980,5 +2035,735 @@ function MetricCard({ icon, iconBg, iconColor, label, value, delta, deltaType })
         </div>
       )}
     </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Rules Tab Content
+// ---------------------------------------------------------------------------
+function RulesTabContent({
+  merchant, gateways, tspCompliance,
+  addRule, updateRule, deleteRule, toggleRuleEnabled, reorderRules,
+  showToast, addAuditEntry,
+  showRuleBuilder, setShowRuleBuilder,
+  editingRule, setEditingRule,
+  showSimulator, setShowSimulator,
+  simForm, setSimForm, simResult, setSimResult,
+  ruleForm, setRuleForm,
+}) {
+  const rules = merchant.routingRulesV2 || []
+  const ntfGaps = useMemo(() => detectNTFGaps(rules, merchant), [rules, merchant])
+
+  // Sort rules by priority
+  const sortedRules = useMemo(() => {
+    return [...rules].sort((a, b) => a.priority - b.priority)
+  }, [rules])
+
+  const nonDefaultRules = sortedRules.filter(r => !r.isDefault)
+  const defaultRule = sortedRules.find(r => r.isDefault)
+
+  // Build available terminals from merchant's gateway metrics
+  const availableTerminals = useMemo(() => {
+    return merchant.gatewayMetrics.map(gm => {
+      const info = getTerminalGatewayInfo(gm.terminalId)
+      return {
+        terminalId: gm.terminalId,
+        displayId: info?.displayId || gm.terminalId,
+        gatewayShort: info?.gatewayShort || '??',
+        successRate: gm.successRate,
+        costPerTxn: gm.costPerTxn,
+        supportedMethods: gm.supportedMethods || [],
+      }
+    })
+  }, [merchant])
+
+  // ── Handlers ──
+
+  const handleOpenBuilder = useCallback((rule = null) => {
+    if (rule) {
+      setEditingRule(rule)
+      setRuleForm({
+        name: rule.name,
+        type: rule.type,
+        conditions: rule.conditions.map(c => ({ ...c })),
+        conditionLogic: rule.conditionLogic,
+        terminals: rule.action.type === 'route' ? [...rule.action.terminals] : [],
+        splits: rule.action.type === 'split' ? rule.action.splits.map(s => ({ ...s })) : [],
+      })
+    } else {
+      setEditingRule(null)
+      setRuleForm({ name: '', type: 'conditional', conditions: [], conditionLogic: 'AND', terminals: [], splits: [] })
+    }
+    setShowRuleBuilder(true)
+  }, [setEditingRule, setRuleForm, setShowRuleBuilder])
+
+  const handleSaveRule = useCallback(() => {
+    if (!ruleForm.name.trim()) {
+      showToast('Rule name is required', 'error')
+      return
+    }
+    const actionTerminals = ruleForm.type === 'conditional' ? ruleForm.terminals : []
+    const actionSplits = ruleForm.type === 'volume_split' ? ruleForm.splits : []
+
+    if (ruleForm.type === 'conditional' && actionTerminals.length === 0) {
+      showToast('Select at least one target terminal', 'error')
+      return
+    }
+    if (ruleForm.type === 'volume_split') {
+      if (actionSplits.length === 0) {
+        showToast('Add at least one terminal split', 'error')
+        return
+      }
+      const totalPct = actionSplits.reduce((s, sp) => s + sp.percentage, 0)
+      if (totalPct !== 100) {
+        showToast(`Split percentages must total 100% (currently ${totalPct}%)`, 'error')
+        return
+      }
+    }
+
+    const ruleObj = {
+      id: editingRule ? editingRule.id : `rule-${merchant.id}-${Date.now()}`,
+      name: ruleForm.name.trim(),
+      type: ruleForm.type,
+      enabled: editingRule ? editingRule.enabled : true,
+      priority: editingRule ? editingRule.priority : 0,
+      conditions: ruleForm.conditions,
+      conditionLogic: ruleForm.conditionLogic,
+      action: {
+        type: ruleForm.type === 'volume_split' ? 'split' : 'route',
+        terminals: actionTerminals,
+        splits: actionSplits,
+      },
+      isDefault: false,
+      createdAt: editingRule ? editingRule.createdAt : new Date().toISOString(),
+      createdBy: editingRule ? editingRule.createdBy : 'anugrah.sharma@razorpay.com',
+    }
+
+    if (editingRule) {
+      updateRule(merchant.id, editingRule.id, ruleObj)
+    } else {
+      addRule(merchant.id, ruleObj)
+    }
+    setShowRuleBuilder(false)
+    setEditingRule(null)
+  }, [ruleForm, editingRule, merchant.id, addRule, updateRule, showToast, setShowRuleBuilder, setEditingRule])
+
+  const handleMoveRule = useCallback((ruleId, direction) => {
+    const idx = nonDefaultRules.findIndex(r => r.id === ruleId)
+    if (idx < 0) return
+    if (direction === 'up' && idx === 0) return
+    if (direction === 'down' && idx === nonDefaultRules.length - 1) return
+    const newOrder = [...nonDefaultRules]
+    const swapIdx = direction === 'up' ? idx - 1 : idx + 1
+    ;[newOrder[idx], newOrder[swapIdx]] = [newOrder[swapIdx], newOrder[idx]]
+    const orderedIds = [...newOrder.map(r => r.id), defaultRule?.id].filter(Boolean)
+    reorderRules(merchant.id, orderedIds)
+  }, [nonDefaultRules, defaultRule, merchant.id, reorderRules])
+
+  const handleSimulate = useCallback(() => {
+    const result = simulateTransaction(rules, simForm, merchant)
+    setSimResult(result)
+  }, [rules, simForm, merchant, setSimResult])
+
+  const handleApplySuggestedSplit = useCallback(() => {
+    if (!tspCompliance) return
+    const lockedGwId = merchant.dealDetails?.lockedGatewayId
+    const lockedTerminals = merchant.gatewayMetrics.filter(gm => gm.gatewayId === lockedGwId)
+    const otherTerminals = merchant.gatewayMetrics.filter(gm => gm.gatewayId !== lockedGwId)
+    if (lockedTerminals.length === 0) {
+      showToast('No terminal found for the locked gateway', 'error')
+      return
+    }
+    const suggestedPct = Math.min(100, Math.ceil(tspCompliance.suggestedTrafficPct))
+    const remainingPct = 100 - suggestedPct
+    const splits = [
+      { terminalId: lockedTerminals[0].terminalId, percentage: suggestedPct },
+    ]
+    if (otherTerminals.length > 0 && remainingPct > 0) {
+      const perOther = Math.floor(remainingPct / otherTerminals.length)
+      let remainder = remainingPct - (perOther * otherTerminals.length)
+      otherTerminals.forEach((t, i) => {
+        splits.push({ terminalId: t.terminalId, percentage: perOther + (i === 0 ? remainder : 0) })
+      })
+    }
+    const splitRule = {
+      id: `rule-${merchant.id}-tsp-${Date.now()}`,
+      name: `${tspCompliance.lockedGatewayName} Volume Commitment`,
+      type: 'volume_split',
+      enabled: true,
+      priority: 0,
+      conditions: [],
+      conditionLogic: 'AND',
+      action: { type: 'split', terminals: [], splits },
+      isDefault: false,
+      createdAt: new Date().toISOString(),
+      createdBy: 'anugrah.sharma@razorpay.com',
+    }
+    addRule(merchant.id, splitRule)
+  }, [merchant, tspCompliance, addRule, showToast])
+
+  // Condition row helpers
+  const addCondition = useCallback(() => {
+    setRuleForm(prev => ({
+      ...prev,
+      conditions: [...prev.conditions, { field: 'payment_method', operator: 'equals', value: 'CC' }],
+    }))
+  }, [setRuleForm])
+
+  const removeCondition = useCallback((idx) => {
+    setRuleForm(prev => ({
+      ...prev,
+      conditions: prev.conditions.filter((_, i) => i !== idx),
+    }))
+  }, [setRuleForm])
+
+  const updateCondition = useCallback((idx, updates) => {
+    setRuleForm(prev => ({
+      ...prev,
+      conditions: prev.conditions.map((c, i) => i === idx ? { ...c, ...updates } : c),
+    }))
+  }, [setRuleForm])
+
+  // Terminal selection helpers
+  const toggleTerminal = useCallback((terminalId) => {
+    setRuleForm(prev => {
+      const has = prev.terminals.includes(terminalId)
+      return { ...prev, terminals: has ? prev.terminals.filter(t => t !== terminalId) : [...prev.terminals, terminalId] }
+    })
+  }, [setRuleForm])
+
+  const addSplit = useCallback((terminalId) => {
+    setRuleForm(prev => {
+      if (prev.splits.some(s => s.terminalId === terminalId)) return prev
+      return { ...prev, splits: [...prev.splits, { terminalId, percentage: 0 }] }
+    })
+  }, [setRuleForm])
+
+  const removeSplit = useCallback((terminalId) => {
+    setRuleForm(prev => ({
+      ...prev,
+      splits: prev.splits.filter(s => s.terminalId !== terminalId),
+    }))
+  }, [setRuleForm])
+
+  const updateSplitPct = useCallback((terminalId, pct) => {
+    setRuleForm(prev => ({
+      ...prev,
+      splits: prev.splits.map(s => s.terminalId === terminalId ? { ...s, percentage: Number(pct) || 0 } : s),
+    }))
+  }, [setRuleForm])
+
+  // ── Offer rule helper ──
+  const hasOfferRule = useMemo(() => {
+    if (merchant.dealType !== 'offer_linked') return false
+    const lockedGwId = merchant.dealDetails?.lockedGatewayId
+    return rules.some(r =>
+      r.enabled && !r.isDefault &&
+      r.action.terminals?.some(tid => {
+        const info = getTerminalGatewayInfo(tid)
+        return info?.gatewayId === lockedGwId
+      })
+    )
+  }, [merchant, rules])
+
+  const handleCreateOfferRule = useCallback(() => {
+    const lockedGwId = merchant.dealDetails?.lockedGatewayId
+    const lockedTerminals = merchant.gatewayMetrics.filter(gm => gm.gatewayId === lockedGwId)
+    if (lockedTerminals.length === 0) {
+      showToast('Locked gateway terminal not available for this merchant', 'error')
+      return
+    }
+    const gwName = gatewayData.find(g => g.id === lockedGwId)?.shortName || 'Gateway'
+    const offerRule = {
+      id: `rule-${merchant.id}-offer-${Date.now()}`,
+      name: `CC → ${gwName} (Offer)`,
+      type: 'conditional',
+      enabled: true,
+      priority: 0,
+      conditions: [{ field: 'payment_method', operator: 'equals', value: 'CC' }],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: [lockedTerminals[0].terminalId], splits: [] },
+      isDefault: false,
+      createdAt: new Date().toISOString(),
+      createdBy: 'anugrah.sharma@razorpay.com',
+    }
+    addRule(merchant.id, offerRule)
+  }, [merchant, addRule, showToast])
+
+  return (
+    <>
+      {/* ── NTF Guard Banner ─────────────────────────── */}
+      {ntfGaps.hasGaps && (
+        <div className="kam-rules-ntf-banner">
+          <div className="kam-rules-ntf-header">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+              <line x1="12" y1="9" x2="12" y2="13" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+            <strong>NTF Risk Detected</strong>
+            <span className="kam-badge danger">{ntfGaps.gaps.length} gap{ntfGaps.gaps.length !== 1 ? 's' : ''}</span>
+          </div>
+          <p>The current rule set has coverage gaps that could cause payment failures:</p>
+          <ul className="kam-rules-ntf-list">
+            {ntfGaps.gaps.map((gap, i) => (
+              <li key={i}>
+                {gap.method && <span className="kam-badge neutral" style={{ marginRight: 6 }}>{gap.method}</span>}
+                {gap.reason}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* ── GMV Commitment Card (TSP only) ────────────── */}
+      {merchant.dealType === 'tsp' && tspCompliance && (
+        <div className="kam-rules-commitment-card">
+          <div className="kam-card-header">
+            <span className="kam-card-title">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+              </svg>
+              GMV Commitment — {tspCompliance.lockedGatewayName}
+            </span>
+            <span className={`kam-badge ${tspCompliance.status === 'on_track' ? 'success' : tspCompliance.status === 'at_risk' ? 'warning' : 'danger'}`}>
+              {tspCompliance.status === 'on_track' ? 'On Track' : tspCompliance.status === 'at_risk' ? 'At Risk' : 'Off Track'}
+            </span>
+          </div>
+          <div className="kam-rules-commitment-body">
+            <div className="kam-rules-commitment-metrics">
+              <div className="kam-rules-commitment-metric">
+                <span className="label">Annual Target</span>
+                <span className="value">{formatINR(tspCompliance.gmvCommitment)}</span>
+              </div>
+              <div className="kam-rules-commitment-metric">
+                <span className="label">Projected Annual</span>
+                <span className="value">{formatINR(tspCompliance.projectedAnnualGMV)}</span>
+              </div>
+              <div className="kam-rules-commitment-metric">
+                <span className="label">Current Traffic</span>
+                <span className="value">{tspCompliance.actualTrafficPct}%</span>
+              </div>
+              <div className="kam-rules-commitment-metric">
+                <span className="label">Suggested Traffic</span>
+                <span className="value" style={{ color: 'var(--rzp-blue)' }}>{tspCompliance.suggestedTrafficPct}%</span>
+              </div>
+            </div>
+            <div className="kam-rules-commitment-progress">
+              <div className="kam-rules-progress-bar">
+                <div
+                  className={`kam-rules-progress-fill ${tspCompliance.status}`}
+                  style={{ width: `${Math.min(100, (tspCompliance.projectedAnnualGMV / tspCompliance.gmvCommitment) * 100)}%` }}
+                />
+              </div>
+              <span className="kam-rules-progress-label">
+                {((tspCompliance.projectedAnnualGMV / tspCompliance.gmvCommitment) * 100).toFixed(0)}% of target
+              </span>
+            </div>
+            {tspCompliance.status !== 'on_track' && (
+              <button className="kam-btn kam-btn-primary" style={{ marginTop: 12, fontSize: 13 }} onClick={handleApplySuggestedSplit}>
+                Apply Suggested Split ({tspCompliance.suggestedTrafficPct}% → {tspCompliance.lockedGatewayName})
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── Offer Routing Card (offer-linked only) ─────── */}
+      {merchant.dealType === 'offer_linked' && merchant.dealDetails && (
+        <div className="kam-rules-offer-card">
+          <div className="kam-card-header">
+            <span className="kam-card-title">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 12 20 22 4 22 4 12" /><rect x="2" y="7" width="20" height="5" /><line x1="12" y1="22" x2="12" y2="7" /><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z" /><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" />
+              </svg>
+              Offer Routing
+            </span>
+            <span className={`kam-badge ${hasOfferRule ? 'success' : 'warning'}`}>
+              {hasOfferRule ? 'Rule Active' : 'Rule Missing'}
+            </span>
+          </div>
+          <p style={{ fontSize: 13, fontFamily: 'var(--font-secondary)', color: 'var(--rzp-text-secondary)', lineHeight: 1.5, marginBottom: 12 }}>
+            {merchant.dealDetails.description}
+          </p>
+          <div style={{ display: 'flex', gap: 16, fontSize: 13, fontFamily: 'var(--font-secondary)', color: 'var(--rzp-text-primary)', marginBottom: 12 }}>
+            <span><strong>Constraint:</strong> {merchant.dealDetails.constraint}</span>
+            <span><strong>Expires:</strong> {merchant.dealDetails.expiresAt}</span>
+          </div>
+          {!hasOfferRule && (
+            <button className="kam-btn kam-btn-primary" style={{ fontSize: 13 }} onClick={handleCreateOfferRule}>
+              Create Offer Rule
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* ── Rule List ──────────────────────────────────── */}
+      <div className="kam-detail-card">
+        <div className="kam-card-header">
+          <span className="kam-card-title">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" /><line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" />
+            </svg>
+            Routing Rules
+          </span>
+          <button className="kam-btn kam-btn-primary kam-rules-add-btn" onClick={() => handleOpenBuilder()}>
+            + Add Rule
+          </button>
+        </div>
+        <p style={{ fontSize: 13, fontFamily: 'var(--font-secondary)', color: 'var(--rzp-text-secondary)', lineHeight: 1.5, marginBottom: 16 }}>
+          Rules are evaluated in priority order. First matching rule wins. The default fallback rule catches unmatched transactions.
+        </p>
+
+        <div className="kam-rules-list">
+          {nonDefaultRules.map((rule, idx) => (
+            <div key={rule.id} className={`kam-rule-card ${rule.type === 'volume_split' ? 'volume-split' : 'conditional'}${!rule.enabled ? ' disabled' : ''}`}>
+              <div className="kam-rule-card-header">
+                <div className="kam-rule-left">
+                  <span className="kam-rule-priority">#{idx + 1}</span>
+                  <span className="kam-rule-name">{rule.name}</span>
+                  <span className={`kam-badge ${rule.type === 'volume_split' ? 'deal-tsp' : 'info'}`} style={{ fontSize: 11 }}>
+                    {rule.type === 'volume_split' ? 'Volume Split' : 'Conditional'}
+                  </span>
+                </div>
+                <div className="kam-rule-actions">
+                  <button className="kam-rule-move-btn" title="Move up" disabled={idx === 0} onClick={() => handleMoveRule(rule.id, 'up')}>↑</button>
+                  <button className="kam-rule-move-btn" title="Move down" disabled={idx === nonDefaultRules.length - 1} onClick={() => handleMoveRule(rule.id, 'down')}>↓</button>
+                  <label className="kam-rule-toggle">
+                    <input type="checkbox" checked={rule.enabled} onChange={() => toggleRuleEnabled(merchant.id, rule.id)} />
+                    <span className="kam-rule-toggle-slider" />
+                  </label>
+                  <button className="kam-rule-edit-btn" title="Edit" onClick={() => handleOpenBuilder(rule)}>
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
+                  </button>
+                  <button className="kam-rule-delete-btn" title="Delete" onClick={() => deleteRule(merchant.id, rule.id)}>
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
+                  </button>
+                </div>
+              </div>
+
+              {/* Conditions */}
+              {rule.conditions.length > 0 && (
+                <div className="kam-rule-conditions">
+                  <span className="kam-rule-if">IF</span>
+                  {rule.conditions.map((c, ci) => (
+                    <React.Fragment key={ci}>
+                      {ci > 0 && <span className="kam-rule-logic">{rule.conditionLogic}</span>}
+                      <span className="kam-rule-condition-chip">
+                        {RULE_CONDITIONS[c.field]?.label || c.field} {RULE_OPERATOR_LABELS[c.operator] || c.operator} {
+                          Array.isArray(c.value)
+                            ? `${c.value[0]}–${c.value[1]}`
+                            : c.field === 'amount' ? `₹${Number(c.value).toLocaleString('en-IN')}` : c.value
+                        }
+                      </span>
+                    </React.Fragment>
+                  ))}
+                </div>
+              )}
+
+              {/* Action */}
+              <div className="kam-rule-action">
+                {rule.action.type === 'route' ? (
+                  <>
+                    <span className="kam-rule-then">THEN Route to:</span>
+                    {rule.action.terminals.map((tid, i) => {
+                      const info = getTerminalGatewayInfo(tid)
+                      return (
+                        <React.Fragment key={tid}>
+                          {i > 0 && <span className="kam-rule-arrow">→</span>}
+                          <span className="kam-rule-terminal-chip">{info?.displayId || tid} <span className="muted">({info?.gatewayShort || '??'})</span></span>
+                        </React.Fragment>
+                      )
+                    })}
+                  </>
+                ) : (
+                  <>
+                    <span className="kam-rule-then">THEN Split:</span>
+                    {rule.action.splits.map((s, i) => {
+                      const info = getTerminalGatewayInfo(s.terminalId)
+                      return (
+                        <React.Fragment key={s.terminalId}>
+                          {i > 0 && <span className="kam-rule-split-dot">·</span>}
+                          <span className="kam-rule-terminal-chip">{info?.displayId || s.terminalId} ({s.percentage}%)</span>
+                        </React.Fragment>
+                      )
+                    })}
+                  </>
+                )}
+              </div>
+
+              {/* Meta */}
+              <div className="kam-rule-meta">
+                Created {new Date(rule.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })} by {rule.createdBy.split('@')[0]}
+              </div>
+            </div>
+          ))}
+
+          {/* Default Rule (read-only) */}
+          {defaultRule && (
+            <div className="kam-rule-card kam-rule-default">
+              <div className="kam-rule-card-header">
+                <div className="kam-rule-left">
+                  <span className="kam-rule-priority" style={{ background: 'var(--rzp-bg-secondary)', color: 'var(--rzp-text-muted)' }}>∞</span>
+                  <span className="kam-rule-name">{defaultRule.name}</span>
+                  <span className="kam-badge neutral" style={{ fontSize: 11 }}>Default Fallback</span>
+                </div>
+              </div>
+              <div className="kam-rule-action">
+                <span className="kam-rule-then">Fallback:</span>
+                {defaultRule.action.terminals.map((tid, i) => {
+                  const info = getTerminalGatewayInfo(tid)
+                  return (
+                    <React.Fragment key={tid}>
+                      {i > 0 && <span className="kam-rule-arrow">→</span>}
+                      <span className="kam-rule-terminal-chip">{info?.displayId || tid} <span className="muted">({info?.gatewayShort || '??'})</span></span>
+                    </React.Fragment>
+                  )
+                })}
+              </div>
+              <div className="kam-rule-meta">
+                Strategy: {merchant.routingStrategy === 'cost_based' ? 'Cost-optimised' : 'SR-optimised'} · Cannot be deleted
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ── Transaction Simulator (collapsible) ──────── */}
+      <div className="kam-detail-card kam-rules-simulator">
+        <div className="kam-card-header" onClick={() => setShowSimulator(!showSimulator)} style={{ cursor: 'pointer' }}>
+          <span className="kam-card-title">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+            </svg>
+            Transaction Simulator
+          </span>
+          <span style={{ fontSize: 20, color: 'var(--rzp-text-muted)', transition: 'transform 0.2s', transform: showSimulator ? 'rotate(180deg)' : 'rotate(0)' }}>▾</span>
+        </div>
+        {showSimulator && (
+          <>
+            <div className="kam-rules-sim-form">
+              <div className="kam-rules-sim-field">
+                <label>Payment Method</label>
+                <select value={simForm.payment_method} onChange={e => setSimForm(p => ({ ...p, payment_method: e.target.value }))}>
+                  {RULE_CONDITIONS.payment_method.options.map(o => <option key={o} value={o}>{o}</option>)}
+                </select>
+              </div>
+              <div className="kam-rules-sim-field">
+                <label>Card Network</label>
+                <select value={simForm.card_network} onChange={e => setSimForm(p => ({ ...p, card_network: e.target.value }))}>
+                  {RULE_CONDITIONS.card_network.options.map(o => <option key={o} value={o}>{o}</option>)}
+                </select>
+              </div>
+              <div className="kam-rules-sim-field">
+                <label>Amount (₹)</label>
+                <input type="number" value={simForm.amount} onChange={e => setSimForm(p => ({ ...p, amount: Number(e.target.value) || 0 }))} />
+              </div>
+              <div className="kam-rules-sim-field">
+                <label>Issuer Bank</label>
+                <select value={simForm.issuer_bank} onChange={e => setSimForm(p => ({ ...p, issuer_bank: e.target.value }))}>
+                  {RULE_CONDITIONS.issuer_bank.options.map(o => <option key={o} value={o}>{o}</option>)}
+                </select>
+              </div>
+              <button className="kam-btn kam-btn-primary" onClick={handleSimulate} style={{ alignSelf: 'flex-end' }}>Simulate</button>
+            </div>
+            {simResult && (
+              <div className="kam-rules-sim-result">
+                {simResult.matchedRule ? (
+                  <>
+                    <div className="kam-rules-sim-match">
+                      <span className="kam-rules-sim-label">Matched Rule:</span>
+                      <span className="kam-rules-sim-value">{simResult.matchedRule.name}</span>
+                      <span className={`kam-badge ${simResult.matchedRule.isDefault ? 'neutral' : 'info'}`} style={{ fontSize: 11 }}>
+                        {simResult.matchedRule.isDefault ? 'Default' : `#${simResult.matchedRule.priority}`}
+                      </span>
+                    </div>
+                    <div className="kam-rules-sim-terminals">
+                      <span className="kam-rules-sim-label">Terminal Route:</span>
+                      {simResult.terminals.map((t, i) => (
+                        <span key={t.terminalId} className="kam-rule-terminal-chip">
+                          {t.displayId} ({t.gatewayShort}) — SR {t.successRate}%, ₹{t.costPerTxn.toFixed(2)}
+                          {t.percentage != null && ` · ${t.percentage}%`}
+                        </span>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <div className="kam-rules-sim-no-match">
+                    <WarningIcon /> No rule matched — transaction would fail (NTF)
+                  </div>
+                )}
+                {simResult.warnings.length > 0 && (
+                  <div className="kam-rules-sim-warnings">
+                    {simResult.warnings.map((w, i) => (
+                      <div key={i} className="kam-rules-sim-warning">⚠ {w}</div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* ── Rule Builder Modal ───────────────────────── */}
+      {showRuleBuilder && (
+        <div className="kam-modal-overlay" onClick={() => setShowRuleBuilder(false)}>
+          <div className="kam-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 640 }}>
+            <div className="kam-modal-header">
+              <div>
+                <h3>{editingRule ? 'Edit Rule' : 'Add Rule'}</h3>
+                <p>{merchant.name}</p>
+              </div>
+              <button className="kam-modal-close" onClick={() => setShowRuleBuilder(false)}>
+                <XIcon />
+              </button>
+            </div>
+            <div className="kam-modal-body" style={{ maxHeight: 'calc(80vh - 160px)', overflowY: 'auto' }}>
+              {/* Rule Name */}
+              <div className="kam-rule-builder-field">
+                <label>Rule Name</label>
+                <input type="text" value={ruleForm.name} onChange={e => setRuleForm(p => ({ ...p, name: e.target.value }))} placeholder="e.g. Visa CC High Value → HDFC" />
+              </div>
+
+              {/* Rule Type */}
+              <div className="kam-rule-builder-field">
+                <label>Rule Type</label>
+                <div className="kam-rule-builder-type-cards">
+                  <div
+                    className={`kam-rule-type-card${ruleForm.type === 'conditional' ? ' selected' : ''}`}
+                    onClick={() => setRuleForm(p => ({ ...p, type: 'conditional' }))}
+                  >
+                    <strong>Conditional</strong>
+                    <span>If-then routing based on payment attributes</span>
+                  </div>
+                  <div
+                    className={`kam-rule-type-card${ruleForm.type === 'volume_split' ? ' selected' : ''}`}
+                    onClick={() => setRuleForm(p => ({ ...p, type: 'volume_split' }))}
+                  >
+                    <strong>Volume Split</strong>
+                    <span>Distribute traffic by percentage</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Conditions */}
+              <div className="kam-rule-builder-field">
+                <label>
+                  Conditions
+                  {ruleForm.type === 'volume_split' && <span style={{ fontWeight: 400, color: 'var(--rzp-text-muted)' }}> (optional for volume splits)</span>}
+                </label>
+                {ruleForm.conditions.length > 1 && (
+                  <div className="kam-rule-builder-logic-toggle">
+                    <button className={ruleForm.conditionLogic === 'AND' ? 'active' : ''} onClick={() => setRuleForm(p => ({ ...p, conditionLogic: 'AND' }))}>AND</button>
+                    <button className={ruleForm.conditionLogic === 'OR' ? 'active' : ''} onClick={() => setRuleForm(p => ({ ...p, conditionLogic: 'OR' }))}>OR</button>
+                  </div>
+                )}
+                <div className="kam-rule-builder-conditions">
+                  {ruleForm.conditions.map((cond, ci) => (
+                    <div key={ci} className="kam-rule-builder-condition-row">
+                      <select value={cond.field} onChange={e => {
+                        const newField = e.target.value
+                        const config = RULE_CONDITIONS[newField]
+                        updateCondition(ci, {
+                          field: newField,
+                          operator: config.operators[0],
+                          value: config.type === 'number' ? 0 : config.options[0],
+                        })
+                      }}>
+                        {Object.entries(RULE_CONDITIONS).map(([key, cfg]) => (
+                          <option key={key} value={key}>{cfg.label}</option>
+                        ))}
+                      </select>
+                      <select value={cond.operator} onChange={e => updateCondition(ci, { operator: e.target.value })}>
+                        {(RULE_CONDITIONS[cond.field]?.operators || ['equals']).map(op => (
+                          <option key={op} value={op}>{RULE_OPERATOR_LABELS[op] || op}</option>
+                        ))}
+                      </select>
+                      {RULE_CONDITIONS[cond.field]?.type === 'select' ? (
+                        <select value={cond.value} onChange={e => updateCondition(ci, { value: e.target.value })}>
+                          {(RULE_CONDITIONS[cond.field]?.options || []).map(o => (
+                            <option key={o} value={o}>{o}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <input type="number" value={cond.value} onChange={e => updateCondition(ci, { value: Number(e.target.value) || 0 })} placeholder="Amount" />
+                      )}
+                      <button className="kam-rule-builder-remove-btn" onClick={() => removeCondition(ci)}>×</button>
+                    </div>
+                  ))}
+                  <button className="kam-btn kam-btn-secondary" style={{ fontSize: 12, padding: '4px 12px' }} onClick={addCondition}>+ Add Condition</button>
+                </div>
+              </div>
+
+              {/* Action: Terminal Selection */}
+              <div className="kam-rule-builder-field">
+                <label>{ruleForm.type === 'conditional' ? 'Route to Terminals (priority order)' : 'Split Percentages'}</label>
+                {ruleForm.type === 'conditional' ? (
+                  <div className="kam-rule-builder-terminals">
+                    {availableTerminals.map(t => (
+                      <div
+                        key={t.terminalId}
+                        className={`kam-rule-terminal-option${ruleForm.terminals.includes(t.terminalId) ? ' selected' : ''}`}
+                        onClick={() => toggleTerminal(t.terminalId)}
+                      >
+                        <span className="kam-rule-terminal-check">{ruleForm.terminals.includes(t.terminalId) ? '✓' : ''}</span>
+                        <span className="kam-rule-terminal-id">{t.displayId}</span>
+                        <span className="kam-rule-terminal-gw">{t.gatewayShort}</span>
+                        <span className="kam-rule-terminal-sr">SR {t.successRate}%</span>
+                        <span className="kam-rule-terminal-cost">₹{t.costPerTxn.toFixed(2)}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="kam-rule-builder-splits">
+                    {ruleForm.splits.map(s => {
+                      const t = availableTerminals.find(at => at.terminalId === s.terminalId)
+                      return (
+                        <div key={s.terminalId} className="kam-rule-split-row">
+                          <span className="kam-rule-terminal-id">{t?.displayId || s.terminalId}</span>
+                          <span className="kam-rule-terminal-gw">{t?.gatewayShort || '??'}</span>
+                          <input
+                            type="number"
+                            min="0"
+                            max="100"
+                            value={s.percentage}
+                            onChange={e => updateSplitPct(s.terminalId, e.target.value)}
+                            className="kam-rule-split-input"
+                          />
+                          <span>%</span>
+                          <button className="kam-rule-builder-remove-btn" onClick={() => removeSplit(s.terminalId)}>×</button>
+                        </div>
+                      )
+                    })}
+                    <div className="kam-rule-split-total">
+                      Total: {ruleForm.splits.reduce((s, sp) => s + sp.percentage, 0)}%
+                      {ruleForm.splits.reduce((s, sp) => s + sp.percentage, 0) !== 100 && (
+                        <span style={{ color: 'var(--rzp-danger)', marginLeft: 8 }}>Must equal 100%</span>
+                      )}
+                    </div>
+                    <div className="kam-rule-builder-add-split">
+                      {availableTerminals
+                        .filter(t => !ruleForm.splits.some(s => s.terminalId === t.terminalId))
+                        .map(t => (
+                          <button key={t.terminalId} className="kam-btn kam-btn-secondary" style={{ fontSize: 12, padding: '4px 10px' }} onClick={() => addSplit(t.terminalId)}>
+                            + {t.displayId}
+                          </button>
+                        ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="kam-modal-footer">
+              <button className="kam-btn kam-btn-secondary" onClick={() => setShowRuleBuilder(false)}>Cancel</button>
+              <button className="kam-btn kam-btn-primary" onClick={handleSaveRule}>
+                {editingRule ? 'Update Rule' : 'Save Rule'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   )
 }

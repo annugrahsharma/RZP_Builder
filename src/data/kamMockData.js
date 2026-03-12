@@ -534,6 +534,22 @@ export const routingStrategies = [
   },
 ]
 
+// ── Rule Engine Schema ─────────────────
+export const RULE_CONDITIONS = {
+  payment_method: { label: 'Payment Method', type: 'select', options: ['CC', 'DC', 'UPI', 'NB'], operators: ['equals'] },
+  card_network:   { label: 'Card Network',   type: 'select', options: ['Visa', 'Mastercard', 'RuPay', 'Amex'], operators: ['equals'] },
+  card_type:      { label: 'Card Type',      type: 'select', options: ['credit', 'debit'], operators: ['equals'] },
+  issuer_bank:    { label: 'Issuer Bank',    type: 'select', options: ['HDFC', 'ICICI', 'SBI', 'Axis', 'Kotak'], operators: ['equals'] },
+  amount:         { label: 'Amount (₹)',     type: 'number', options: [], operators: ['greater_than', 'less_than', 'between'] },
+}
+
+export const RULE_OPERATOR_LABELS = {
+  equals: '=',
+  greater_than: '>',
+  less_than: '<',
+  between: 'between',
+}
+
 // ── Helpers ─────────────────────────────
 
 export function computeMerchantRevenue(merchant) {
@@ -1675,4 +1691,536 @@ export function generateMonthlyHistory(merchantList) {
   }
 
   return months
+}
+
+// ── Rule Engine ───────────────────────────
+
+// Seed routing rules per merchant (custom rules only — default rule is generated)
+const SEED_RULES = {
+  // Zomato — standard, SR-based, 4 terminals
+  'merch-001': [
+    {
+      id: 'rule-merch-001-001', name: 'Visa CC High Value → HDFC', type: 'conditional', enabled: true, priority: 1,
+      conditions: [
+        { field: 'payment_method', operator: 'equals', value: 'CC' },
+        { field: 'card_network', operator: 'equals', value: 'Visa' },
+        { field: 'amount', operator: 'greater_than', value: 5000 },
+      ],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-hdfc-001', 'term-icici-001'], splits: [] },
+      isDefault: false, createdAt: '2026-02-10T10:30:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+    {
+      id: 'rule-merch-001-002', name: 'UPI → HDFC + Axis', type: 'conditional', enabled: true, priority: 2,
+      conditions: [{ field: 'payment_method', operator: 'equals', value: 'UPI' }],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-hdfc-001', 'term-axis-001'], splits: [] },
+      isDefault: false, createdAt: '2026-02-10T10:35:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+  ],
+  // Swiggy — TSP, HDFC 70% commitment
+  'merch-002': [
+    {
+      id: 'rule-merch-002-001', name: 'HDFC Volume Commitment (TSP)', type: 'volume_split', enabled: true, priority: 1,
+      conditions: [],
+      conditionLogic: 'AND',
+      action: { type: 'split', terminals: [], splits: [
+        { terminalId: 'term-hdfc-001', percentage: 70 },
+        { terminalId: 'term-icici-002', percentage: 30 },
+      ]},
+      isDefault: false, createdAt: '2026-01-15T10:30:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+    {
+      id: 'rule-merch-002-002', name: 'High Value Visa CC → HDFC', type: 'conditional', enabled: true, priority: 2,
+      conditions: [
+        { field: 'payment_method', operator: 'equals', value: 'CC' },
+        { field: 'card_network', operator: 'equals', value: 'Visa' },
+        { field: 'amount', operator: 'greater_than', value: 5000 },
+      ],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-hdfc-001'], splits: [] },
+      isDefault: false, createdAt: '2026-01-20T14:15:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+  ],
+  // CRED — standard, fintech
+  'merch-003': [
+    {
+      id: 'rule-merch-003-001', name: 'CC → HDFC Terminals', type: 'conditional', enabled: true, priority: 1,
+      conditions: [{ field: 'payment_method', operator: 'equals', value: 'CC' }],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-hdfc-001', 'term-hdfc-002'], splits: [] },
+      isDefault: false, createdAt: '2026-02-05T09:00:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+    {
+      id: 'rule-merch-003-002', name: 'UPI → Axis', type: 'conditional', enabled: true, priority: 2,
+      conditions: [{ field: 'payment_method', operator: 'equals', value: 'UPI' }],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-axis-001'], splits: [] },
+      isDefault: false, createdAt: '2026-02-05T09:10:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+  ],
+  // Flipkart — standard, e-commerce, 3 terminals
+  'merch-004': [
+    {
+      id: 'rule-merch-004-001', name: 'Mastercard CC → ICICI', type: 'conditional', enabled: true, priority: 1,
+      conditions: [
+        { field: 'payment_method', operator: 'equals', value: 'CC' },
+        { field: 'card_network', operator: 'equals', value: 'Mastercard' },
+      ],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-icici-001'], splits: [] },
+      isDefault: false, createdAt: '2026-02-01T11:00:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+    {
+      id: 'rule-merch-004-002', name: 'UPI → HDFC + Axis', type: 'conditional', enabled: true, priority: 2,
+      conditions: [{ field: 'payment_method', operator: 'equals', value: 'UPI' }],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-hdfc-002', 'term-axis-001'], splits: [] },
+      isDefault: false, createdAt: '2026-02-01T11:15:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+    {
+      id: 'rule-merch-004-003', name: 'RuPay Debit → ICICI', type: 'conditional', enabled: true, priority: 3,
+      conditions: [
+        { field: 'payment_method', operator: 'equals', value: 'DC' },
+        { field: 'card_network', operator: 'equals', value: 'RuPay' },
+      ],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-icici-001'], splits: [] },
+      isDefault: false, createdAt: '2026-02-01T11:30:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+  ],
+  // BigBasket — standard, 2 terminals
+  'merch-005': [
+    {
+      id: 'rule-merch-005-001', name: 'UPI → RBL', type: 'conditional', enabled: true, priority: 1,
+      conditions: [{ field: 'payment_method', operator: 'equals', value: 'UPI' }],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-rbl-001'], splits: [] },
+      isDefault: false, createdAt: '2026-02-15T16:00:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+  ],
+  // Myntra — TSP violation! HDFC locked but NO HDFC terminal in metrics
+  'merch-006': [
+    {
+      id: 'rule-merch-006-001', name: 'High Value CC → Axis', type: 'conditional', enabled: true, priority: 1,
+      conditions: [
+        { field: 'payment_method', operator: 'equals', value: 'CC' },
+        { field: 'amount', operator: 'greater_than', value: 3000 },
+      ],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-axis-001'], splits: [] },
+      isDefault: false, createdAt: '2026-01-25T13:00:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+  ],
+  // BookMyShow — offer_linked, HDFC 10% cashback on CC
+  'merch-007': [
+    {
+      id: 'rule-merch-007-001', name: 'CC → HDFC (Cashback Offer)', type: 'conditional', enabled: true, priority: 1,
+      conditions: [{ field: 'payment_method', operator: 'equals', value: 'CC' }],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-hdfc-001'], splits: [] },
+      isDefault: false, createdAt: '2026-02-20T10:00:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+  ],
+  // MakeMyTrip — offer_linked, Axis EMI (but Axis NOT in merchant's terminals!)
+  'merch-008': [
+    {
+      id: 'rule-merch-008-001', name: 'High Value CC → ICICI', type: 'conditional', enabled: true, priority: 1,
+      conditions: [
+        { field: 'payment_method', operator: 'equals', value: 'CC' },
+        { field: 'amount', operator: 'greater_than', value: 10000 },
+      ],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-icici-001'], splits: [] },
+      isDefault: false, createdAt: '2026-02-18T15:30:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+  ],
+  // Nykaa — standard, cost_based
+  'merch-009': [
+    {
+      id: 'rule-merch-009-001', name: 'Visa CC → ICICI', type: 'conditional', enabled: true, priority: 1,
+      conditions: [
+        { field: 'payment_method', operator: 'equals', value: 'CC' },
+        { field: 'card_network', operator: 'equals', value: 'Visa' },
+      ],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-icici-002'], splits: [] },
+      isDefault: false, createdAt: '2026-03-01T10:00:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+  ],
+  // Urban Company — standard, cost_based
+  'merch-010': [
+    {
+      id: 'rule-merch-010-001', name: 'UPI → Yes Bank Zero Cost', type: 'conditional', enabled: true, priority: 1,
+      conditions: [{ field: 'payment_method', operator: 'equals', value: 'UPI' }],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-yes-001', 'term-axis-002'], splits: [] },
+      isDefault: false, createdAt: '2026-02-28T11:00:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+  ],
+  // Zepto — standard, SR-based, 4 terminals
+  'merch-011': [
+    {
+      id: 'rule-merch-011-001', name: 'CC High Value → HDFC', type: 'conditional', enabled: true, priority: 1,
+      conditions: [
+        { field: 'payment_method', operator: 'equals', value: 'CC' },
+        { field: 'amount', operator: 'greater_than', value: 2000 },
+      ],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-hdfc-001', 'term-icici-001'], splits: [] },
+      isDefault: false, createdAt: '2026-02-22T09:30:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+    {
+      id: 'rule-merch-011-002', name: 'UPI → Zero Cost Terminals', type: 'conditional', enabled: true, priority: 2,
+      conditions: [{ field: 'payment_method', operator: 'equals', value: 'UPI' }],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-yes-001', 'term-hdfc-001'], splits: [] },
+      isDefault: false, createdAt: '2026-02-22T09:45:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+  ],
+  // Ola — standard, 3 terminals
+  'merch-012': [
+    {
+      id: 'rule-merch-012-001', name: 'CC → ICICI + Axis', type: 'conditional', enabled: true, priority: 1,
+      conditions: [{ field: 'payment_method', operator: 'equals', value: 'CC' }],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-icici-001', 'term-axis-001'], splits: [] },
+      isDefault: false, createdAt: '2026-02-12T14:00:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+    {
+      id: 'rule-merch-012-002', name: 'UPI → Axis + RBL', type: 'conditional', enabled: true, priority: 2,
+      conditions: [{ field: 'payment_method', operator: 'equals', value: 'UPI' }],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-axis-001', 'term-rbl-001'], splits: [] },
+      isDefault: false, createdAt: '2026-02-12T14:15:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+  ],
+  // PhonePe — standard, high volume, 4 terminals
+  'merch-013': [
+    {
+      id: 'rule-merch-013-001', name: 'Visa CC → HDFC + ICICI', type: 'conditional', enabled: true, priority: 1,
+      conditions: [
+        { field: 'payment_method', operator: 'equals', value: 'CC' },
+        { field: 'card_network', operator: 'equals', value: 'Visa' },
+      ],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-hdfc-001', 'term-icici-001'], splits: [] },
+      isDefault: false, createdAt: '2026-02-08T10:00:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+    {
+      id: 'rule-merch-013-002', name: 'UPI → Axis Zero Cost', type: 'conditional', enabled: true, priority: 2,
+      conditions: [{ field: 'payment_method', operator: 'equals', value: 'UPI' }],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-axis-002'], splits: [] },
+      isDefault: false, createdAt: '2026-02-08T10:15:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+  ],
+  // Paytm Mall — standard, cost_based
+  'merch-014': [
+    {
+      id: 'rule-merch-014-001', name: 'UPI → Yes Bank Zero Cost', type: 'conditional', enabled: true, priority: 1,
+      conditions: [{ field: 'payment_method', operator: 'equals', value: 'UPI' }],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-yes-001'], splits: [] },
+      isDefault: false, createdAt: '2026-03-02T16:00:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+  ],
+  // 1mg — standard, cost_based
+  'merch-015': [
+    {
+      id: 'rule-merch-015-001', name: 'CC → RBL', type: 'conditional', enabled: true, priority: 1,
+      conditions: [{ field: 'payment_method', operator: 'equals', value: 'CC' }],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-rbl-002'], splits: [] },
+      isDefault: false, createdAt: '2026-03-05T11:30:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+  ],
+}
+
+/**
+ * Generate seed routing rules for a merchant.
+ * Returns custom rules + auto-generated default rule.
+ */
+export function generateSeedRules(merchant) {
+  const customRules = SEED_RULES[merchant.id] || []
+  const rules = customRules.map(r => ({ ...r }))
+
+  // Default rule: routes to all terminals sorted by current routing strategy
+  const sortedTerminals = [...merchant.gatewayMetrics]
+    .sort((a, b) => {
+      if (merchant.routingStrategy === 'cost_based') return a.costPerTxn - b.costPerTxn
+      return b.successRate - a.successRate
+    })
+    .map(gm => gm.terminalId)
+
+  rules.push({
+    id: `rule-${merchant.id}-default`,
+    name: 'Default Routing',
+    type: 'conditional',
+    enabled: true,
+    priority: 999,
+    conditions: [],
+    conditionLogic: 'AND',
+    action: { type: 'route', terminals: sortedTerminals, splits: [] },
+    isDefault: true,
+    createdAt: '2025-12-01T00:00:00Z',
+    createdBy: 'system',
+  })
+
+  return rules
+}
+
+// ── Rule Evaluation Engine ──────────────
+
+/**
+ * Check if a single rule's conditions match a transaction.
+ */
+function matchesConditions(rule, transaction) {
+  if (!rule.conditions || rule.conditions.length === 0) return true
+
+  const results = rule.conditions.map(cond => {
+    const txnValue = transaction[cond.field]
+    if (txnValue === undefined || txnValue === null) return false
+
+    switch (cond.operator) {
+      case 'equals':
+        return String(txnValue).toLowerCase() === String(cond.value).toLowerCase()
+      case 'greater_than':
+        return Number(txnValue) > Number(cond.value)
+      case 'less_than':
+        return Number(txnValue) < Number(cond.value)
+      case 'between':
+        if (!Array.isArray(cond.value) || cond.value.length < 2) return false
+        return Number(txnValue) >= Number(cond.value[0]) && Number(txnValue) <= Number(cond.value[1])
+      default:
+        return false
+    }
+  })
+
+  if (rule.conditionLogic === 'OR') return results.some(Boolean)
+  return results.every(Boolean) // AND
+}
+
+/**
+ * Walk enabled rules in priority order. First match wins.
+ * Returns { matchedRule, action } or { matchedRule: null, action: null }.
+ */
+export function evaluateRules(rules, transaction) {
+  const sorted = [...rules]
+    .filter(r => r.enabled)
+    .sort((a, b) => a.priority - b.priority)
+
+  for (const rule of sorted) {
+    if (matchesConditions(rule, transaction)) {
+      return { matchedRule: rule, action: rule.action }
+    }
+  }
+
+  return { matchedRule: null, action: null }
+}
+
+// ── NTF Gap Detection ────────────────────
+
+/**
+ * Detect coverage gaps that could cause Not-to-Fail (NTF) events.
+ * Checks: method-terminal mismatches, orphan terminals, missing default.
+ */
+export function detectNTFGaps(rules, merchant) {
+  const gaps = []
+  const enabledRules = rules.filter(r => r.enabled)
+
+  if (enabledRules.length === 0) {
+    gaps.push({ method: 'ALL', network: null, reason: 'No routing rules are enabled', severity: 'critical', ruleId: null })
+    return { hasGaps: true, gaps }
+  }
+
+  // Build terminal capability map from merchant's active terminals
+  const terminalMethods = {}
+  merchant.gatewayMetrics.forEach(gm => {
+    terminalMethods[gm.terminalId] = new Set(gm.supportedMethods || [])
+  })
+  const merchantTerminalIds = new Set(merchant.gatewayMetrics.map(gm => gm.terminalId))
+
+  // Check each non-default enabled rule for potential gaps
+  enabledRules.forEach(rule => {
+    if (rule.isDefault) return
+
+    const targetTerminals = rule.action.type === 'split'
+      ? rule.action.splits.map(s => s.terminalId)
+      : rule.action.terminals
+
+    // 1. Orphan terminals: referenced in rule but not in merchant's active terminals
+    const orphans = targetTerminals.filter(tid => !merchantTerminalIds.has(tid))
+    if (orphans.length > 0) {
+      const orphanNames = orphans.map(tid => getTerminalDisplayId(tid)).join(', ')
+      gaps.push({
+        method: null, network: null,
+        reason: `Rule "${rule.name}" references inactive terminal(s): ${orphanNames}`,
+        severity: 'critical', ruleId: rule.id,
+      })
+    }
+
+    // 2. For unconditional volume splits: must cover ALL merchant payment methods
+    if (rule.action.type === 'split' && rule.conditions.length === 0) {
+      const allMethods = new Set()
+      merchant.gatewayMetrics.forEach(gm => {
+        (gm.supportedMethods || []).forEach(m => allMethods.add(m))
+      })
+
+      allMethods.forEach(method => {
+        const hasSupport = targetTerminals.some(tid => {
+          const methods = terminalMethods[tid]
+          return methods && methods.has(method)
+        })
+        if (!hasSupport) {
+          gaps.push({
+            method, network: null,
+            reason: `Volume split "${rule.name}" has no terminal supporting ${method}`,
+            severity: 'high', ruleId: rule.id,
+          })
+        }
+      })
+    }
+
+    // 3. For conditional rules with payment_method: check terminal supports that method
+    const methodCond = rule.conditions.find(c => c.field === 'payment_method')
+    if (methodCond) {
+      const method = methodCond.value
+      const activeTargets = targetTerminals.filter(tid => merchantTerminalIds.has(tid))
+      const hasSupport = activeTargets.some(tid => {
+        const methods = terminalMethods[tid]
+        return methods && methods.has(method)
+      })
+      if (!hasSupport && activeTargets.length > 0) {
+        gaps.push({
+          method, network: null,
+          reason: `Rule "${rule.name}" routes ${method} to terminal(s) that don't support it`,
+          severity: 'critical', ruleId: rule.id,
+        })
+      }
+    }
+  })
+
+  // 4. Check: is the default rule present and enabled?
+  const hasDefaultEnabled = enabledRules.some(r => r.isDefault)
+  if (!hasDefaultEnabled) {
+    gaps.push({
+      method: 'ALL', network: null,
+      reason: 'Default fallback rule is disabled — unmatched transactions will fail',
+      severity: 'critical', ruleId: null,
+    })
+  }
+
+  return { hasGaps: gaps.length > 0, gaps }
+}
+
+// ── Transaction Simulator ────────────────
+
+/**
+ * Full simulation of a transaction against the rule set.
+ * Returns matched rule, resolved terminals, SR/cost, and any warnings.
+ */
+export function simulateTransaction(rules, transaction, merchant) {
+  const result = evaluateRules(rules, transaction)
+  const warnings = []
+
+  if (!result.matchedRule) {
+    return { matchedRule: null, terminals: [], warnings: ['No rule matched this transaction — it would fail (NTF)'] }
+  }
+
+  const { matchedRule, action } = result
+  const thresholdLow = merchant.srThresholdLow || 85
+
+  // Resolve target terminals with full detail
+  let targetTerminals
+  if (action.type === 'split') {
+    targetTerminals = action.splits.map(s => {
+      const gm = merchant.gatewayMetrics.find(g => g.terminalId === s.terminalId)
+      const gw = gateways.find(g => g.id === gm?.gatewayId)
+      const term = gw?.terminals.find(t => t.id === s.terminalId)
+      return {
+        terminalId: s.terminalId,
+        displayId: term?.terminalId || s.terminalId,
+        gatewayShort: gw?.shortName || '??',
+        percentage: s.percentage,
+        successRate: gm?.successRate || 0,
+        costPerTxn: gm?.costPerTxn || 0,
+        supportedMethods: gm?.supportedMethods || [],
+      }
+    })
+  } else {
+    targetTerminals = action.terminals.map(tid => {
+      const gm = merchant.gatewayMetrics.find(g => g.terminalId === tid)
+      const gw = gateways.find(g => g.id === gm?.gatewayId)
+      const term = gw?.terminals.find(t => t.id === tid)
+      return {
+        terminalId: tid,
+        displayId: term?.terminalId || tid,
+        gatewayShort: gw?.shortName || '??',
+        successRate: gm?.successRate || 0,
+        costPerTxn: gm?.costPerTxn || 0,
+        supportedMethods: gm?.supportedMethods || [],
+      }
+    })
+  }
+
+  // Warning: method not supported by target terminals
+  const paymentMethod = transaction.payment_method
+  if (paymentMethod) {
+    const supportsMethod = targetTerminals.some(t => t.supportedMethods.includes(paymentMethod))
+    if (!supportsMethod) {
+      warnings.push(`None of the target terminals support ${paymentMethod} — this transaction would fail (NTF)`)
+    }
+  }
+
+  // Warning: terminal SR below threshold
+  targetTerminals.forEach(t => {
+    if (t.successRate > 0 && t.successRate < thresholdLow) {
+      warnings.push(`Terminal ${t.displayId} has SR ${t.successRate}%, below threshold of ${thresholdLow}%`)
+    }
+  })
+
+  // Warning: terminal not in merchant's active list
+  const merchantTerminalIds = new Set(merchant.gatewayMetrics.map(gm => gm.terminalId))
+  targetTerminals.forEach(t => {
+    if (!merchantTerminalIds.has(t.terminalId)) {
+      warnings.push(`Terminal ${t.displayId} is not active for this merchant`)
+    }
+  })
+
+  return { matchedRule, terminals: targetTerminals, warnings }
+}
+
+// ── Terminal Display Helpers ─────────────
+
+/**
+ * Resolve internal terminal ID (e.g. 'term-hdfc-001') to display ID ('HDFC_T1').
+ */
+export function getTerminalDisplayId(terminalId) {
+  for (const gw of gateways) {
+    const term = gw.terminals.find(t => t.id === terminalId)
+    if (term) return term.terminalId
+  }
+  return terminalId
+}
+
+/**
+ * Get full gateway + terminal info from an internal terminal ID.
+ */
+export function getTerminalGatewayInfo(terminalId) {
+  for (const gw of gateways) {
+    const term = gw.terminals.find(t => t.id === terminalId)
+    if (term) {
+      return {
+        displayId: term.terminalId,
+        gatewayId: gw.id,
+        gatewayName: gw.name,
+        gatewayShort: gw.shortName,
+        successRate: term.successRate,
+        costPerTxn: term.costPerTxn,
+        isZeroCost: term.isZeroCost,
+      }
+    }
+  }
+  return null
 }
