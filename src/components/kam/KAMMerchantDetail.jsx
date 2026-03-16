@@ -24,6 +24,8 @@ import {
   getTerminalDisplayId,
   getTerminalGatewayInfo,
   parseRuleIntent,
+  generateNTFAnalysis,
+  merchants as allMerchantsData,
   gateways as gatewayData,
 } from '../../data/kamMockData'
 
@@ -147,6 +149,12 @@ const WarningIcon = () => (
     <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
     <line x1="12" y1="9" x2="12" y2="13" />
     <line x1="12" y1="17" x2="12.01" y2="17" />
+  </svg>
+)
+
+const ChevronIcon = ({ className }) => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <polyline points="6 9 12 15 18 9" />
   </svg>
 )
 
@@ -811,6 +819,7 @@ export default function KAMMerchantDetail() {
   const navigate = useNavigate()
   const {
     getMerchantById,
+    allMerchants,
     gateways,
     auditLog,
     addAuditEntry,
@@ -927,6 +936,9 @@ export default function KAMMerchantDetail() {
 
   const [expandedNTFs, setExpandedNTFs] = useState(new Set())
   const [copiedNTF, setCopiedNTF] = useState(null)
+  const [expandedProfiles, setExpandedProfiles] = useState(new Set())
+  const [ntfActiveLayer, setNtfActiveLayer] = useState({})
+  const [copiedTemplate, setCopiedTemplate] = useState(null)
 
   const cbrOrder = useMemo(() => {
     if (!merchant || merchant.srSensitive) return null
@@ -992,6 +1004,12 @@ export default function KAMMerchantDetail() {
     return transactions.filter(t => t.isNTF)
   }, [transactions])
   const ntfCount = ntfTransactions.length
+
+  const ntfAnalysis = useMemo(() => {
+    if (!merchant || ntfTransactions.length === 0) return null
+    const rules = merchant.routingRulesV2 || []
+    return generateNTFAnalysis(merchant, ntfTransactions, rules)
+  }, [merchant, ntfTransactions])
 
   const filteredTxns = useMemo(() => {
     let result = transactions
@@ -1634,6 +1652,7 @@ export default function KAMMerchantDetail() {
 
       {/* ── Routing Rules (RulesTabContent) ──────────────────────── */}
       <RulesTabContent
+        key={merchant.id}
         merchant={merchant}
         gateways={gateways}
         tspCompliance={tspCompliance}
@@ -1867,7 +1886,7 @@ export default function KAMMerchantDetail() {
             icon={<RoutingIcon />}
             iconBg={dopplerRoutePercent >= 80 ? 'var(--rzp-blue-light)' : 'var(--rzp-warning-light)'}
             iconColor={dopplerRoutePercent >= 80 ? 'var(--rzp-blue)' : 'var(--rzp-warning)'}
-            label="Doppler Routed"
+            label="ML Routed"
             value={`${dopplerRoutePercent}%`}
             delta={dopplerRoutePercent >= 80 ? 'Healthy' : 'Below 80% threshold'}
             deltaType={dopplerRoutePercent >= 80 ? 'positive' : 'negative'}
@@ -2128,7 +2147,218 @@ export default function KAMMerchantDetail() {
       </div>
 
       {/* ══════════════════════════════════════════════════════════ */}
-      {/*  SECTION 7: AUDIT LOG                                       */}
+      {/*  SECTION 7: NTF ANALYSIS                                    */}
+      {/* ══════════════════════════════════════════════════════════ */}
+      <div ref={el => sectionRefs.current.ntfs = el} className="kam-tab-section">
+        <div className="kam-card">
+          <div className="kam-card-header">
+            <h3 className="kam-card-title">
+              <WarningIcon style={{ display: 'inline', verticalAlign: '-3px', marginRight: 6 }} />
+              NTF Analysis
+            </h3>
+            {ntfAnalysis?.summary && (
+              <span className="kam-badge danger">{ntfAnalysis.summary.totalNTFCount} failures</span>
+            )}
+          </div>
+
+          {!ntfAnalysis || ntfAnalysis.profiles.length === 0 ? (
+            <div className="kam-empty-state" style={{ minHeight: 120 }}>
+              <CheckCircleIcon />
+              <p>No NTF failures detected. All transactions routed successfully.</p>
+            </div>
+          ) : (
+            <>
+              {/* Summary banner */}
+              <div className="kam-ntfa-summary">
+                <div className="kam-ntfa-summary-metrics">
+                  <div className="kam-ntfa-summary-metric">
+                    <span className="kam-ntfa-metric-label">Total NTFs</span>
+                    <span className="kam-ntfa-metric-value">{ntfAnalysis.summary.totalNTFCount}</span>
+                  </div>
+                  <div className="kam-ntfa-summary-metric">
+                    <span className="kam-ntfa-metric-label">Revenue Lost</span>
+                    <span className="kam-ntfa-metric-value danger">₹{formatINR(ntfAnalysis.summary.totalRevenueLost)}</span>
+                  </div>
+                  <div className="kam-ntfa-summary-metric">
+                    <span className="kam-ntfa-metric-label">SR Impact</span>
+                    <span className="kam-ntfa-metric-value danger">{ntfAnalysis.summary.totalSRImpact}%</span>
+                  </div>
+                  <div className="kam-ntfa-summary-metric">
+                    <span className="kam-ntfa-metric-label">Top Cause</span>
+                    <span className="kam-ntfa-metric-value small">{ntfAnalysis.summary.topCause}</span>
+                    <span className="kam-ntfa-metric-sub">{ntfAnalysis.summary.topCausePercentage}% of NTFs</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Profile list */}
+              <div className="kam-ntfa-profiles">
+                {ntfAnalysis.profiles.map(profile => {
+                  const isExpanded = expandedProfiles.has(profile.id)
+                  const activeLayer = ntfActiveLayer[profile.id] || 'isolate'
+                  return (
+                    <div key={profile.id} className={`kam-ntfa-profile ${isExpanded ? 'expanded' : ''}`}>
+                      <div
+                        className="kam-ntfa-profile-header"
+                        onClick={() => {
+                          setExpandedProfiles(prev => {
+                            const next = new Set(prev)
+                            next.has(profile.id) ? next.delete(profile.id) : next.add(profile.id)
+                            return next
+                          })
+                        }}
+                      >
+                        <div className="kam-ntfa-profile-info">
+                          <span className="kam-ntfa-profile-label">{profile.profileLabel}</span>
+                          <span className={`kam-badge ${profile.ntfCause === 'rule_elimination' ? 'danger' : profile.ntfCause === 'method_unsupported' ? 'warning' : 'neutral'}`}>
+                            {profile.ntfCauseLabel}
+                          </span>
+                        </div>
+                        <div className="kam-ntfa-profile-stats">
+                          <span className="kam-badge danger">{profile.txnCount} txns</span>
+                          <span className="kam-ntfa-revenue-lost">₹{formatINR(profile.totalAmount)} failed</span>
+                          <ChevronIcon className={`kam-ntfa-chevron ${isExpanded ? 'expanded' : ''}`} />
+                        </div>
+                      </div>
+
+                      {isExpanded && (
+                        <div className="kam-ntfa-profile-body">
+                          {/* Layer tabs */}
+                          <div className="kam-ntfa-layer-tabs">
+                            {['isolate', 'understand', 'act'].map(layer => (
+                              <button
+                                key={layer}
+                                className={`kam-ntfa-layer-tab ${activeLayer === layer ? 'active' : ''}`}
+                                onClick={() => setNtfActiveLayer(prev => ({ ...prev, [profile.id]: layer }))}
+                              >
+                                {layer === 'isolate' ? 'Rule Chain' : layer === 'understand' ? 'Impact' : 'Actions'}
+                              </button>
+                            ))}
+                          </div>
+
+                          {/* Layer 1: Isolate — Rule chain waterfall */}
+                          {activeLayer === 'isolate' && (
+                            <div className="kam-ntfa-waterfall">
+                              {profile.ruleChainTrace.steps.map((step, si) => (
+                                <div key={si} className={`kam-ntfa-step ${step.type === 'ntf' || step.type === 'rule_ntf' || step.type === 'pipeline_filter' ? 'ntf-cause' : step.type === 'rule_filter' ? 'filtered' : ''}`}>
+                                  <div className={`kam-ntfa-step-marker ${step.type === 'ntf' || step.type === 'rule_ntf' ? 'danger' : step.type === 'rule_filter' || step.type === 'pipeline_filter' ? 'warning' : step.type === 'rule_skip' ? 'neutral' : 'success'}`} />
+                                  <div className="kam-ntfa-step-content">
+                                    <div className="kam-ntfa-step-header">
+                                      <span className="kam-ntfa-step-label">{step.label}</span>
+                                      {step.ruleType && <span className="kam-badge neutral" style={{ fontSize: 10 }}>{step.ruleType}</span>}
+                                    </div>
+                                    <p className="kam-ntfa-step-desc">{step.description}</p>
+                                    {step.terminalsRemaining && step.terminalsRemaining.length > 0 && (
+                                      <div className="kam-ntfa-step-terminals">
+                                        {step.terminalsRemaining.map(t => (
+                                          <span key={t.terminalId || t.displayId} className="kam-ntfa-terminal-chip remaining">{t.displayId || t.terminalId}</span>
+                                        ))}
+                                      </div>
+                                    )}
+                                    {step.terminalsEliminated && step.terminalsEliminated.length > 0 && (
+                                      <div className="kam-ntfa-step-terminals">
+                                        {step.terminalsEliminated.map(t => (
+                                          <span key={t.terminalId || t.displayId} className="kam-ntfa-terminal-chip eliminated">{t.displayId || t.terminalId} ✕</span>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Layer 2: Understand — Impact */}
+                          {activeLayer === 'understand' && (
+                            <div className="kam-ntfa-understand">
+                              <div className="kam-ntfa-impact-grid">
+                                <div className="kam-ntfa-impact-card">
+                                  <span className="kam-ntfa-metric-label">Revenue Lost</span>
+                                  <span className="kam-ntfa-metric-value danger">₹{formatINR(profile.impact.revenueLost)}</span>
+                                </div>
+                                <div className="kam-ntfa-impact-card">
+                                  <span className="kam-ntfa-metric-label">SR Impact</span>
+                                  <span className="kam-ntfa-metric-value danger">{profile.impact.srImpact}%</span>
+                                </div>
+                                <div className="kam-ntfa-impact-card">
+                                  <span className="kam-ntfa-metric-label">Failed Txns</span>
+                                  <span className="kam-ntfa-metric-value">{profile.txnCount}</span>
+                                </div>
+                              </div>
+
+                              <div className="kam-ntfa-explain-card">
+                                <h4>Trade-off</h4>
+                                <p>{profile.impact.tradeOff}</p>
+                              </div>
+
+                              {profile.impact.alternativeTerminals.length > 0 && (
+                                <div className="kam-ntfa-explain-card alt">
+                                  <h4>Alternative Terminals</h4>
+                                  <p>These terminals could be procured to provide coverage:</p>
+                                  <div className="kam-ntfa-alt-terminals">
+                                    {profile.impact.alternativeTerminals.map(t => (
+                                      <div key={t.terminalId} className="kam-ntfa-alt-row">
+                                        <span className="kam-ntfa-terminal-chip remaining">{t.displayId}</span>
+                                        <span>{t.gatewayShort}</span>
+                                        <span>SR: {t.successRate}%</span>
+                                        <span>Cost: ₹{t.costPerTxn.toFixed(2)}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Layer 3: Act — Recommendations */}
+                          {activeLayer === 'act' && (
+                            <div className="kam-ntfa-actions">
+                              {profile.actions.map(action => (
+                                <div key={action.id} className={`kam-ntfa-action ${action.priority}`}>
+                                  <div className="kam-ntfa-action-header">
+                                    <span className={`kam-badge ${action.priority === 'high' ? 'danger' : action.priority === 'medium' ? 'warning' : 'info'}`}>
+                                      {action.priority}
+                                    </span>
+                                    <span className="kam-badge neutral">{action.owner}</span>
+                                  </div>
+                                  <h4 className="kam-ntfa-action-title">{action.title}</h4>
+                                  <p className="kam-ntfa-action-desc">{action.description}</p>
+                                  <div className="kam-ntfa-action-footer">
+                                    {action.type === 'external' && action.escalationTemplate && (
+                                      <button
+                                        className="kam-btn kam-btn-sm kam-btn-outline"
+                                        onClick={() => {
+                                          const tpl = action.escalationTemplate
+                                          const text = `To: ${tpl.to}\nSubject: ${tpl.subject}\n\n${tpl.body}`
+                                          navigator.clipboard.writeText(text)
+                                          setCopiedTemplate(action.id)
+                                          setTimeout(() => setCopiedTemplate(null), 2000)
+                                        }}
+                                      >
+                                        {copiedTemplate === action.id ? 'Copied!' : 'Copy Escalation Template'}
+                                      </button>
+                                    )}
+                                    {action.type === 'in-dashboard' && (
+                                      <span className="kam-ntfa-action-hint">Review in Rules tab above</span>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* ══════════════════════════════════════════════════════════ */}
+      {/*  SECTION 8: AUDIT LOG                                       */}
       {/* ══════════════════════════════════════════════════════════ */}
       <div ref={el => sectionRefs.current.audit = el} className="kam-tab-section">
       <div className="kam-card">
@@ -2395,8 +2625,28 @@ function RulesTabContent({
   const ntfGaps = useMemo(() => detectNTFGaps(rules, merchant), [rules, merchant])
 
   // Primary routing decision: SR-optimized (Doppler) vs Cost-saving (manual rules)
-  const [routingMode, setRoutingMode] = useState(merchant.routingStrategy === 'cost_based' ? 'cost' : null)
-  // null = no decision yet (show decision UI), 'sr' = Doppler, 'cost' = manual rules
+  const [routingMode, setRoutingMode] = useState(merchant.routingStrategy === 'cost_based' ? 'cost' : 'sr')
+  const [showSwitchWarning, setShowSwitchWarning] = useState(false)
+
+  // Compute MCC benchmark: SR comparison between SR-optimized vs cost-based merchants in same MCC
+  const mccBenchmark = useMemo(() => {
+    if (!merchant) return null
+    const sameMCC = allMerchantsData.filter(m => m.mcc === merchant.mcc && m.id !== merchant.id)
+    const srOptimized = sameMCC.filter(m => m.routingStrategy === 'success_rate')
+    const costBased = sameMCC.filter(m => m.routingStrategy === 'cost_based')
+    const avgSR_sr = srOptimized.length > 0
+      ? srOptimized.reduce((s, m) => s + m.avgPaymentSuccessRate, 0) / srOptimized.length
+      : null
+    const avgSR_cost = costBased.length > 0
+      ? costBased.reduce((s, m) => s + m.avgPaymentSuccessRate, 0) / costBased.length
+      : null
+    const currentSR = merchant.avgPaymentSuccessRate
+    // Estimate cost savings from cost-based routing (avg ~₹0.40/txn cheaper)
+    const estimatedCostSaving = merchant.monthlyTxnVolume * 0.4
+    // Estimate SR drop if switching to cost-based
+    const srDelta = avgSR_sr && avgSR_cost ? Math.round((avgSR_sr - avgSR_cost) * 10) / 10 : 2.1
+    return { avgSR_sr, avgSR_cost, currentSR, srDelta, estimatedCostSaving, sameMCCCount: sameMCC.length }
+  }, [merchant])
 
   // Sort rules by priority
   const sortedRules = useMemo(() => {
@@ -2967,73 +3217,99 @@ function RulesTabContent({
   return (
     <>
       {/* ── Primary Routing Decision ────────────────── */}
-      {routingMode !== 'cost' && (
-        <div className="kam-routing-decision">
-          <div className="kam-routing-decision-header">
-            <h3>Routing Strategy</h3>
-            <p>Choose how transactions should be routed for this merchant.</p>
-          </div>
-          <div className="kam-routing-decision-cards">
-            <div
-              className={`kam-routing-decision-card${routingMode === 'sr' ? ' selected' : ''}`}
-              onClick={() => setRoutingMode('sr')}
-            >
-              <div className="kam-routing-decision-card-icon sr">
-                <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+      <div className="kam-routing-decision">
+        <div className="kam-routing-decision-header">
+          <h3>Routing Strategy</h3>
+        </div>
+
+        {/* Active strategy display */}
+        <div className="kam-routing-active">
+          <div className={`kam-routing-strategy-card ${routingMode === 'sr' ? 'active' : 'inactive'}`}>
+            <div className="kam-routing-strategy-top">
+              <div className="kam-routing-strategy-card-icon sr">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
               </div>
-              <div className="kam-routing-decision-card-content">
+              <div className="kam-routing-strategy-labels">
                 <strong>Optimize for Success Rate</strong>
-                <span>Doppler ML routes to the highest-SR terminal automatically. No manual rules needed.</span>
+                <span className="kam-badge success" style={{ fontSize: 10, padding: '1px 6px' }}>Recommended</span>
               </div>
               {routingMode === 'sr' && (
-                <div className="kam-routing-decision-check">
-                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                </div>
+                <span className="kam-routing-active-badge">Active</span>
               )}
             </div>
-            <div
-              className={`kam-routing-decision-card${routingMode === 'cost' ? ' selected' : ''}`}
-              onClick={() => setRoutingMode('cost')}
-            >
-              <div className="kam-routing-decision-card-icon cost">
-                <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            <p className="kam-routing-strategy-desc">Routes to the highest-SR terminal automatically. Protects wallet share by maximizing payment experience.</p>
+
+            {routingMode === 'sr' && mccBenchmark && (
+              <div className="kam-routing-benefit">
+                <div className="kam-routing-benefit-item">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--rzp-success)" strokeWidth="2.5"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/></svg>
+                  <span>
+                    <strong>+{mccBenchmark.srDelta}% higher SR</strong> than cost-optimized merchants in same MCC category
+                  </span>
+                </div>
+                <div className="kam-routing-benefit-item">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--rzp-success)" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  <span>Auto-failover across {merchant.gatewayMetrics?.length || 0} terminals — keeps merchant's volume on Razorpay</span>
+                </div>
               </div>
-              <div className="kam-routing-decision-card-content">
-                <strong>Save Cost / Custom Rules</strong>
-                <span>Override Doppler with manual rules — reduce cost, meet TSP targets, or enable bank offers.</span>
-              </div>
-            </div>
+            )}
+
           </div>
 
-          {/* SR-selected state */}
-          {routingMode === 'sr' && (
-            <div className="kam-routing-sr-state">
-              <div className="kam-routing-sr-icon">
-                <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+          <div className={`kam-routing-strategy-card ${routingMode === 'cost' ? 'active' : 'inactive'}`}>
+            <div className="kam-routing-strategy-top">
+              <div className="kam-routing-strategy-card-icon cost">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
               </div>
-              <h4>Doppler is managing routing</h4>
-              <p>Transactions are automatically routed to the terminal with the highest predicted success rate. The ML model adapts in real-time based on live SR data, downtime signals, and network conditions.</p>
-              <div className="kam-routing-sr-stats">
-                <div className="kam-routing-sr-stat">
-                  <span className="kam-routing-sr-stat-value">{merchant.avgPaymentSuccessRate?.toFixed(1) || '—'}%</span>
-                  <span className="kam-routing-sr-stat-label">Current SR</span>
-                </div>
-                <div className="kam-routing-sr-stat">
-                  <span className="kam-routing-sr-stat-value">{merchant.gatewayMetrics?.length || 0}</span>
-                  <span className="kam-routing-sr-stat-label">Active Terminals</span>
-                </div>
-                <div className="kam-routing-sr-stat">
-                  <span className="kam-routing-sr-stat-value">Auto</span>
-                  <span className="kam-routing-sr-stat-label">Failover</span>
+              <div className="kam-routing-strategy-labels">
+                <strong>Save Cost / Custom Rules</strong>
+              </div>
+              {routingMode === 'cost' && (
+                <span className="kam-routing-active-badge cost">Active</span>
+              )}
+            </div>
+            <p className="kam-routing-strategy-desc">Apply manual rules to reduce backward cost, meet TSP commitments, or enable bank offers.</p>
+
+            {routingMode === 'cost' && (
+              <div className="kam-routing-benefit cost-mode">
+                <div className="kam-routing-benefit-item warn">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--rzp-warning)" strokeWidth="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                  <span>Short-term N/R gain, but <strong>~{mccBenchmark?.srDelta || 2.1}% lower SR</strong> — merchant may shift volume to other PGs, reducing Razorpay's wallet share</span>
                 </div>
               </div>
-              <button className="kam-btn kam-btn-secondary" style={{ marginTop: 16 }} onClick={() => setRoutingMode('cost')}>
+            )}
+
+            {routingMode !== 'cost' && (
+              <button className="kam-btn kam-btn-sm kam-btn-outline" style={{ marginTop: 8 }} onClick={() => setShowSwitchWarning(true)}>
                 Switch to Custom Rules
               </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
-      )}
+
+        {/* Switch warning modal */}
+        {showSwitchWarning && (
+          <div className="kam-routing-switch-warning">
+            <div className="kam-routing-switch-warning-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--rzp-warning)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <div className="kam-routing-switch-warning-content">
+              <h4>Switching to Cost-optimized Routing</h4>
+              <p>While this may improve net revenue short-term, merchants in the same MCC category ({merchant.mccLabel}) using cost-optimized routing show <strong>~{mccBenchmark?.srDelta || 2.1}% lower success rates</strong>. Lower SR gives the merchant reason to route more volume through other payment gateways, <strong>reducing Razorpay's wallet share</strong> with this merchant.</p>
+              <p style={{ fontSize: 12, color: 'var(--rzp-text-muted)', marginTop: 4 }}>You can switch back to SR-optimized at any time.</p>
+            </div>
+            <div className="kam-routing-switch-warning-actions">
+              <button className="kam-btn kam-btn-sm kam-btn-outline" onClick={() => setShowSwitchWarning(false)}>Cancel</button>
+              <button className="kam-btn kam-btn-sm kam-btn-warning" onClick={() => {
+                setRoutingMode('cost')
+                setShowSwitchWarning(false)
+                showToast('Switched to custom rules routing')
+                addAuditEntry('routing_strategy_change', 'Switched routing strategy to Cost-based / Custom Rules', merchant.id)
+              }}>Switch Anyway</button>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* ── Rules Content (only when cost mode) ──── */}
       {routingMode === 'cost' && (
@@ -3161,16 +3437,13 @@ function RulesTabContent({
               <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
               Cost-Saving Mode
             </span>
-            <button className="kam-btn kam-btn-secondary" style={{ fontSize: 11, padding: '4px 10px' }} onClick={() => setRoutingMode('sr')}>
-              Switch to SR-Optimized
-            </button>
             <button className="kam-btn kam-btn-primary kam-rules-add-btn" onClick={() => handleOpenBuilder()}>
               + Add Rule
             </button>
           </div>
         </div>
         <p style={{ fontSize: 13, fontFamily: 'var(--font-secondary)', color: 'var(--rzp-text-secondary)', lineHeight: 1.5, marginBottom: 16 }}>
-          Rules grouped by payment method. Empty slots show where Doppler manages routing by default.
+          Rules grouped by payment method. Empty slots use default ML-based routing.
         </p>
 
         <div className="kam-rule-groups">

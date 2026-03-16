@@ -193,8 +193,13 @@ export const merchants = [
     currentTerminalId: 'term-icici-001',
     routingStrategy: 'success_rate',
     gatewayMetrics: [
-      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 72.8, costPerTxn: 1.70, txnShare: 60, supportedMethods: ['CC', 'DC', 'NB'] },
-      { gatewayId: 'gw-rbl', terminalId: 'term-rbl-001', successRate: 68.8, costPerTxn: 1.10, txnShare: 40, supportedMethods: ['CC', 'DC', 'UPI'] },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 73.5, costPerTxn: 1.80, txnShare: 25, supportedMethods: ['CC', 'DC'] },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 72.1, costPerTxn: 0, txnShare: 15, supportedMethods: ['UPI'] },
+      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 72.8, costPerTxn: 1.70, txnShare: 20, supportedMethods: ['CC', 'DC', 'NB'] },
+      { gatewayId: 'gw-axis', terminalId: 'term-axis-001', successRate: 71.4, costPerTxn: 1.50, txnShare: 15, supportedMethods: ['CC', 'UPI'] },
+      { gatewayId: 'gw-rbl', terminalId: 'term-rbl-001', successRate: 68.8, costPerTxn: 1.10, txnShare: 10, supportedMethods: ['NB', 'DC'] },
+      { gatewayId: 'gw-yes', terminalId: 'term-yes-001', successRate: 69.1, costPerTxn: 0, txnShare: 10, supportedMethods: ['UPI'] },
+      { gatewayId: 'gw-yes', terminalId: 'term-yes-002', successRate: 67.8, costPerTxn: 0.85, txnShare: 5, supportedMethods: ['CC', 'DC'] },
     ],
     status: 'active',
     routingRules: { selectRules: 2, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: false },
@@ -1616,16 +1621,22 @@ export function generateSRTimeSeries(merchant) {
 // ── Transaction Generator ───────────────
 
 const PAYMENT_METHODS = [
-  { type: 'Visa Credit', short: 'CC' },
-  { type: 'Mastercard Credit', short: 'CC' },
-  { type: 'Visa Debit', short: 'DC' },
-  { type: 'RuPay Debit', short: 'DC' },
-  { type: 'UPI', short: 'UPI' },
-  { type: 'Net Banking', short: 'NB' },
+  { type: 'Visa Credit', short: 'CC', network: 'Visa', cardType: 'credit' },
+  { type: 'Mastercard Credit', short: 'CC', network: 'Mastercard', cardType: 'credit' },
+  { type: 'Visa Debit', short: 'DC', network: 'Visa', cardType: 'debit' },
+  { type: 'RuPay Debit', short: 'DC', network: 'RuPay', cardType: 'debit' },
+  { type: 'UPI', short: 'UPI', network: null, cardType: null },
+  { type: 'Net Banking', short: 'NB', network: null, cardType: null },
 ]
 
+function getAmountRange(amount) {
+  if (amount < 2000) return '0-2K'
+  if (amount < 10000) return '2K-10K'
+  return '10K+'
+}
+
 export function generateMerchantTransactions(merchant) {
-  const txnCount = 30
+  const txnCount = 50
   const transactions = []
   const avgTxnValue = merchant.monthlyGMV / merchant.monthlyTxnVolume
 
@@ -1664,9 +1675,9 @@ export function generateMerchantTransactions(merchant) {
     const pmIdx = seed % PAYMENT_METHODS.length
     const paymentMethod = PAYMENT_METHODS[pmIdx]
 
-    // Status: ~80% success, 10% failed, 10% refunded
-    const statusSeed = hashCode(merchant.id + '-st-' + i) % 10
-    const status = statusSeed < 8 ? 'success' : statusSeed < 9 ? 'failed' : 'refunded'
+    // Status: ~75% success, 15% failed, 10% refunded
+    const statusSeed = hashCode(merchant.id + '-st-' + i) % 20
+    const status = statusSeed < 15 ? 'success' : statusSeed < 18 ? 'failed' : 'refunded'
 
     // Simulate routing decision
     let routingDecision
@@ -1770,19 +1781,48 @@ export function generateMerchantTransactions(merchant) {
       }
     }
 
-    // Mark ~40% of failed transactions as NTF (Not-to-Fail)
+    // Mark failed transactions as NTF (No Terminal Found)
+    // Higher rate for merchants with routing constraints (TSP, offer-linked)
     let isNTF = false
     let ntfReason = null
     if (status === 'failed') {
       const ntfSeed = hashCode(merchant.id + '-ntf-' + i) % 10
-      if (ntfSeed < 4) {
+      const ntfThreshold = merchant.dealType === 'tsp' ? 7
+        : merchant.dealType === 'offer-linked' ? 6
+        : 4
+      if (ntfSeed < ntfThreshold) {
         isNTF = true
-        const reasons = [
-          'Cost-driven REJECT rule without fallback gateway',
-          'No SELECT rule for payment method — terminal unavailable',
-          'Network/card type restriction — no eligible terminal',
-          'Blocked MCC compliance restriction',
-        ]
+        // Assign reasons based on payment method and merchant context for realism
+        const pm = paymentMethod.short
+        const reasons = pm === 'DC' || pm === 'NB'
+          ? [
+              'No SELECT rule for payment method — terminal unavailable',
+              'Network/card type restriction — no eligible terminal',
+              'No SELECT rule for payment method — terminal unavailable',
+              'Cost-driven REJECT rule without fallback gateway',
+              'Network/card type restriction — no eligible terminal',
+              'Blocked MCC compliance restriction',
+              'No SELECT rule for payment method — terminal unavailable',
+            ]
+          : pm === 'UPI'
+          ? [
+              'Cost-driven REJECT rule without fallback gateway',
+              'Cost-driven REJECT rule without fallback gateway',
+              'Network/card type restriction — no eligible terminal',
+              'Blocked MCC compliance restriction',
+              'Cost-driven REJECT rule without fallback gateway',
+              'Cost-driven REJECT rule without fallback gateway',
+              'Network/card type restriction — no eligible terminal',
+            ]
+          : [
+              'Cost-driven REJECT rule without fallback gateway',
+              'No SELECT rule for payment method — terminal unavailable',
+              'Network/card type restriction — no eligible terminal',
+              'Blocked MCC compliance restriction',
+              'Cost-driven REJECT rule without fallback gateway',
+              'Cost-driven REJECT rule without fallback gateway',
+              'Network/card type restriction — no eligible terminal',
+            ]
         ntfReason = reasons[ntfSeed]
       }
     }
@@ -2958,4 +2998,226 @@ export function getTerminalGatewayInfo(terminalId) {
     }
   }
   return null
+}
+
+// ── NTF Analysis ───────────────
+
+export function generateNTFAnalysis(merchant, ntfTransactions, rules) {
+  if (!ntfTransactions || ntfTransactions.length === 0) {
+    return { profiles: [], summary: null }
+  }
+
+  // Group NTFs by transaction profile
+  const groups = {}
+  for (const txn of ntfTransactions) {
+    const pm = txn.paymentMethod || {}
+    const profileKey = [
+      pm.short || 'Unknown',
+      pm.network || 'N/A',
+      pm.cardType || 'N/A',
+      getAmountRange(txn.amount),
+    ].join('|')
+
+    if (!groups[profileKey]) {
+      groups[profileKey] = {
+        paymentMethod: pm.short || 'Unknown',
+        paymentMethodLabel: pm.type || 'Unknown',
+        cardNetwork: pm.network || null,
+        cardType: pm.cardType || null,
+        amountRange: getAmountRange(txn.amount),
+        transactions: [],
+      }
+    }
+    groups[profileKey].transactions.push(txn)
+  }
+
+  const NTF_CAUSE_LABELS = {
+    rule_elimination: 'Cost-driven REJECT rule without fallback gateway',
+    method_unsupported: 'No terminal supports this payment method',
+    pipeline_filter: 'Pipeline filter (SR threshold / compliance)',
+  }
+
+  const profiles = Object.entries(groups).map(([key, group], idx) => {
+    const txns = group.transactions
+    const totalAmount = txns.reduce((s, t) => s + t.amount, 0)
+    const avgAmount = Math.round(totalAmount / txns.length)
+
+    // Build profile label
+    let profileLabel = group.paymentMethodLabel
+    if (group.amountRange) profileLabel += `, ${group.amountRange}`
+
+    // Trace rule chain for representative transaction
+    const representative = txns[0]
+    const trace = traceNTFRuleChain(representative, rules, merchant)
+
+    // Determine NTF cause
+    const ntfStep = trace.steps.find(s => s.type === 'ntf')
+    const causeStep = trace.steps.find(s => s.isNTFCause)
+    const ntfCause = ntfStep?.ntfCause || 'pipeline_filter'
+
+    // Estimate revenue impact (forward pricing ~2% of GMV)
+    const revenueLost = Math.round(totalAmount * 0.02)
+    const srImpact = -((txns.length / 30) * 100 * 0.1) // rough SR impact
+
+    // Find alternative terminals that COULD handle this traffic
+    const allTerminals = merchant.gatewayMetrics.map(gm => {
+      const gw = gateways.find(g => g.id === gm.gatewayId)
+      const term = gw?.terminals.find(t => t.id === gm.terminalId)
+      return {
+        terminalId: gm.terminalId,
+        displayId: term?.terminalId || gm.terminalId,
+        gatewayShort: gw?.shortName || '??',
+        successRate: gm.successRate,
+        costPerTxn: gm.costPerTxn,
+      }
+    })
+
+    // Terminals NOT currently assigned to this merchant that could help
+    const missingGateways = gateways
+      .filter(gw => !merchant.gatewayMetrics.some(gm => gm.gatewayId === gw.id))
+      .flatMap(gw => gw.terminals.map(t => ({
+        terminalId: t.id,
+        displayId: t.terminalId,
+        gatewayShort: gw.shortName,
+        successRate: t.successRate,
+        costPerTxn: t.costPerTxn,
+      })))
+      .slice(0, 3)
+
+    // Generate actions based on cause
+    const actions = []
+    if (ntfCause === 'rule_elimination' && causeStep) {
+      actions.push({
+        id: `act-${idx}-1`,
+        type: 'in-dashboard',
+        priority: 'high',
+        title: `Disable or modify rule "${causeStep.ruleName}"`,
+        description: `This rule eliminated all eligible terminals for ${profileLabel} transactions. Consider adding a fallback terminal or relaxing conditions.`,
+        owner: 'KAM (You)',
+        ownerTeam: null,
+        actionType: 'modify_rule',
+        targetRuleId: causeStep.ruleId,
+      })
+      if (missingGateways.length > 0) {
+        actions.push({
+          id: `act-${idx}-2`,
+          type: 'external',
+          priority: 'medium',
+          title: `Procure ${missingGateways[0].gatewayShort} terminal`,
+          description: `Adding ${missingGateways[0].displayId} would provide a fallback for ${group.paymentMethod} transactions.`,
+          owner: 'TR Team',
+          ownerTeam: 'Terminal & Routing',
+          escalationTemplate: generateEscalationTemplate(merchant, { profileLabel, txnCount: txns.length, revenueLost }, 'procure_terminal', missingGateways[0]),
+        })
+      }
+    } else if (ntfCause === 'method_unsupported') {
+      actions.push({
+        id: `act-${idx}-1`,
+        type: 'external',
+        priority: 'high',
+        title: `Procure terminal for ${group.paymentMethodLabel}`,
+        description: `No terminal currently supports ${group.paymentMethodLabel}. ${txns.length} transactions failed due to missing coverage.`,
+        owner: 'TR Team',
+        ownerTeam: 'Terminal & Routing',
+        escalationTemplate: generateEscalationTemplate(merchant, { profileLabel, txnCount: txns.length, revenueLost }, 'procure_method', null),
+      })
+    } else {
+      actions.push({
+        id: `act-${idx}-1`,
+        type: 'in-dashboard',
+        priority: 'medium',
+        title: 'Review routing pipeline filters',
+        description: `${txns.length} ${profileLabel} transactions were filtered by pipeline-level checks (SR threshold, compliance). Review threshold settings.`,
+        owner: 'KAM (You)',
+        ownerTeam: null,
+        actionType: 'review_config',
+      })
+      actions.push({
+        id: `act-${idx}-2`,
+        type: 'external',
+        priority: 'low',
+        title: 'Escalate to Banking Alliances',
+        description: `If compliance/MCC restrictions are causing NTFs, request an exemption review.`,
+        owner: 'Banking Alliances',
+        ownerTeam: 'Banking Alliances',
+        escalationTemplate: generateEscalationTemplate(merchant, { profileLabel, txnCount: txns.length, revenueLost }, 'compliance_review', null),
+      })
+    }
+
+    return {
+      id: `profile-${idx}`,
+      profileKey: key,
+      profileLabel,
+      paymentMethod: group.paymentMethod,
+      cardNetwork: group.cardNetwork,
+      cardType: group.cardType,
+      amountRange: group.amountRange,
+      txnCount: txns.length,
+      totalAmount,
+      avgAmount,
+      ruleChainTrace: trace,
+      ntfCause,
+      ntfCauseLabel: NTF_CAUSE_LABELS[ntfCause] || ntfCause,
+      causeRule: causeStep ? { id: causeStep.ruleId, name: causeStep.ruleName } : null,
+      impact: {
+        revenueLost,
+        srImpact: Math.round(srImpact * 10) / 10,
+        tradeOff: ntfCause === 'rule_elimination' && causeStep
+          ? `Rule "${causeStep.ruleName}" is saving backward cost but causing ${txns.length} NTF failures worth ₹${formatINR(revenueLost)} in lost revenue.`
+          : `${txns.length} transactions worth ₹${formatINR(totalAmount)} failed due to ${NTF_CAUSE_LABELS[ntfCause] || 'routing issues'}.`,
+        alternativeTerminals: missingGateways,
+      },
+      actions,
+    }
+  })
+
+  // Sort by txn count descending
+  profiles.sort((a, b) => b.txnCount - a.txnCount)
+
+  // Summary
+  const totalNTF = ntfTransactions.length
+  const totalRevenueLost = profiles.reduce((s, p) => s + p.impact.revenueLost, 0)
+  const totalSRImpact = profiles.reduce((s, p) => s + p.impact.srImpact, 0)
+  const causeCounts = {}
+  profiles.forEach(p => {
+    causeCounts[p.ntfCauseLabel] = (causeCounts[p.ntfCauseLabel] || 0) + p.txnCount
+  })
+  const topCause = Object.entries(causeCounts).sort((a, b) => b[1] - a[1])[0]
+
+  return {
+    profiles,
+    summary: {
+      totalNTFCount: totalNTF,
+      totalRevenueLost,
+      totalSRImpact: Math.round(totalSRImpact * 10) / 10,
+      topCause: topCause ? topCause[0] : 'Unknown',
+      topCausePercentage: topCause ? Math.round((topCause[1] / totalNTF) * 100) : 0,
+    },
+  }
+}
+
+function generateEscalationTemplate(merchant, profile, actionType, terminal) {
+  const mid = merchant.id
+  const name = merchant.name
+  const base = `Merchant: ${name} (${mid})\nAffected Profile: ${profile.profileLabel}\nFailed Transactions: ${profile.txnCount}\nEstimated Revenue Impact: ₹${formatINR(profile.revenueLost)}\n`
+
+  if (actionType === 'procure_terminal' && terminal) {
+    return {
+      to: 'tr-team@razorpay.com',
+      subject: `Terminal Procurement: ${name} - ${terminal.gatewayShort}`,
+      body: `Hi TR Team,\n\n${base}\nRequest: Procure ${terminal.gatewayShort} terminal (${terminal.displayId}) as fallback to prevent NTF failures.\n\nThis merchant is currently missing coverage for the above transaction profile, causing payment failures.\n\nPlease prioritize based on revenue impact.\n\nThanks`,
+    }
+  }
+  if (actionType === 'procure_method') {
+    return {
+      to: 'tr-team@razorpay.com',
+      subject: `Terminal Gap: ${name} - ${profile.profileLabel}`,
+      body: `Hi TR Team,\n\n${base}\nRequest: No terminal currently supports ${profile.profileLabel} for this merchant. Please procure an appropriate terminal.\n\nThanks`,
+    }
+  }
+  return {
+    to: 'banking-alliances@razorpay.com',
+    subject: `Compliance Review: ${name} - NTF Failures`,
+    body: `Hi Banking Alliances,\n\n${base}\nRequest: Review compliance/MCC restrictions that may be causing NTF failures for this merchant. An exemption or terminal addition may be needed.\n\nThanks`,
+  }
 }
