@@ -9,8 +9,8 @@ export const gateways = [
     name: 'HDFC Bank',
     shortName: 'HDFC',
     terminals: [
-      { id: 'term-hdfc-001', terminalId: 'HDFC_T1', successRate: 96.2, costPerTxn: 1.80, isZeroCost: false },
-      { id: 'term-hdfc-002', terminalId: 'HDFC_T2', successRate: 94.8, costPerTxn: 0, isZeroCost: true },
+      { id: 'term-hdfc-001', terminalId: 'HDFC_T1', successRate: 73.5, costPerTxn: 1.80, isZeroCost: false },
+      { id: 'term-hdfc-002', terminalId: 'HDFC_T2', successRate: 72.1, costPerTxn: 0, isZeroCost: true },
     ],
   },
   {
@@ -18,8 +18,8 @@ export const gateways = [
     name: 'ICICI Bank',
     shortName: 'ICICI',
     terminals: [
-      { id: 'term-icici-001', terminalId: 'ICICI_T1', successRate: 95.1, costPerTxn: 1.70, isZeroCost: false },
-      { id: 'term-icici-002', terminalId: 'ICICI_T2', successRate: 93.4, costPerTxn: 1.45, isZeroCost: false },
+      { id: 'term-icici-001', terminalId: 'ICICI_T1', successRate: 72.8, costPerTxn: 1.70, isZeroCost: false },
+      { id: 'term-icici-002', terminalId: 'ICICI_T2', successRate: 71.2, costPerTxn: 1.45, isZeroCost: false },
     ],
   },
   {
@@ -27,8 +27,8 @@ export const gateways = [
     name: 'Axis Bank',
     shortName: 'Axis',
     terminals: [
-      { id: 'term-axis-001', terminalId: 'AXIS_T1', successRate: 93.8, costPerTxn: 1.50, isZeroCost: false },
-      { id: 'term-axis-002', terminalId: 'AXIS_T2', successRate: 91.5, costPerTxn: 0, isZeroCost: true },
+      { id: 'term-axis-001', terminalId: 'AXIS_T1', successRate: 71.4, costPerTxn: 1.50, isZeroCost: false },
+      { id: 'term-axis-002', terminalId: 'AXIS_T2', successRate: 69.6, costPerTxn: 0, isZeroCost: true },
     ],
   },
   {
@@ -36,8 +36,8 @@ export const gateways = [
     name: 'RBL Bank',
     shortName: 'RBL',
     terminals: [
-      { id: 'term-rbl-001', terminalId: 'RBL_T1', successRate: 90.3, costPerTxn: 1.10, isZeroCost: false },
-      { id: 'term-rbl-002', terminalId: 'RBL_T2', successRate: 88.9, costPerTxn: 0.95, isZeroCost: false },
+      { id: 'term-rbl-001', terminalId: 'RBL_T1', successRate: 68.8, costPerTxn: 1.10, isZeroCost: false },
+      { id: 'term-rbl-002', terminalId: 'RBL_T2', successRate: 67.5, costPerTxn: 0.95, isZeroCost: false },
     ],
   },
   {
@@ -45,8 +45,8 @@ export const gateways = [
     name: 'Yes Bank',
     shortName: 'Yes',
     terminals: [
-      { id: 'term-yes-001', terminalId: 'YES_T1', successRate: 89.7, costPerTxn: 0, isZeroCost: true },
-      { id: 'term-yes-002', terminalId: 'YES_T2', successRate: 88.2, costPerTxn: 0.85, isZeroCost: false },
+      { id: 'term-yes-001', terminalId: 'YES_T1', successRate: 69.1, costPerTxn: 0, isZeroCost: true },
+      { id: 'term-yes-002', terminalId: 'YES_T2', successRate: 67.8, costPerTxn: 0.85, isZeroCost: false },
     ],
   },
 ]
@@ -64,16 +64,16 @@ export const merchants = [
     dealDetails: null,
     monthlyTxnVolume: 1250000,
     monthlyGMV: 437500000,
-    avgPaymentSuccessRate: 95.8,
+    avgPaymentSuccessRate: 72.9,
     forwardPricing: 2.0,
     currentGatewayId: 'gw-hdfc',
     currentTerminalId: 'term-hdfc-001',
     routingStrategy: 'success_rate',
     gatewayMetrics: [
-      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 96.2, costPerTxn: 1.80, txnShare: 45, supportedMethods: ['CC', 'DC', 'UPI', 'NB'] },
-      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 94.8, costPerTxn: 0, txnShare: 20, supportedMethods: ['CC', 'DC'] },
-      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 95.1, costPerTxn: 1.70, txnShare: 25, supportedMethods: ['CC', 'DC', 'NB'] },
-      { gatewayId: 'gw-axis', terminalId: 'term-axis-001', successRate: 93.8, costPerTxn: 1.50, txnShare: 10, supportedMethods: ['UPI', 'NB'] },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 73.5, costPerTxn: 1.80, txnShare: 45, supportedMethods: ['CC', 'DC', 'UPI', 'NB'] },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 72.1, costPerTxn: 0, txnShare: 20, supportedMethods: ['CC', 'DC'] },
+      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 72.8, costPerTxn: 1.70, txnShare: 25, supportedMethods: ['CC', 'DC', 'NB'] },
+      { gatewayId: 'gw-axis', terminalId: 'term-axis-001', successRate: 71.4, costPerTxn: 1.50, txnShare: 10, supportedMethods: ['UPI', 'NB'] },
     ],
     status: 'active',
     routingRules: { selectRules: 3, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: false },
@@ -101,14 +101,14 @@ export const merchants = [
     },
     monthlyTxnVolume: 1100000,
     monthlyGMV: 385000000,
-    avgPaymentSuccessRate: 94.5,
+    avgPaymentSuccessRate: 71.8,
     forwardPricing: 1.9,
     currentGatewayId: 'gw-hdfc',
     currentTerminalId: 'term-hdfc-001',
     routingStrategy: 'success_rate',
     gatewayMetrics: [
-      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 96.2, costPerTxn: 1.80, txnShare: 70, supportedMethods: ['CC', 'DC', 'UPI', 'NB'] },
-      { gatewayId: 'gw-icici', terminalId: 'term-icici-002', successRate: 93.4, costPerTxn: 1.45, txnShare: 30, supportedMethods: ['CC', 'DC', 'NB'] },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 73.5, costPerTxn: 1.80, txnShare: 70, supportedMethods: ['CC', 'DC', 'UPI', 'NB'] },
+      { gatewayId: 'gw-icici', terminalId: 'term-icici-002', successRate: 71.2, costPerTxn: 1.45, txnShare: 30, supportedMethods: ['CC', 'DC', 'NB'] },
     ],
     status: 'active',
     routingRules: { selectRules: 2, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: true },
@@ -129,20 +129,20 @@ export const merchants = [
     dealDetails: null,
     monthlyTxnVolume: 850000,
     monthlyGMV: 620000000,
-    avgPaymentSuccessRate: 97.1,
+    avgPaymentSuccessRate: 73.8,
     forwardPricing: 1.8,
     currentGatewayId: 'gw-hdfc',
     currentTerminalId: 'term-hdfc-001',
     routingStrategy: 'success_rate',
     gatewayMetrics: [
-      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 96.2, costPerTxn: 1.80, txnShare: 60, supportedMethods: ['CC', 'DC', 'UPI'] },
-      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 94.8, costPerTxn: 0, txnShare: 20, supportedMethods: ['CC', 'DC'] },
-      { gatewayId: 'gw-axis', terminalId: 'term-axis-001', successRate: 93.8, costPerTxn: 1.50, txnShare: 20, supportedMethods: ['UPI', 'NB'] },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 73.5, costPerTxn: 1.80, txnShare: 60, supportedMethods: ['CC', 'DC', 'UPI'] },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 72.1, costPerTxn: 0, txnShare: 20, supportedMethods: ['CC', 'DC'] },
+      { gatewayId: 'gw-axis', terminalId: 'term-axis-001', successRate: 71.4, costPerTxn: 1.50, txnShare: 20, supportedMethods: ['UPI', 'NB'] },
     ],
     status: 'active',
     routingRules: { selectRules: 3, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: false },
     srSensitive: false,
-    srThresholdLow: 90,
+    srThresholdLow: 68,
     txnVolumeHistory: { currentMonth: 650000, lastYearSameMonth: 820000 },
     contactName: 'Kunal Shah',
     contactEmail: 'payments@cred.club',
@@ -158,20 +158,20 @@ export const merchants = [
     dealDetails: null,
     monthlyTxnVolume: 2200000,
     monthlyGMV: 1320000000,
-    avgPaymentSuccessRate: 94.2,
+    avgPaymentSuccessRate: 71.5,
     forwardPricing: 1.6,
     currentGatewayId: 'gw-icici',
     currentTerminalId: 'term-icici-001',
     routingStrategy: 'success_rate',
     gatewayMetrics: [
-      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 95.1, costPerTxn: 1.70, txnShare: 50, supportedMethods: ['CC', 'DC', 'NB'] },
-      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 94.8, costPerTxn: 0, txnShare: 30, supportedMethods: ['CC', 'DC', 'UPI'] },
-      { gatewayId: 'gw-axis', terminalId: 'term-axis-001', successRate: 93.8, costPerTxn: 1.50, txnShare: 20, supportedMethods: ['UPI', 'NB'] },
+      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 72.8, costPerTxn: 1.70, txnShare: 50, supportedMethods: ['CC', 'DC', 'NB'] },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 72.1, costPerTxn: 0, txnShare: 30, supportedMethods: ['CC', 'DC', 'UPI'] },
+      { gatewayId: 'gw-axis', terminalId: 'term-axis-001', successRate: 71.4, costPerTxn: 1.50, txnShare: 20, supportedMethods: ['UPI', 'NB'] },
     ],
     status: 'active',
     routingRules: { selectRules: 3, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: false },
     srSensitive: false,
-    srThresholdLow: 87,
+    srThresholdLow: 64,
     txnVolumeHistory: { currentMonth: 980000, lastYearSameMonth: 950000 },
     contactName: 'Kalyan Krishnamurthy',
     contactEmail: 'payments@flipkart.com',
@@ -187,14 +187,14 @@ export const merchants = [
     dealDetails: null,
     monthlyTxnVolume: 680000,
     monthlyGMV: 238000000,
-    avgPaymentSuccessRate: 93.1,
+    avgPaymentSuccessRate: 70.7,
     forwardPricing: 2.1,
     currentGatewayId: 'gw-icici',
     currentTerminalId: 'term-icici-001',
     routingStrategy: 'success_rate',
     gatewayMetrics: [
-      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 95.1, costPerTxn: 1.70, txnShare: 60, supportedMethods: ['CC', 'DC', 'NB'] },
-      { gatewayId: 'gw-rbl', terminalId: 'term-rbl-001', successRate: 90.3, costPerTxn: 1.10, txnShare: 40, supportedMethods: ['CC', 'DC', 'UPI'] },
+      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 72.8, costPerTxn: 1.70, txnShare: 60, supportedMethods: ['CC', 'DC', 'NB'] },
+      { gatewayId: 'gw-rbl', terminalId: 'term-rbl-001', successRate: 68.8, costPerTxn: 1.10, txnShare: 40, supportedMethods: ['CC', 'DC', 'UPI'] },
     ],
     status: 'active',
     routingRules: { selectRules: 2, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: false },
@@ -222,14 +222,14 @@ export const merchants = [
     },
     monthlyTxnVolume: 920000,
     monthlyGMV: 350000000,
-    avgPaymentSuccessRate: 92.8,
+    avgPaymentSuccessRate: 70.4,
     forwardPricing: 2.2,
     currentGatewayId: 'gw-axis',
     currentTerminalId: 'term-axis-001',
     routingStrategy: 'cost_based',
     gatewayMetrics: [
-      { gatewayId: 'gw-axis', terminalId: 'term-axis-001', successRate: 93.8, costPerTxn: 1.50, txnShare: 55, supportedMethods: ['CC', 'DC', 'UPI', 'NB'] },
-      { gatewayId: 'gw-rbl', terminalId: 'term-rbl-001', successRate: 90.3, costPerTxn: 1.10, txnShare: 45, supportedMethods: ['CC', 'DC'] },
+      { gatewayId: 'gw-axis', terminalId: 'term-axis-001', successRate: 71.4, costPerTxn: 1.50, txnShare: 55, supportedMethods: ['CC', 'DC', 'UPI', 'NB'] },
+      { gatewayId: 'gw-rbl', terminalId: 'term-rbl-001', successRate: 68.8, costPerTxn: 1.10, txnShare: 45, supportedMethods: ['CC', 'DC'] },
     ],
     status: 'active',
     routingRules: { selectRules: 1, rejectRules: 2, hasFallback: false, hasCardRestrictions: false, hasNetworkRestrictions: true },
@@ -256,14 +256,14 @@ export const merchants = [
     },
     monthlyTxnVolume: 450000,
     monthlyGMV: 180000000,
-    avgPaymentSuccessRate: 96.3,
+    avgPaymentSuccessRate: 73.2,
     forwardPricing: 2.5,
     currentGatewayId: 'gw-hdfc',
     currentTerminalId: 'term-hdfc-001',
     routingStrategy: 'success_rate',
     gatewayMetrics: [
-      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 96.2, costPerTxn: 1.80, txnShare: 75, supportedMethods: ['CC', 'DC', 'UPI', 'NB'] },
-      { gatewayId: 'gw-yes', terminalId: 'term-yes-001', successRate: 89.7, costPerTxn: 0, txnShare: 25, supportedMethods: ['UPI'] },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 73.5, costPerTxn: 1.80, txnShare: 75, supportedMethods: ['CC', 'DC', 'UPI', 'NB'] },
+      { gatewayId: 'gw-yes', terminalId: 'term-yes-001', successRate: 69.1, costPerTxn: 0, txnShare: 25, supportedMethods: ['UPI'] },
     ],
     status: 'active',
     routingRules: { selectRules: 2, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: false },
@@ -290,14 +290,14 @@ export const merchants = [
     },
     monthlyTxnVolume: 380000,
     monthlyGMV: 850000000,
-    avgPaymentSuccessRate: 95.5,
+    avgPaymentSuccessRate: 72.6,
     forwardPricing: 1.5,
     currentGatewayId: 'gw-hdfc',
     currentTerminalId: 'term-hdfc-002',
     routingStrategy: 'success_rate',
     gatewayMetrics: [
-      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 94.8, costPerTxn: 0, txnShare: 60, supportedMethods: ['CC', 'DC', 'UPI'] },
-      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 95.1, costPerTxn: 1.70, txnShare: 40, supportedMethods: ['CC', 'DC', 'NB'] },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 72.1, costPerTxn: 0, txnShare: 60, supportedMethods: ['CC', 'DC', 'UPI'] },
+      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 72.8, costPerTxn: 1.70, txnShare: 40, supportedMethods: ['CC', 'DC', 'NB'] },
     ],
     status: 'active',
     routingRules: { selectRules: 2, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: true },
@@ -318,14 +318,14 @@ export const merchants = [
     dealDetails: null,
     monthlyTxnVolume: 520000,
     monthlyGMV: 150000000,
-    avgPaymentSuccessRate: 91.7,
+    avgPaymentSuccessRate: 69.5,
     forwardPricing: 2.3,
     currentGatewayId: 'gw-icici',
     currentTerminalId: 'term-icici-002',
     routingStrategy: 'cost_based',
     gatewayMetrics: [
-      { gatewayId: 'gw-icici', terminalId: 'term-icici-002', successRate: 93.4, costPerTxn: 1.45, txnShare: 50, supportedMethods: ['CC', 'DC', 'NB'] },
-      { gatewayId: 'gw-rbl', terminalId: 'term-rbl-001', successRate: 90.3, costPerTxn: 1.10, txnShare: 50, supportedMethods: ['CC', 'DC', 'UPI'] },
+      { gatewayId: 'gw-icici', terminalId: 'term-icici-002', successRate: 71.2, costPerTxn: 1.45, txnShare: 50, supportedMethods: ['CC', 'DC', 'NB'] },
+      { gatewayId: 'gw-rbl', terminalId: 'term-rbl-001', successRate: 68.8, costPerTxn: 1.10, txnShare: 50, supportedMethods: ['CC', 'DC', 'UPI'] },
     ],
     status: 'active',
     routingRules: { selectRules: 1, rejectRules: 2, hasFallback: false, hasCardRestrictions: true, hasNetworkRestrictions: false },
@@ -346,14 +346,14 @@ export const merchants = [
     dealDetails: null,
     monthlyTxnVolume: 310000,
     monthlyGMV: 85000000,
-    avgPaymentSuccessRate: 90.4,
+    avgPaymentSuccessRate: 68.6,
     forwardPricing: 2.4,
     currentGatewayId: 'gw-axis',
     currentTerminalId: 'term-axis-002',
     routingStrategy: 'cost_based',
     gatewayMetrics: [
-      { gatewayId: 'gw-axis', terminalId: 'term-axis-002', successRate: 91.5, costPerTxn: 0, txnShare: 60, supportedMethods: ['CC', 'DC', 'UPI', 'NB'] },
-      { gatewayId: 'gw-yes', terminalId: 'term-yes-001', successRate: 89.7, costPerTxn: 0, txnShare: 40, supportedMethods: ['UPI'] },
+      { gatewayId: 'gw-axis', terminalId: 'term-axis-002', successRate: 69.6, costPerTxn: 0, txnShare: 60, supportedMethods: ['CC', 'DC', 'UPI', 'NB'] },
+      { gatewayId: 'gw-yes', terminalId: 'term-yes-001', successRate: 69.1, costPerTxn: 0, txnShare: 40, supportedMethods: ['UPI'] },
     ],
     status: 'active',
     routingRules: { selectRules: 0, rejectRules: 1, hasFallback: false, hasCardRestrictions: false, hasNetworkRestrictions: false },
@@ -374,16 +374,16 @@ export const merchants = [
     dealDetails: null,
     monthlyTxnVolume: 780000,
     monthlyGMV: 195000000,
-    avgPaymentSuccessRate: 93.9,
+    avgPaymentSuccessRate: 71.3,
     forwardPricing: 2.0,
     currentGatewayId: 'gw-hdfc',
     currentTerminalId: 'term-hdfc-001',
     routingStrategy: 'success_rate',
     gatewayMetrics: [
-      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 96.2, costPerTxn: 1.80, txnShare: 40, supportedMethods: ['CC', 'DC', 'UPI', 'NB'] },
-      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 94.8, costPerTxn: 0, txnShare: 15, supportedMethods: ['CC', 'DC'] },
-      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 95.1, costPerTxn: 1.70, txnShare: 30, supportedMethods: ['CC', 'DC', 'NB'] },
-      { gatewayId: 'gw-yes', terminalId: 'term-yes-001', successRate: 89.7, costPerTxn: 0, txnShare: 15, supportedMethods: ['UPI'] },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 73.5, costPerTxn: 1.80, txnShare: 40, supportedMethods: ['CC', 'DC', 'UPI', 'NB'] },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 72.1, costPerTxn: 0, txnShare: 15, supportedMethods: ['CC', 'DC'] },
+      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 72.8, costPerTxn: 1.70, txnShare: 30, supportedMethods: ['CC', 'DC', 'NB'] },
+      { gatewayId: 'gw-yes', terminalId: 'term-yes-001', successRate: 69.1, costPerTxn: 0, txnShare: 15, supportedMethods: ['UPI'] },
     ],
     status: 'active',
     routingRules: { selectRules: 3, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: false },
@@ -404,15 +404,15 @@ export const merchants = [
     dealDetails: null,
     monthlyTxnVolume: 1500000,
     monthlyGMV: 280000000,
-    avgPaymentSuccessRate: 92.1,
+    avgPaymentSuccessRate: 69.8,
     forwardPricing: 1.7,
     currentGatewayId: 'gw-icici',
     currentTerminalId: 'term-icici-001',
     routingStrategy: 'success_rate',
     gatewayMetrics: [
-      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 95.1, costPerTxn: 1.70, txnShare: 45, supportedMethods: ['CC', 'DC', 'NB'] },
-      { gatewayId: 'gw-axis', terminalId: 'term-axis-001', successRate: 93.8, costPerTxn: 1.50, txnShare: 35, supportedMethods: ['CC', 'DC', 'UPI'] },
-      { gatewayId: 'gw-rbl', terminalId: 'term-rbl-001', successRate: 90.3, costPerTxn: 1.10, txnShare: 20, supportedMethods: ['UPI', 'NB'] },
+      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 72.8, costPerTxn: 1.70, txnShare: 45, supportedMethods: ['CC', 'DC', 'NB'] },
+      { gatewayId: 'gw-axis', terminalId: 'term-axis-001', successRate: 71.4, costPerTxn: 1.50, txnShare: 35, supportedMethods: ['CC', 'DC', 'UPI'] },
+      { gatewayId: 'gw-rbl', terminalId: 'term-rbl-001', successRate: 68.8, costPerTxn: 1.10, txnShare: 20, supportedMethods: ['UPI', 'NB'] },
     ],
     status: 'active',
     routingRules: { selectRules: 2, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: false },
@@ -433,16 +433,16 @@ export const merchants = [
     dealDetails: null,
     monthlyTxnVolume: 3200000,
     monthlyGMV: 960000000,
-    avgPaymentSuccessRate: 96.8,
+    avgPaymentSuccessRate: 73.5,
     forwardPricing: 1.4,
     currentGatewayId: 'gw-hdfc',
     currentTerminalId: 'term-hdfc-001',
     routingStrategy: 'success_rate',
     gatewayMetrics: [
-      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 96.2, costPerTxn: 1.80, txnShare: 35, supportedMethods: ['CC', 'DC', 'UPI', 'NB'] },
-      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 94.8, costPerTxn: 0, txnShare: 15, supportedMethods: ['CC', 'DC'] },
-      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 95.1, costPerTxn: 1.70, txnShare: 35, supportedMethods: ['CC', 'DC', 'NB'] },
-      { gatewayId: 'gw-axis', terminalId: 'term-axis-002', successRate: 91.5, costPerTxn: 0, txnShare: 15, supportedMethods: ['UPI'] },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 73.5, costPerTxn: 1.80, txnShare: 35, supportedMethods: ['CC', 'DC', 'UPI', 'NB'] },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 72.1, costPerTxn: 0, txnShare: 15, supportedMethods: ['CC', 'DC'] },
+      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 72.8, costPerTxn: 1.70, txnShare: 35, supportedMethods: ['CC', 'DC', 'NB'] },
+      { gatewayId: 'gw-axis', terminalId: 'term-axis-002', successRate: 69.6, costPerTxn: 0, txnShare: 15, supportedMethods: ['UPI'] },
     ],
     status: 'active',
     routingRules: { selectRules: 3, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: false },
@@ -463,14 +463,14 @@ export const merchants = [
     dealDetails: null,
     monthlyTxnVolume: 420000,
     monthlyGMV: 120000000,
-    avgPaymentSuccessRate: 89.6,
+    avgPaymentSuccessRate: 68.1,
     forwardPricing: 2.1,
     currentGatewayId: 'gw-rbl',
     currentTerminalId: 'term-rbl-001',
     routingStrategy: 'cost_based',
     gatewayMetrics: [
-      { gatewayId: 'gw-rbl', terminalId: 'term-rbl-001', successRate: 90.3, costPerTxn: 1.10, txnShare: 70, supportedMethods: ['CC', 'DC', 'NB'] },
-      { gatewayId: 'gw-yes', terminalId: 'term-yes-001', successRate: 89.7, costPerTxn: 0, txnShare: 30, supportedMethods: ['UPI'] },
+      { gatewayId: 'gw-rbl', terminalId: 'term-rbl-001', successRate: 68.8, costPerTxn: 1.10, txnShare: 70, supportedMethods: ['CC', 'DC', 'NB'] },
+      { gatewayId: 'gw-yes', terminalId: 'term-yes-001', successRate: 69.1, costPerTxn: 0, txnShare: 30, supportedMethods: ['UPI'] },
     ],
     status: 'active',
     routingRules: { selectRules: 1, rejectRules: 2, hasFallback: false, hasCardRestrictions: true, hasNetworkRestrictions: false },
@@ -491,14 +491,14 @@ export const merchants = [
     dealDetails: null,
     monthlyTxnVolume: 290000,
     monthlyGMV: 75000000,
-    avgPaymentSuccessRate: 91.2,
+    avgPaymentSuccessRate: 69.2,
     forwardPricing: 2.2,
     currentGatewayId: 'gw-yes',
     currentTerminalId: 'term-yes-001',
     routingStrategy: 'cost_based',
     gatewayMetrics: [
-      { gatewayId: 'gw-yes', terminalId: 'term-yes-001', successRate: 89.7, costPerTxn: 0, txnShare: 60, supportedMethods: ['UPI', 'NB'] },
-      { gatewayId: 'gw-rbl', terminalId: 'term-rbl-002', successRate: 88.9, costPerTxn: 0.95, txnShare: 40, supportedMethods: ['CC', 'DC'] },
+      { gatewayId: 'gw-yes', terminalId: 'term-yes-001', successRate: 69.1, costPerTxn: 0, txnShare: 60, supportedMethods: ['UPI', 'NB'] },
+      { gatewayId: 'gw-rbl', terminalId: 'term-rbl-002', successRate: 67.5, costPerTxn: 0.95, txnShare: 40, supportedMethods: ['CC', 'DC'] },
     ],
     status: 'active',
     routingRules: { selectRules: 1, rejectRules: 1, hasFallback: false, hasCardRestrictions: false, hasNetworkRestrictions: false },
@@ -533,6 +533,118 @@ export const routingStrategies = [
     description: 'Routes to cheapest gateway. Lower cost, may have slightly lower success rate.',
   },
 ]
+
+// ── Rule Engine Schema ─────────────────
+export const RULE_CONDITIONS = {
+  payment_method: { label: 'Payment Method', type: 'select', options: ['CC', 'DC', 'UPI', 'NB'], operators: ['equals', 'in'] },
+  card_network:   { label: 'Card Network',   type: 'select', options: ['Visa', 'Mastercard', 'RuPay', 'Amex', 'Diners'], operators: ['equals', 'in'] },
+  card_type:      { label: 'Card Type',      type: 'select', options: ['credit', 'debit'], operators: ['equals'] },
+  issuer_bank:    { label: 'Issuer Bank',    type: 'select', options: ['HDFC', 'ICICI', 'SBI', 'Axis', 'Kotak'], operators: ['equals'] },
+  upi_flow:       { label: 'UPI Flow',       type: 'select', options: ['one_time', 'autopay'], operators: ['equals'] },
+}
+
+export const RULE_OPERATOR_LABELS = {
+  equals: '=',
+  in: 'in',
+}
+
+export const PAYMENT_METHOD_GROUPS = [
+  { key: 'all_txn', label: 'All Transactions', icon: 'layers',
+    methodValues: null, subMethodField: null, subMethods: [], alwaysExpanded: true },
+  { key: 'UPI', label: 'UPI', icon: 'smartphone',
+    methodValues: ['UPI'], subMethodField: 'upi_flow',
+    subMethods: [
+      { value: 'one_time', label: 'One-time' },
+      { value: 'autopay', label: 'Autopay' },
+    ] },
+  { key: 'CC', label: 'Credit Cards', icon: 'credit-card',
+    methodValues: ['CC'], subMethodField: 'card_network',
+    subMethods: [
+      { value: 'Visa', label: 'Visa' }, { value: 'Mastercard', label: 'Mastercard' },
+      { value: 'RuPay', label: 'RuPay' }, { value: 'Amex', label: 'Amex' },
+      { value: 'Diners', label: 'Diners' },
+    ] },
+  { key: 'DC', label: 'Debit Cards', icon: 'credit-card',
+    methodValues: ['DC'], subMethodField: 'card_network',
+    subMethods: [
+      { value: 'Visa', label: 'Visa' }, { value: 'Mastercard', label: 'Mastercard' },
+      { value: 'RuPay', label: 'RuPay' }, { value: 'Amex', label: 'Amex' },
+      { value: 'Diners', label: 'Diners' },
+    ] },
+  { key: 'NB', label: 'Net Banking', icon: 'globe',
+    methodValues: ['NB'], subMethodField: null, subMethods: [] },
+  { key: 'all_methods', label: 'All Methods', icon: 'grid',
+    methodValues: 'catch_all', subMethodField: null, subMethods: [] },
+]
+
+/**
+ * Groups flat routing rules into method-based groups for visual display.
+ * Returns { groups: [...], defaultRule }
+ */
+export function groupRulesByMethod(rules) {
+  const nonDefaultRules = rules.filter(r => !r.isDefault)
+  const defaultRule = rules.find(r => r.isDefault) || null
+
+  const groups = PAYMENT_METHOD_GROUPS.map(groupDef => ({
+    groupDef,
+    rules: [],
+    subMethodRules: new Map(groupDef.subMethods.map(sm => [sm.value, []])),
+  }))
+  const groupMap = Object.fromEntries(groups.map(g => [g.groupDef.key, g]))
+
+  for (const rule of nonDefaultRules) {
+    const methodCond = rule.conditions.find(c => c.field === 'payment_method')
+
+    // Volume split with no conditions → "All Transactions"
+    if (rule.conditions.length === 0 || (rule.type === 'volume_split' && !methodCond)) {
+      groupMap['all_txn'].rules.push(rule)
+      continue
+    }
+
+    // No payment_method condition → "All Methods"
+    if (!methodCond) {
+      groupMap['all_methods'].rules.push(rule)
+      continue
+    }
+
+    let targetMethods = []
+    if (methodCond.operator === 'equals') {
+      targetMethods = [methodCond.value]
+    } else if (methodCond.operator === 'in' && Array.isArray(methodCond.value)) {
+      targetMethods = methodCond.value
+    } else {
+      targetMethods = [methodCond.value]
+    }
+
+    for (const method of targetMethods) {
+      const group = groupMap[method]
+      if (!group) { groupMap['all_methods'].rules.push(rule); continue }
+
+      group.rules.push(rule)
+
+      if (group.groupDef.subMethodField) {
+        const subCond = rule.conditions.find(c => c.field === group.groupDef.subMethodField)
+        if (subCond) {
+          const subValues = subCond.operator === 'in' && Array.isArray(subCond.value)
+            ? subCond.value : [subCond.value]
+          for (const sv of subValues) {
+            if (group.subMethodRules.has(sv)) {
+              group.subMethodRules.get(sv).push(rule)
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return {
+    groups: groups.filter(g => {
+      if (g.groupDef.key === 'all_txn' || g.groupDef.key === 'all_methods') return g.rules.length > 0
+      return true
+    }),
+    defaultRule,
+  }
+}
 
 // ── Helpers ─────────────────────────────
 
@@ -1147,7 +1259,7 @@ function seededRandom(seed) {
 export function generateRecommendations(merchant) {
   const recs = []
 
-  // 1. Churn risk: txn volume dropped YoY
+  // 1. Wallet share risk: txn volume dropped YoY
   const { currentMonth, lastYearSameMonth } = merchant.txnVolumeHistory || {}
   if (currentMonth && lastYearSameMonth && lastYearSameMonth > 0) {
     const yoyChange = ((currentMonth - lastYearSameMonth) / lastYearSameMonth) * 100
@@ -1158,20 +1270,24 @@ export function generateRecommendations(merchant) {
           id: 'enable-sr-sensitivity',
           type: 'critical',
           title: 'Enable SR Sensitivity flag',
-          description: `Transaction volume has dropped ${dropPct}% compared to the same month last year, indicating potential churn risk. Enabling SR sensitivity locks routing to the highest success-rate terminal, improving payment reliability and merchant experience.`,
+          description: `Transaction volume has dropped ${dropPct}% compared to the same month last year, indicating potential wallet share risk. Enabling SR sensitivity locks routing to the highest success-rate terminal, improving payment reliability and merchant experience.`,
           signal: `${dropPct}% YoY transaction decline`,
           action: 'enable_sr_sensitive',
           impact: 'Improve payment success rate, reduce failed transactions',
+          confidence: 88,
+          affectedArea: 'Routing Strategy',
         })
       } else {
         recs.push({
-          id: 'churn-risk-alert',
+          id: 'wallet-share-risk-alert',
           type: 'warning',
-          title: 'Monitor churn risk closely',
+          title: 'Monitor wallet share risk closely',
           description: `Transaction volume has dropped ${dropPct}% compared to the same month last year. SR sensitivity is already enabled. Consider reaching out to the merchant to understand if there are integration or business issues driving the decline.`,
           signal: `${dropPct}% YoY transaction decline`,
           action: 'contact_merchant',
           impact: 'Retain merchant, prevent further volume loss',
+          confidence: 82,
+          affectedArea: 'Merchant Retention',
         })
       }
     }
@@ -1187,6 +1303,8 @@ export function generateRecommendations(merchant) {
       signal: `SR at ${merchant.avgPaymentSuccessRate}% (below 93% benchmark)`,
       action: 'review_terminals',
       impact: 'Improve conversion rate by 2–4%',
+      confidence: 92,
+      affectedArea: 'Terminal Health',
     })
   }
 
@@ -1203,6 +1321,8 @@ export function generateRecommendations(merchant) {
         signal: `Zero-cost terminal(s) at ${lowShare.map(t => t.txnShare + '% share').join(', ')}`,
         action: 'optimize_routing',
         impact: `Save ₹${(lowShare.reduce((s, t) => s + (1.5 * merchant.monthlyTxnVolume * 0.15 / 100), 0) / 100000).toFixed(1)}L/month in backward cost`,
+        confidence: 78,
+        affectedArea: 'Cost Optimization',
       })
     }
   }
@@ -1221,6 +1341,8 @@ export function generateRecommendations(merchant) {
         signal: `TSP gateway at ${tspTerminal.txnShare}% share (target: >50%)`,
         action: 'adjust_routing',
         impact: 'Avoid TSP contract penalty, maintain deal terms',
+        confidence: 95,
+        affectedArea: 'Compliance',
       })
     }
   }
@@ -1239,6 +1361,8 @@ export function generateRecommendations(merchant) {
         signal: `${merchant.avgPaymentSuccessRate}% SR with ${yoyChange.toFixed(0)}% volume growth`,
         action: 'optimize_cost',
         impact: 'Reduce backward cost while maintaining SR above 95%',
+        confidence: 74,
+        affectedArea: 'Cost Optimization',
       })
     }
   }
@@ -1276,6 +1400,8 @@ export function generateRecommendations(merchant) {
           signal: `${srBps} bps SR loss vs ${costBps} bps cost saving`,
           action: 'prioritize_terminal',
           impact: `Save ₹${savingLakhs}L/month in backward cost with minimal SR impact`,
+          confidence: 71,
+          affectedArea: 'Terminal Routing',
           meta: {
             fromTerminal: primaryTermId,
             toTerminal: altTermId,
@@ -1322,6 +1448,8 @@ export function generateRecommendations(merchant) {
         signal: `₹${visaGMVCr}Cr/month Visa GMV, ${cheapestCC.successRate}% SR at ${ccGwName}`,
         action: 'visa_card_routing',
         impact: `Improve NR by ~${nrImprovementBps} bps, earn clawback on ₹${visaGMVCr}Cr Visa GMV`,
+        confidence: 76,
+        affectedArea: 'Card Routing',
         meta: {
           gateway: ccGwName,
           terminal: ccTermId,
@@ -1329,6 +1457,47 @@ export function generateRecommendations(merchant) {
           nrBps: nrImprovementBps,
         },
       })
+    }
+  }
+
+  // 8. MCC peer comparison — procure terminal from higher-SR peer's gateway
+  if (merchant.routingStrategy === 'success_rate') {
+    const mccPeers = merchants.filter(
+      (m) => m.mcc === merchant.mcc && m.id !== merchant.id && m.routingStrategy === 'success_rate'
+    )
+    if (mccPeers.length > 0) {
+      const mccGroup = [merchant, ...mccPeers]
+      const mccAvgSR = mccGroup.reduce((s, m) => s + m.avgPaymentSuccessRate, 0) / mccGroup.length
+
+      if (merchant.avgPaymentSuccessRate < mccAvgSR) {
+        const bestPeer = mccPeers.reduce((best, m) =>
+          m.avgPaymentSuccessRate > best.avgPaymentSuccessRate ? m : best
+        )
+        const merchantGwIds = new Set(merchant.gatewayMetrics.map((gm) => gm.gatewayId))
+        const peerOnlyGws = bestPeer.gatewayMetrics.filter((gm) => !merchantGwIds.has(gm.gatewayId))
+
+        if (peerOnlyGws.length > 0) {
+          const bestMissing = peerOnlyGws.reduce((best, gm) =>
+            gm.successRate > best.successRate ? gm : best
+          )
+          const gwInfo = gateways.find((g) => g.id === bestMissing.gatewayId)
+          const gwName = gwInfo?.shortName || bestMissing.gatewayId
+          const srGap = (bestPeer.avgPaymentSuccessRate - merchant.avgPaymentSuccessRate).toFixed(1)
+
+          recs.push({
+            id: `mcc-peer-terminal-${bestMissing.gatewayId}`,
+            type: 'warning',
+            signal: `SR ${merchant.avgPaymentSuccessRate}% vs MCC avg ${mccAvgSR.toFixed(1)}% (${bestPeer.name} at ${bestPeer.avgPaymentSuccessRate}%)`,
+            title: `Procure ${gwName} terminal to improve success rate`,
+            description: `${merchant.name}'s SR trails MCC peer ${bestPeer.name} (${bestPeer.avgPaymentSuccessRate}%) by ${srGap}pp. ${bestPeer.name} routes ${bestMissing.txnShare}% traffic via ${gwName} (${bestMissing.successRate}% SR) — a gateway ${merchant.name} currently lacks. Adding ${gwName} terminal could improve overall SR by ~0.5–1%.`,
+            impact: 'Close SR gap with MCC peers',
+            action: 'procure_terminal',
+            confidence: 85,
+            affectedArea: 'Terminal Procurement',
+            meta: { peerName: bestPeer.name, peerSR: bestPeer.avgPaymentSuccessRate, gwName, gwSR: bestMissing.successRate, srGap: parseFloat(srGap) },
+          })
+        }
+      }
     }
   }
 
@@ -1342,6 +1511,8 @@ export function generateRecommendations(merchant) {
       signal: 'All metrics nominal',
       action: 'schedule_review',
       impact: 'Strengthen merchant relationship',
+      confidence: 65,
+      affectedArea: 'Account Health',
     })
   }
 
@@ -1599,12 +1770,31 @@ export function generateMerchantTransactions(merchant) {
       }
     }
 
+    // Mark ~40% of failed transactions as NTF (Not-to-Fail)
+    let isNTF = false
+    let ntfReason = null
+    if (status === 'failed') {
+      const ntfSeed = hashCode(merchant.id + '-ntf-' + i) % 10
+      if (ntfSeed < 4) {
+        isNTF = true
+        const reasons = [
+          'Cost-driven REJECT rule without fallback gateway',
+          'No SELECT rule for payment method — terminal unavailable',
+          'Network/card type restriction — no eligible terminal',
+          'Blocked MCC compliance restriction',
+        ]
+        ntfReason = reasons[ntfSeed]
+      }
+    }
+
     transactions.push({
       txnId,
       timestamp,
       amount,
       paymentMethod,
       status,
+      isNTF,
+      ntfReason,
       gatewayId: terminalInfos.find((t) => t.displayTerminalId === routingDecision.selectedTerminalId)?.gatewayId || merchant.currentGatewayId,
       terminalId: terminalInfos.find((t) => t.displayTerminalId === routingDecision.selectedTerminalId)?.terminalId || merchant.currentTerminalId,
       routingDecision,
@@ -1675,4 +1865,1097 @@ export function generateMonthlyHistory(merchantList) {
   }
 
   return months
+}
+
+// ── Rule Engine ───────────────────────────
+
+// Seed routing rules per merchant (custom rules only — default rule is generated)
+const SEED_RULES = {
+  // Zomato — standard, SR-based, 4 terminals
+  'merch-001': [
+    {
+      id: 'rule-merch-001-001', name: 'Visa CC High Value → HDFC', type: 'conditional', enabled: true, priority: 1,
+      conditions: [
+        { field: 'payment_method', operator: 'equals', value: 'CC' },
+        { field: 'card_network', operator: 'equals', value: 'Visa' },
+        { field: 'amount', operator: 'greater_than', value: 5000 },
+      ],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-hdfc-001', 'term-icici-001'], splits: [], srThreshold: 90, minPaymentCount: 100 },
+      isDefault: false, createdAt: '2026-02-10T10:30:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+    {
+      id: 'rule-merch-001-002', name: 'UPI → HDFC + Axis', type: 'conditional', enabled: true, priority: 2,
+      conditions: [{ field: 'payment_method', operator: 'equals', value: 'UPI' }],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-hdfc-001', 'term-axis-001'], splits: [], srThreshold: 88, minPaymentCount: 100 },
+      isDefault: false, createdAt: '2026-02-10T10:35:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+  ],
+  // Swiggy — TSP, HDFC 70% commitment
+  'merch-002': [
+    {
+      id: 'rule-merch-002-001', name: 'HDFC Volume Commitment (TSP)', type: 'volume_split', enabled: true, priority: 1,
+      conditions: [],
+      conditionLogic: 'AND',
+      action: { type: 'split', terminals: [], splits: [
+        { terminalId: 'term-hdfc-001', percentage: 70 },
+        { terminalId: 'term-icici-002', percentage: 30 },
+      ]},
+      isDefault: false, createdAt: '2026-01-15T10:30:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+    {
+      id: 'rule-merch-002-002', name: 'High Value Visa CC → HDFC', type: 'conditional', enabled: true, priority: 2,
+      conditions: [
+        { field: 'payment_method', operator: 'equals', value: 'CC' },
+        { field: 'card_network', operator: 'equals', value: 'Visa' },
+        { field: 'amount', operator: 'greater_than', value: 5000 },
+      ],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-hdfc-001'], splits: [], srThreshold: 92, minPaymentCount: 200 },
+      isDefault: false, createdAt: '2026-01-20T14:15:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+  ],
+  // CRED — standard, fintech
+  'merch-003': [
+    {
+      id: 'rule-merch-003-001', name: 'CC → HDFC Terminals', type: 'conditional', enabled: true, priority: 1,
+      conditions: [{ field: 'payment_method', operator: 'equals', value: 'CC' }],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-hdfc-001', 'term-hdfc-002'], splits: [], srThreshold: 93, minPaymentCount: 150 },
+      isDefault: false, createdAt: '2026-02-05T09:00:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+    {
+      id: 'rule-merch-003-002', name: 'UPI → Axis', type: 'conditional', enabled: true, priority: 2,
+      conditions: [{ field: 'payment_method', operator: 'equals', value: 'UPI' }],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-axis-001'], splits: [], srThreshold: 88, minPaymentCount: 100 },
+      isDefault: false, createdAt: '2026-02-05T09:10:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+  ],
+  // Flipkart — standard, e-commerce, 3 terminals
+  'merch-004': [
+    {
+      id: 'rule-merch-004-001', name: 'Mastercard CC → ICICI', type: 'conditional', enabled: true, priority: 1,
+      conditions: [
+        { field: 'payment_method', operator: 'equals', value: 'CC' },
+        { field: 'card_network', operator: 'equals', value: 'Mastercard' },
+      ],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-icici-001'], splits: [], srThreshold: 91, minPaymentCount: 100 },
+      isDefault: false, createdAt: '2026-02-01T11:00:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+    {
+      id: 'rule-merch-004-002', name: 'UPI → HDFC + Axis', type: 'conditional', enabled: true, priority: 2,
+      conditions: [{ field: 'payment_method', operator: 'equals', value: 'UPI' }],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-hdfc-002', 'term-axis-001'], splits: [], srThreshold: 90, minPaymentCount: 100 },
+      isDefault: false, createdAt: '2026-02-01T11:15:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+    {
+      id: 'rule-merch-004-003', name: 'RuPay Debit → ICICI', type: 'conditional', enabled: true, priority: 3,
+      conditions: [
+        { field: 'payment_method', operator: 'equals', value: 'DC' },
+        { field: 'card_network', operator: 'equals', value: 'RuPay' },
+      ],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-icici-001'], splits: [], srThreshold: 90, minPaymentCount: 100 },
+      isDefault: false, createdAt: '2026-02-01T11:30:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+  ],
+  // BigBasket — standard, 2 terminals
+  'merch-005': [
+    {
+      id: 'rule-merch-005-001', name: 'UPI → RBL', type: 'conditional', enabled: true, priority: 1,
+      conditions: [{ field: 'payment_method', operator: 'equals', value: 'UPI' }],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-rbl-001'], splits: [] },
+      isDefault: false, createdAt: '2026-02-15T16:00:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+  ],
+  // Myntra — TSP violation! HDFC locked but NO HDFC terminal in metrics
+  'merch-006': [
+    {
+      id: 'rule-merch-006-001', name: 'High Value CC → Axis', type: 'conditional', enabled: true, priority: 1,
+      conditions: [
+        { field: 'payment_method', operator: 'equals', value: 'CC' },
+        { field: 'amount', operator: 'greater_than', value: 3000 },
+      ],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-axis-001'], splits: [] },
+      isDefault: false, createdAt: '2026-01-25T13:00:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+  ],
+  // BookMyShow — offer_linked, HDFC 10% cashback on CC
+  'merch-007': [
+    {
+      id: 'rule-merch-007-001', name: 'CC → HDFC (Cashback Offer)', type: 'conditional', enabled: true, priority: 1,
+      conditions: [{ field: 'payment_method', operator: 'equals', value: 'CC' }],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-hdfc-001'], splits: [], srThreshold: 90, minPaymentCount: 100 },
+      isDefault: false, createdAt: '2026-02-20T10:00:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+  ],
+  // MakeMyTrip — offer_linked, Axis EMI (but Axis NOT in merchant's terminals!)
+  'merch-008': [
+    {
+      id: 'rule-merch-008-001', name: 'High Value CC → ICICI', type: 'conditional', enabled: true, priority: 1,
+      conditions: [
+        { field: 'payment_method', operator: 'equals', value: 'CC' },
+        { field: 'amount', operator: 'greater_than', value: 10000 },
+      ],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-icici-001'], splits: [] },
+      isDefault: false, createdAt: '2026-02-18T15:30:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+  ],
+  // Nykaa — standard, cost_based
+  'merch-009': [
+    {
+      id: 'rule-merch-009-001', name: 'Visa CC → ICICI', type: 'conditional', enabled: true, priority: 1,
+      conditions: [
+        { field: 'payment_method', operator: 'equals', value: 'CC' },
+        { field: 'card_network', operator: 'equals', value: 'Visa' },
+      ],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-icici-002'], splits: [] },
+      isDefault: false, createdAt: '2026-03-01T10:00:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+  ],
+  // Urban Company — standard, cost_based
+  'merch-010': [
+    {
+      id: 'rule-merch-010-001', name: 'UPI → Yes Bank Zero Cost', type: 'conditional', enabled: true, priority: 1,
+      conditions: [{ field: 'payment_method', operator: 'equals', value: 'UPI' }],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-yes-001', 'term-axis-002'], splits: [] },
+      isDefault: false, createdAt: '2026-02-28T11:00:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+  ],
+  // Zepto — standard, SR-based, 4 terminals
+  'merch-011': [
+    {
+      id: 'rule-merch-011-001', name: 'CC High Value → HDFC', type: 'conditional', enabled: true, priority: 1,
+      conditions: [
+        { field: 'payment_method', operator: 'equals', value: 'CC' },
+        { field: 'amount', operator: 'greater_than', value: 2000 },
+      ],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-hdfc-001', 'term-icici-001'], splits: [] },
+      isDefault: false, createdAt: '2026-02-22T09:30:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+    {
+      id: 'rule-merch-011-002', name: 'UPI → Zero Cost Terminals', type: 'conditional', enabled: true, priority: 2,
+      conditions: [{ field: 'payment_method', operator: 'equals', value: 'UPI' }],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-yes-001', 'term-hdfc-001'], splits: [] },
+      isDefault: false, createdAt: '2026-02-22T09:45:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+  ],
+  // Ola — standard, 3 terminals
+  'merch-012': [
+    {
+      id: 'rule-merch-012-001', name: 'CC → ICICI + Axis', type: 'conditional', enabled: true, priority: 1,
+      conditions: [{ field: 'payment_method', operator: 'equals', value: 'CC' }],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-icici-001', 'term-axis-001'], splits: [] },
+      isDefault: false, createdAt: '2026-02-12T14:00:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+    {
+      id: 'rule-merch-012-002', name: 'UPI → Axis + RBL', type: 'conditional', enabled: true, priority: 2,
+      conditions: [{ field: 'payment_method', operator: 'equals', value: 'UPI' }],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-axis-001', 'term-rbl-001'], splits: [] },
+      isDefault: false, createdAt: '2026-02-12T14:15:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+  ],
+  // PhonePe — standard, high volume, 4 terminals
+  'merch-013': [
+    {
+      id: 'rule-merch-013-001', name: 'Visa CC → HDFC + ICICI', type: 'conditional', enabled: true, priority: 1,
+      conditions: [
+        { field: 'payment_method', operator: 'equals', value: 'CC' },
+        { field: 'card_network', operator: 'equals', value: 'Visa' },
+      ],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-hdfc-001', 'term-icici-001'], splits: [] },
+      isDefault: false, createdAt: '2026-02-08T10:00:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+    {
+      id: 'rule-merch-013-002', name: 'UPI → Axis Zero Cost', type: 'conditional', enabled: true, priority: 2,
+      conditions: [{ field: 'payment_method', operator: 'equals', value: 'UPI' }],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-axis-002'], splits: [] },
+      isDefault: false, createdAt: '2026-02-08T10:15:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+  ],
+  // Paytm Mall — standard, cost_based
+  'merch-014': [
+    {
+      id: 'rule-merch-014-001', name: 'UPI → Yes Bank Zero Cost', type: 'conditional', enabled: true, priority: 1,
+      conditions: [{ field: 'payment_method', operator: 'equals', value: 'UPI' }],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-yes-001'], splits: [] },
+      isDefault: false, createdAt: '2026-03-02T16:00:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+  ],
+  // 1mg — standard, cost_based
+  'merch-015': [
+    {
+      id: 'rule-merch-015-001', name: 'CC → RBL', type: 'conditional', enabled: true, priority: 1,
+      conditions: [{ field: 'payment_method', operator: 'equals', value: 'CC' }],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-rbl-002'], splits: [] },
+      isDefault: false, createdAt: '2026-03-05T11:30:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+  ],
+}
+
+/**
+ * Generate seed routing rules for a merchant.
+ * Returns custom rules + auto-generated default rule.
+ */
+export function generateSeedRules(merchant) {
+  const customRules = SEED_RULES[merchant.id] || []
+  const rules = customRules.map(r => ({ ...r }))
+
+  // Default rule: routes to all terminals sorted by current routing strategy
+  const sortedTerminals = [...merchant.gatewayMetrics]
+    .sort((a, b) => {
+      if (merchant.routingStrategy === 'cost_based') return a.costPerTxn - b.costPerTxn
+      return b.successRate - a.successRate
+    })
+    .map(gm => gm.terminalId)
+
+  rules.push({
+    id: `rule-${merchant.id}-default`,
+    name: 'Default Routing',
+    type: 'conditional',
+    enabled: true,
+    priority: 999,
+    conditions: [],
+    conditionLogic: 'AND',
+    action: { type: 'route', terminals: sortedTerminals, splits: [] },
+    isDefault: true,
+    createdAt: '2025-12-01T00:00:00Z',
+    createdBy: 'system',
+  })
+
+  return rules
+}
+
+// ── Rule Evaluation Engine ──────────────
+
+/**
+ * Check if a single rule's conditions match a transaction.
+ */
+function matchesConditions(rule, transaction) {
+  if (!rule.conditions || rule.conditions.length === 0) return true
+
+  const results = rule.conditions.map(cond => {
+    const txnValue = transaction[cond.field]
+    if (txnValue === undefined || txnValue === null) return false
+
+    switch (cond.operator) {
+      case 'equals':
+        return String(txnValue).toLowerCase() === String(cond.value).toLowerCase()
+      case 'in':
+        return Array.isArray(cond.value) && cond.value.some(v => String(v).toLowerCase() === String(txnValue).toLowerCase())
+      case 'greater_than':
+        return Number(txnValue) > Number(cond.value)
+      case 'less_than':
+        return Number(txnValue) < Number(cond.value)
+      case 'between':
+        if (!Array.isArray(cond.value) || cond.value.length < 2) return false
+        return Number(txnValue) >= Number(cond.value[0]) && Number(txnValue) <= Number(cond.value[1])
+      default:
+        return false
+    }
+  })
+
+  if (rule.conditionLogic === 'OR') return results.some(Boolean)
+  return results.every(Boolean) // AND
+}
+
+/**
+ * Walk enabled rules in priority order. First match wins.
+ * Returns { matchedRule, action } or { matchedRule: null, action: null }.
+ */
+export function evaluateRules(rules, transaction) {
+  const sorted = [...rules]
+    .filter(r => r.enabled)
+    .sort((a, b) => a.priority - b.priority)
+
+  for (const rule of sorted) {
+    if (matchesConditions(rule, transaction)) {
+      return { matchedRule: rule, action: rule.action }
+    }
+  }
+
+  return { matchedRule: null, action: null }
+}
+
+// ── NTF Gap Detection ────────────────────
+
+/**
+ * Detect coverage gaps that could cause Not-to-Fail (NTF) events.
+ * Checks: method-terminal mismatches, orphan terminals, missing default.
+ */
+export function detectNTFGaps(rules, merchant) {
+  const gaps = []
+  const enabledRules = rules.filter(r => r.enabled)
+
+  if (enabledRules.length === 0) {
+    gaps.push({ method: 'ALL', network: null, reason: 'No routing rules are enabled', severity: 'critical', ruleId: null })
+    return { hasGaps: true, gaps }
+  }
+
+  // Build terminal capability map from merchant's active terminals
+  const terminalMethods = {}
+  merchant.gatewayMetrics.forEach(gm => {
+    terminalMethods[gm.terminalId] = new Set(gm.supportedMethods || [])
+  })
+  const merchantTerminalIds = new Set(merchant.gatewayMetrics.map(gm => gm.terminalId))
+
+  // Check each non-default enabled rule for potential gaps
+  enabledRules.forEach(rule => {
+    if (rule.isDefault) return
+
+    const targetTerminals = rule.action.type === 'split'
+      ? rule.action.splits.map(s => s.terminalId)
+      : rule.action.terminals
+
+    // 1. Orphan terminals: referenced in rule but not in merchant's active terminals
+    const orphans = targetTerminals.filter(tid => !merchantTerminalIds.has(tid))
+    if (orphans.length > 0) {
+      const orphanNames = orphans.map(tid => getTerminalDisplayId(tid)).join(', ')
+      gaps.push({
+        method: null, network: null,
+        reason: `Rule "${rule.name}" references inactive terminal(s): ${orphanNames}`,
+        severity: 'critical', ruleId: rule.id,
+      })
+    }
+
+    // 2. For unconditional volume splits: must cover ALL merchant payment methods
+    if (rule.action.type === 'split' && rule.conditions.length === 0) {
+      const allMethods = new Set()
+      merchant.gatewayMetrics.forEach(gm => {
+        (gm.supportedMethods || []).forEach(m => allMethods.add(m))
+      })
+
+      allMethods.forEach(method => {
+        const hasSupport = targetTerminals.some(tid => {
+          const methods = terminalMethods[tid]
+          return methods && methods.has(method)
+        })
+        if (!hasSupport) {
+          gaps.push({
+            method, network: null,
+            reason: `Volume split "${rule.name}" has no terminal supporting ${method}`,
+            severity: 'high', ruleId: rule.id,
+          })
+        }
+      })
+    }
+
+    // 3. For conditional rules with payment_method: check terminal supports that method
+    const methodCond = rule.conditions.find(c => c.field === 'payment_method')
+    if (methodCond) {
+      const method = methodCond.value
+      const activeTargets = targetTerminals.filter(tid => merchantTerminalIds.has(tid))
+      const hasSupport = activeTargets.some(tid => {
+        const methods = terminalMethods[tid]
+        return methods && methods.has(method)
+      })
+      if (!hasSupport && activeTargets.length > 0) {
+        gaps.push({
+          method, network: null,
+          reason: `Rule "${rule.name}" routes ${method} to terminal(s) that don't support it`,
+          severity: 'critical', ruleId: rule.id,
+        })
+      }
+    }
+  })
+
+  // 4. Check: is the default rule present and enabled?
+  const hasDefaultEnabled = enabledRules.some(r => r.isDefault)
+  if (!hasDefaultEnabled) {
+    gaps.push({
+      method: 'ALL', network: null,
+      reason: 'Default fallback rule is disabled — unmatched transactions will fail',
+      severity: 'critical', ruleId: null,
+    })
+  }
+
+  return { hasGaps: gaps.length > 0, gaps }
+}
+
+// ── Transaction Simulator ────────────────
+
+/**
+ * Full simulation of a transaction against the rule set.
+ * Returns matched rule, resolved terminals, SR/cost, and any warnings.
+ */
+export function simulateTransaction(rules, transaction, merchant) {
+  const result = evaluateRules(rules, transaction)
+  const warnings = []
+
+  if (!result.matchedRule) {
+    return { matchedRule: null, terminals: [], warnings: ['No rule matched this transaction — it would fail (NTF)'] }
+  }
+
+  const { matchedRule, action } = result
+  const thresholdLow = merchant.srThresholdLow || 85
+
+  // Resolve target terminals with full detail
+  let targetTerminals
+  if (action.type === 'split') {
+    targetTerminals = action.splits.map(s => {
+      const gm = merchant.gatewayMetrics.find(g => g.terminalId === s.terminalId)
+      const gw = gateways.find(g => g.id === gm?.gatewayId)
+      const term = gw?.terminals.find(t => t.id === s.terminalId)
+      return {
+        terminalId: s.terminalId,
+        displayId: term?.terminalId || s.terminalId,
+        gatewayShort: gw?.shortName || '??',
+        percentage: s.percentage,
+        successRate: gm?.successRate || 0,
+        costPerTxn: gm?.costPerTxn || 0,
+        supportedMethods: gm?.supportedMethods || [],
+      }
+    })
+  } else {
+    const allRouteTerminals = action.terminals.map(tid => {
+      const gm = merchant.gatewayMetrics.find(g => g.terminalId === tid)
+      const gw = gateways.find(g => g.id === gm?.gatewayId)
+      const term = gw?.terminals.find(t => t.id === tid)
+      // Derive payment count from txnShare × merchant total volume
+      const totalVolume = merchant.txnVolumeHistory?.currentMonth || 0
+      const paymentCount = gm ? Math.round((gm.txnShare / 100) * totalVolume) : 0
+      return {
+        terminalId: tid,
+        displayId: term?.terminalId || tid,
+        gatewayShort: gw?.shortName || '??',
+        successRate: gm?.successRate || 0,
+        costPerTxn: gm?.costPerTxn || 0,
+        supportedMethods: gm?.supportedMethods || [],
+        paymentCount,
+      }
+    })
+
+    // Apply SR threshold fallback: pick the first terminal that meets threshold,
+    // or whose payment count is below minPaymentCount (insufficient data to judge)
+    const srThreshold = action.srThreshold || 0
+    const minPaymentCount = action.minPaymentCount || 0
+    let selectedTerminal = null
+
+    if (srThreshold > 0 && allRouteTerminals.length > 1) {
+      for (const t of allRouteTerminals) {
+        const hasEnoughData = t.paymentCount >= minPaymentCount
+        const srOk = t.successRate >= srThreshold
+        if (!hasEnoughData || srOk) {
+          selectedTerminal = t
+          break
+        }
+        warnings.push(`Terminal ${t.displayId} SR ${t.successRate}% is below threshold ${srThreshold}% (${t.paymentCount.toLocaleString('en-IN')} payments) — falling back to next`)
+      }
+      // If all terminals failed threshold, use last as best-effort
+      if (!selectedTerminal) {
+        selectedTerminal = allRouteTerminals[allRouteTerminals.length - 1]
+        warnings.push(`All terminals below SR threshold — using ${selectedTerminal.displayId} as last resort`)
+      }
+    }
+
+    // Return all terminals but mark which one is the active selection
+    targetTerminals = allRouteTerminals.map(t => ({
+      ...t,
+      isActive: selectedTerminal ? t.terminalId === selectedTerminal.terminalId : allRouteTerminals[0]?.terminalId === t.terminalId,
+    }))
+  }
+
+  // Warning: method not supported by target terminals
+  const paymentMethod = transaction.payment_method
+  if (paymentMethod) {
+    const supportsMethod = targetTerminals.some(t => t.supportedMethods.includes(paymentMethod))
+    if (!supportsMethod) {
+      warnings.push(`None of the target terminals support ${paymentMethod} — this transaction would fail (NTF)`)
+    }
+  }
+
+  // Warning: terminal SR below threshold
+  targetTerminals.forEach(t => {
+    if (t.successRate > 0 && t.successRate < thresholdLow) {
+      warnings.push(`Terminal ${t.displayId} has SR ${t.successRate}%, below threshold of ${thresholdLow}%`)
+    }
+  })
+
+  // Warning: terminal not in merchant's active list
+  const merchantTerminalIds = new Set(merchant.gatewayMetrics.map(gm => gm.terminalId))
+  targetTerminals.forEach(t => {
+    if (!merchantTerminalIds.has(t.terminalId)) {
+      warnings.push(`Terminal ${t.displayId} is not active for this merchant`)
+    }
+  })
+
+  return { matchedRule, terminals: targetTerminals, warnings }
+}
+
+// ── NTF Rule Chain Tracer ──────────────────
+
+/**
+ * Generate a detailed step-by-step trace of the routing pipeline for an NTF transaction.
+ * Shows how terminals get eliminated at each rule evaluation step.
+ */
+export function traceNTFRuleChain(transaction, rules, merchant) {
+  const steps = []
+  const enabledRules = [...rules].filter(r => r.enabled).sort((a, b) => a.priority - b.priority)
+  const paymentMethod = transaction.paymentMethod?.short || 'UPI'
+
+  // Step 0: Initial eligible terminals (all that support this payment method)
+  const allTerminals = merchant.gatewayMetrics.map(gm => {
+    const gw = gateways.find(g => g.id === gm.gatewayId)
+    const term = gw?.terminals.find(t => t.id === gm.terminalId)
+    return {
+      terminalId: gm.terminalId,
+      displayId: term?.terminalId || gm.terminalId,
+      gatewayShort: gw?.shortName || '??',
+      successRate: gm.successRate,
+      costPerTxn: gm.costPerTxn,
+      supportedMethods: gm.supportedMethods || [],
+    }
+  })
+
+  const eligible = allTerminals.filter(t => t.supportedMethods.includes(paymentMethod))
+  const ineligible = allTerminals.filter(t => !t.supportedMethods.includes(paymentMethod))
+
+  steps.push({
+    stepNumber: 0,
+    type: 'initial',
+    label: 'Eligible Terminals',
+    description: `${eligible.length} of ${allTerminals.length} terminals support ${paymentMethod}`,
+    terminalsRemaining: eligible.map(t => ({ ...t, status: 'eligible' })),
+    terminalsEliminated: ineligible.map(t => ({
+      ...t,
+      status: 'eliminated',
+      reason: `Does not support ${paymentMethod}`,
+    })),
+  })
+
+  if (eligible.length === 0) {
+    steps.push({
+      stepNumber: 1,
+      type: 'ntf',
+      label: 'NTF — No eligible terminals',
+      description: `No terminal supports ${paymentMethod} for this merchant. Payment fails immediately.`,
+      ntfCause: 'method_unsupported',
+    })
+    return { steps, ntfStep: 1 }
+  }
+
+  // Walk through rules and simulate elimination
+  let remaining = [...eligible]
+  let stepNum = 1
+
+  for (const rule of enabledRules) {
+    if (rule.isDefault) continue
+    if (remaining.length === 0) break
+
+    // Check if this rule's conditions could match the transaction
+    const txnProxy = {
+      payment_method: paymentMethod,
+      amount: transaction.amount,
+      card_network: transaction.paymentMethod?.network || null,
+      card_type: transaction.paymentMethod?.cardType || null,
+    }
+    const ruleMatches = matchesConditions(rule, txnProxy)
+
+    if (!ruleMatches) {
+      steps.push({
+        stepNumber: stepNum++,
+        type: 'rule_skip',
+        label: `Rule: ${rule.name}`,
+        ruleId: rule.id,
+        ruleName: rule.name,
+        ruleType: rule.type === 'volume_split' ? 'Volume Split' : 'Conditional',
+        conditions: formatRuleConditions(rule),
+        description: 'Conditions did not match — rule skipped',
+        terminalsRemaining: remaining.map(t => ({ ...t, status: 'passed' })),
+        terminalsEliminated: [],
+      })
+      continue
+    }
+
+    // Rule matched — determine target terminals
+    const targetIds = new Set(
+      rule.action.type === 'split'
+        ? rule.action.splits.map(s => s.terminalId)
+        : rule.action.terminals || []
+    )
+
+    // For REJECT-like rules (route to specific terminals), everything NOT targeted gets rejected
+    const kept = remaining.filter(t => targetIds.has(t.terminalId))
+    const eliminated = remaining.filter(t => !targetIds.has(t.terminalId))
+
+    if (kept.length === 0 && eliminated.length > 0) {
+      // All current terminals eliminated — this rule causes NTF
+      steps.push({
+        stepNumber: stepNum,
+        type: 'rule_ntf',
+        label: `Rule: ${rule.name}`,
+        ruleId: rule.id,
+        ruleName: rule.name,
+        ruleType: rule.type === 'volume_split' ? 'Volume Split' : 'Conditional',
+        conditions: formatRuleConditions(rule),
+        action: formatRuleAction(rule),
+        description: `Rule routes to ${[...targetIds].map(id => _traceTerminalLabel(id)).join(', ')} — none are in the eligible set. All remaining terminals eliminated.`,
+        terminalsRemaining: [],
+        terminalsEliminated: eliminated.map(t => ({
+          ...t,
+          status: 'eliminated',
+          reason: `Not in rule target: ${[...targetIds].map(id => _traceTerminalLabel(id)).join(', ')}`,
+        })),
+        isNTFCause: true,
+      })
+
+      steps.push({
+        stepNumber: stepNum + 1,
+        type: 'ntf',
+        label: 'NTF — All terminals eliminated',
+        description: `Rule "${rule.name}" eliminated all eligible terminals. Payment cannot be routed.`,
+        ntfCause: 'rule_elimination',
+        causeRuleId: rule.id,
+        causeRuleName: rule.name,
+      })
+      return { steps, ntfStep: stepNum + 1, causeRule: rule }
+    }
+
+    if (eliminated.length > 0) {
+      steps.push({
+        stepNumber: stepNum++,
+        type: 'rule_filter',
+        label: `Rule: ${rule.name}`,
+        ruleId: rule.id,
+        ruleName: rule.name,
+        ruleType: rule.type === 'volume_split' ? 'Volume Split' : 'Conditional',
+        conditions: formatRuleConditions(rule),
+        action: formatRuleAction(rule),
+        description: `Rule matched. ${eliminated.length} terminal(s) not in target list eliminated.`,
+        terminalsRemaining: kept.map(t => ({ ...t, status: 'passed' })),
+        terminalsEliminated: eliminated.map(t => ({
+          ...t,
+          status: 'eliminated',
+          reason: 'Not in rule target list',
+        })),
+      })
+      remaining = kept
+    } else {
+      steps.push({
+        stepNumber: stepNum++,
+        type: 'rule_pass',
+        label: `Rule: ${rule.name}`,
+        ruleId: rule.id,
+        ruleName: rule.name,
+        ruleType: rule.type === 'volume_split' ? 'Volume Split' : 'Conditional',
+        conditions: formatRuleConditions(rule),
+        action: formatRuleAction(rule),
+        description: 'Rule matched. All remaining terminals are in target list — no elimination.',
+        terminalsRemaining: remaining.map(t => ({ ...t, status: 'passed' })),
+        terminalsEliminated: [],
+      })
+    }
+  }
+
+  // If we get here with remaining terminals, simulate NTF based on ntfReason
+  // (in real system, further pipeline steps — SR threshold, compliance — could still eliminate)
+  if (remaining.length > 0 && transaction.isNTF) {
+    const reason = transaction.ntfReason || 'Unknown routing failure'
+    const lastEliminated = remaining
+    steps.push({
+      stepNumber: stepNum,
+      type: 'pipeline_filter',
+      label: 'Pipeline: Post-rule filters',
+      description: reason,
+      terminalsRemaining: [],
+      terminalsEliminated: lastEliminated.map(t => ({
+        ...t,
+        status: 'eliminated',
+        reason,
+      })),
+      isNTFCause: true,
+    })
+    steps.push({
+      stepNumber: stepNum + 1,
+      type: 'ntf',
+      label: 'NTF — Payment Failed',
+      description: `${reason}. No terminals available after pipeline filters.`,
+      ntfCause: 'pipeline_filter',
+    })
+    return { steps, ntfStep: stepNum + 1 }
+  }
+
+  return { steps, ntfStep: null }
+}
+
+function formatRuleConditions(rule) {
+  if (!rule.conditions || rule.conditions.length === 0) return 'Unconditional (matches all)'
+  return rule.conditions.map(c => {
+    const field = c.field.replace(/_/g, ' ')
+    const val = Array.isArray(c.value) ? c.value.join('–') : c.value
+    return `${field} ${c.operator.replace(/_/g, ' ')} ${val}`
+  }).join(` ${rule.conditionLogic || 'AND'} `)
+}
+
+function formatRuleAction(rule) {
+  if (rule.action.type === 'split') {
+    return 'Split: ' + rule.action.splits.map(s =>
+      `${_traceTerminalLabel(s.terminalId)} (${s.percentage}%)`
+    ).join(', ')
+  }
+  return 'Route to: ' + (rule.action.terminals || []).map(id => _traceTerminalLabel(id)).join(' → ')
+}
+
+function _traceTerminalLabel(terminalId) {
+  for (const gw of gateways) {
+    const term = gw.terminals.find(t => t.id === terminalId)
+    if (term) return `${term.terminalId} (${gw.shortName})`
+  }
+  return terminalId
+}
+
+// ── AI Rule Intent Parser ─────────────────
+
+const INTENT_KEYWORDS = {
+  payment_method: {
+    'credit card': 'CC', 'credit cards': 'CC', 'cc': 'CC',
+    'debit card': 'DC', 'debit cards': 'DC', 'dc': 'DC',
+    'upi': 'UPI', 'upi payments': 'UPI',
+    'net banking': 'NB', 'netbanking': 'NB', 'nb': 'NB',
+  },
+  card_network: {
+    'visa': 'Visa', 'mastercard': 'Mastercard', 'master card': 'Mastercard',
+    'rupay': 'RuPay', 'ru pay': 'RuPay',
+    'amex': 'Amex', 'american express': 'Amex',
+  },
+  issuer_bank: {
+    'hdfc': 'HDFC', 'icici': 'ICICI', 'sbi': 'SBI',
+    'axis': 'Axis', 'kotak': 'Kotak',
+  },
+  gateway: {
+    'hdfc': 'gw-hdfc', 'icici': 'gw-icici', 'axis': 'gw-axis',
+    'rbl': 'gw-rbl', 'yes': 'gw-yes', 'yes bank': 'gw-yes',
+  },
+}
+
+/**
+ * Parse natural-language rule intent into a structured rule suggestion.
+ * Uses deterministic keyword matching — no LLM calls.
+ *
+ * @param {string} text - Natural language description of desired rule
+ * @param {object} merchant - Merchant object with gatewayMetrics
+ * @returns {{ confidence: number, suggestedRule: object, explanation: string, warnings: string[] }}
+ */
+export function parseRuleIntent(text, merchant) {
+  const input = (text || '').toLowerCase().trim()
+  const warnings = []
+  const conditions = []
+  let ruleType = 'conditional'
+  let actionTerminals = []
+  let actionSplits = []
+  let signals = 0
+  let totalPossibleSignals = 5 // payment_method, card_network, issuer_bank, amount, gateway
+
+  if (!input) {
+    return {
+      confidence: 0,
+      suggestedRule: null,
+      explanation: "Please describe the routing rule you'd like to create. For example: \"Route Visa credit cards above ₹5,000 to HDFC terminal\"",
+      warnings: [],
+    }
+  }
+
+  // 1. Detect payment method
+  for (const [keyword, value] of Object.entries(INTENT_KEYWORDS.payment_method)) {
+    if (input.includes(keyword)) {
+      if (!conditions.find(c => c.field === 'payment_method' && c.value === value)) {
+        conditions.push({ field: 'payment_method', operator: 'equals', value })
+        signals++
+      }
+      break
+    }
+  }
+
+  // 2. Detect card network
+  for (const [keyword, value] of Object.entries(INTENT_KEYWORDS.card_network)) {
+    if (input.includes(keyword)) {
+      if (!conditions.find(c => c.field === 'card_network' && c.value === value)) {
+        conditions.push({ field: 'card_network', operator: 'equals', value })
+        signals++
+      }
+      break
+    }
+  }
+
+  // 3. Detect issuer bank (as condition, not routing target)
+  // Only add as condition if "issued by" or "from" pattern is found
+  const issuerPatterns = [/(?:issued?\s+by|from|issuer)\s+(\w+)/i]
+  for (const pat of issuerPatterns) {
+    const m = input.match(pat)
+    if (m) {
+      const bankName = m[1].toLowerCase()
+      const bankValue = INTENT_KEYWORDS.issuer_bank[bankName]
+      if (bankValue) {
+        conditions.push({ field: 'issuer_bank', operator: 'equals', value: bankValue })
+        signals++
+        break
+      }
+    }
+  }
+
+  // 4. Detect amount
+  const amountPatterns = [
+    { regex: /(?:above|over|greater than|more than|>)\s*(?:₹|rs\.?|inr)?\s*([0-9,.]+(?:k)?)/i, operator: 'greater_than' },
+    { regex: /(?:below|under|less than|<)\s*(?:₹|rs\.?|inr)?\s*([0-9,.]+(?:k)?)/i, operator: 'less_than' },
+    { regex: /(?:high\s*value)/i, operator: 'greater_than', fixedValue: 5000 },
+    { regex: /(?:low\s*value)/i, operator: 'less_than', fixedValue: 1000 },
+    { regex: /(?:between)\s*(?:₹|rs\.?|inr)?\s*([0-9,.]+(?:k)?)\s*(?:and|to|-)\s*(?:₹|rs\.?|inr)?\s*([0-9,.]+(?:k)?)/i, operator: 'between' },
+  ]
+
+  for (const { regex, operator, fixedValue } of amountPatterns) {
+    const m = input.match(regex)
+    if (m || fixedValue !== undefined) {
+      if (operator === 'between' && m) {
+        const low = parseAmountValue(m[1])
+        const high = parseAmountValue(m[2])
+        conditions.push({ field: 'amount', operator: 'between', value: low, valueTo: high })
+      } else {
+        const val = fixedValue !== undefined ? fixedValue : parseAmountValue(m[1])
+        conditions.push({ field: 'amount', operator, value: val })
+      }
+      signals++
+      break
+    }
+  }
+
+  // 5. Detect rule type: volume split vs conditional
+  const splitKeywords = ['split', 'distribute', 'percentage', 'percent', '%']
+  if (splitKeywords.some(kw => input.includes(kw))) {
+    ruleType = 'volume_split'
+  }
+
+  // 6. Detect gateway/terminal targets
+  const merchantTerminalIds = (merchant?.gatewayMetrics || []).map(gm => gm.terminalId)
+  const detectedGateways = []
+
+  for (const [keyword, gwId] of Object.entries(INTENT_KEYWORDS.gateway)) {
+    // Avoid matching 'hdfc' as gateway when it was already matched as issuer
+    if (input.includes(keyword)) {
+      const gw = gateways.find(g => g.id === gwId)
+      if (gw) {
+        // Check if specific terminal mentioned (e.g., "HDFC_T1", "T1", "terminal 1")
+        const termMatch = input.match(new RegExp(keyword + '[_ ]?t([12])', 'i'))
+        if (termMatch) {
+          const termNum = termMatch[1]
+          const termId = gw.terminals[parseInt(termNum) - 1]?.id
+          if (termId && merchantTerminalIds.includes(termId)) {
+            detectedGateways.push({ gwId, termId, gwShort: gw.shortName })
+            signals++
+          } else if (termId) {
+            warnings.push(`${gw.shortName} terminal T${termNum} is not active for ${merchant?.name || 'this merchant'}`)
+            // Still add it as a suggestion
+            detectedGateways.push({ gwId, termId, gwShort: gw.shortName })
+            signals++
+          }
+        } else {
+          // Pick the first available terminal for this gateway
+          const availableTerms = gw.terminals.filter(t => merchantTerminalIds.includes(t.id))
+          if (availableTerms.length > 0) {
+            detectedGateways.push({ gwId, termId: availableTerms[0].id, gwShort: gw.shortName })
+            signals++
+          } else if (gw.terminals.length > 0) {
+            warnings.push(`${gw.shortName} gateway has no active terminals for ${merchant?.name || 'this merchant'}`)
+            detectedGateways.push({ gwId, termId: gw.terminals[0].id, gwShort: gw.shortName })
+            signals++
+          }
+        }
+      }
+      break // Only match first gateway to avoid ambiguity
+    }
+  }
+
+  // 7. Build action
+  if (ruleType === 'volume_split' && detectedGateways.length > 0) {
+    // Parse percentage patterns like "70% hdfc", "hdfc 70%", "70/30 split"
+    const pctPatterns = [
+      /(\d{1,3})\s*%\s*(\w+)/gi,
+      /(\w+)\s+(\d{1,3})\s*%/gi,
+      /(\d{1,3})\s*[\/]\s*(\d{1,3})/i,
+    ]
+    const ratioMatch = input.match(/(\d{1,3})\s*[\/]\s*(\d{1,3})/)
+    if (ratioMatch && detectedGateways.length >= 1) {
+      // Handle "70/30 split" format
+      const pct1 = parseInt(ratioMatch[1])
+      const pct2 = parseInt(ratioMatch[2])
+      if (pct1 + pct2 === 100) {
+        actionSplits.push({ terminalId: detectedGateways[0].termId, percentage: pct1 })
+        if (detectedGateways.length >= 2) {
+          actionSplits.push({ terminalId: detectedGateways[1].termId, percentage: pct2 })
+        } else {
+          // Pick another terminal from merchant
+          const otherTerm = merchantTerminalIds.find(t => t !== detectedGateways[0].termId)
+          if (otherTerm) actionSplits.push({ terminalId: otherTerm, percentage: pct2 })
+        }
+      }
+    } else {
+      // Try named percentage patterns
+      const pctMatch = input.match(/(\d{1,3})\s*%/)
+      if (pctMatch) {
+        const pct = parseInt(pctMatch[1])
+        actionSplits.push({ terminalId: detectedGateways[0].termId, percentage: Math.min(pct, 100) })
+        const remaining = 100 - Math.min(pct, 100)
+        if (remaining > 0) {
+          const otherTerm = merchantTerminalIds.find(t => t !== detectedGateways[0].termId)
+          if (otherTerm) actionSplits.push({ terminalId: otherTerm, percentage: remaining })
+        }
+      } else {
+        // Equal split across detected gateways
+        const pctEach = Math.floor(100 / detectedGateways.length)
+        detectedGateways.forEach((dg, i) => {
+          actionSplits.push({
+            terminalId: dg.termId,
+            percentage: i === detectedGateways.length - 1 ? 100 - pctEach * (detectedGateways.length - 1) : pctEach,
+          })
+        })
+      }
+    }
+    actionTerminals = []
+  } else {
+    // Conditional — terminals in priority order
+    actionTerminals = detectedGateways.map(dg => dg.termId)
+    if (actionTerminals.length === 0 && merchantTerminalIds.length > 0) {
+      // Fallback: pick highest-SR terminal
+      const sorted = [...(merchant?.gatewayMetrics || [])].sort((a, b) => b.successRate - a.successRate)
+      if (sorted.length > 0) {
+        actionTerminals = [sorted[0].terminalId]
+        warnings.push('No specific gateway mentioned — defaulting to highest-SR terminal')
+      }
+    }
+  }
+
+  // 8. Generate rule name
+  const nameParts = []
+  const pmCond = conditions.find(c => c.field === 'payment_method')
+  const cnCond = conditions.find(c => c.field === 'card_network')
+  const amCond = conditions.find(c => c.field === 'amount')
+  if (cnCond) nameParts.push(cnCond.value)
+  if (pmCond) nameParts.push(pmCond.value)
+  if (amCond) {
+    if (amCond.operator === 'greater_than') nameParts.push(`>${formatAmount(amCond.value)}`)
+    else if (amCond.operator === 'less_than') nameParts.push(`<${formatAmount(amCond.value)}`)
+    else if (amCond.operator === 'between') nameParts.push(`${formatAmount(amCond.value)}-${formatAmount(amCond.valueTo)}`)
+  }
+  if (detectedGateways.length > 0) nameParts.push(`→ ${detectedGateways.map(g => g.gwShort).join('+')}`)
+  const ruleName = nameParts.length > 0 ? nameParts.join(' ') : 'New Rule'
+
+  // 9. Compute confidence
+  const confidence = Math.min(signals / 3, 1) // 3+ signals = full confidence
+
+  // 10. Generate explanation
+  let explanation = ''
+  if (confidence === 0) {
+    explanation = "I couldn't identify specific routing parameters from your description. Try mentioning payment methods (CC, UPI), card networks (Visa, Mastercard), amount thresholds, or gateway names (HDFC, ICICI)."
+  } else {
+    const parts = []
+    if (ruleType === 'volume_split') {
+      parts.push('Create a volume split rule')
+    } else {
+      parts.push('Create a conditional routing rule')
+    }
+    if (conditions.length > 0) {
+      const condDescs = conditions.map(c => {
+        if (c.field === 'payment_method') return `payment method is ${c.value}`
+        if (c.field === 'card_network') return `card network is ${c.value}`
+        if (c.field === 'issuer_bank') return `issuer bank is ${c.value}`
+        if (c.field === 'amount') {
+          if (c.operator === 'greater_than') return `amount > ₹${c.value.toLocaleString('en-IN')}`
+          if (c.operator === 'less_than') return `amount < ₹${c.value.toLocaleString('en-IN')}`
+          if (c.operator === 'between') return `amount between ₹${c.value.toLocaleString('en-IN')} and ₹${(c.valueTo || 0).toLocaleString('en-IN')}`
+        }
+        return ''
+      }).filter(Boolean)
+      parts.push(`that matches when ${condDescs.join(' AND ')}`)
+    }
+    if (ruleType === 'volume_split' && actionSplits.length > 0) {
+      const splitDescs = actionSplits.map(s => {
+        const dId = getTerminalDisplayId(s.terminalId)
+        return `${dId} (${s.percentage}%)`
+      })
+      parts.push(`splitting traffic: ${splitDescs.join(', ')}`)
+    } else if (actionTerminals.length > 0) {
+      const termDescs = actionTerminals.map(t => getTerminalDisplayId(t))
+      parts.push(`routing to ${termDescs.join(' → ')} in priority order`)
+    }
+    explanation = parts.join(', ') + '.'
+  }
+
+  const suggestedRule = confidence > 0 ? {
+    name: ruleName,
+    type: ruleType,
+    conditions,
+    conditionLogic: 'AND',
+    action: {
+      type: ruleType === 'volume_split' ? 'split' : 'route',
+      terminals: actionTerminals,
+      splits: actionSplits,
+      srThreshold: ruleType === 'conditional' && actionTerminals.length > 1 ? 90 : 0,
+      minPaymentCount: ruleType === 'conditional' && actionTerminals.length > 1 ? 100 : 0,
+    },
+  } : null
+
+  return { confidence, suggestedRule, explanation, warnings }
+}
+
+function parseAmountValue(str) {
+  if (!str) return 0
+  const cleaned = str.replace(/[,₹]/g, '').trim().toLowerCase()
+  if (cleaned.endsWith('k')) return parseFloat(cleaned) * 1000
+  return parseFloat(cleaned) || 0
+}
+
+function formatAmount(val) {
+  if (val >= 1000) return `₹${(val / 1000).toFixed(val % 1000 === 0 ? 0 : 1)}K`
+  return `₹${val}`
+}
+
+// ── Terminal Display Helpers ─────────────
+
+/**
+ * Resolve internal terminal ID (e.g. 'term-hdfc-001') to display ID ('HDFC_T1').
+ */
+export function getTerminalDisplayId(terminalId) {
+  for (const gw of gateways) {
+    const term = gw.terminals.find(t => t.id === terminalId)
+    if (term) return term.terminalId
+  }
+  return terminalId
+}
+
+/**
+ * Get full gateway + terminal info from an internal terminal ID.
+ */
+export function getTerminalGatewayInfo(terminalId) {
+  for (const gw of gateways) {
+    const term = gw.terminals.find(t => t.id === terminalId)
+    if (term) {
+      return {
+        displayId: term.terminalId,
+        gatewayId: gw.id,
+        gatewayName: gw.name,
+        gatewayShort: gw.shortName,
+        successRate: term.successRate,
+        costPerTxn: term.costPerTxn,
+        isZeroCost: term.isZeroCost,
+      }
+    }
+  }
+  return null
 }

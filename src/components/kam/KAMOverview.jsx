@@ -29,7 +29,7 @@ export default function KAMOverview() {
         <p>Monitor your enterprise merchant portfolio and revenue targets</p>
       </div>
 
-      {/* Churn Risk */}
+      {/* Wallet Share Risk */}
       {retentionRisks.length > 0 && (
         <div className="kam-card" style={{ marginBottom: 'var(--space-lg)' }}>
           <div className="kam-card-header">
@@ -40,12 +40,12 @@ export default function KAMOverview() {
                 <line x1="18" y1="8" x2="23" y2="13" />
                 <line x1="23" y1="8" x2="18" y2="13" />
               </svg>
-              Churn Risk
+              Wallet Share Risk
             </h3>
             <span className="kam-badge danger">{retentionRisks.length} at risk</span>
           </div>
           <div style={{ fontSize: 13, color: 'var(--rzp-text-secondary)', marginBottom: 12, fontFamily: 'var(--font-secondary)' }}>
-            Merchants with significant YoY transaction volume decline — potential churn indicators
+            Merchants with significant YoY transaction volume decline — potential wallet share risk
           </div>
           {retentionRisks.map((risk) => (
             <div
