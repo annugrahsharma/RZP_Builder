@@ -925,10 +925,6 @@ export default function KAMMerchantDetail() {
     return Math.max(30, Math.min(99, base))
   }, [merchant])
 
-  const ntfTransactions = useMemo(() => {
-    return transactions.filter(t => t.isNTF)
-  }, [transactions])
-  const ntfCount = ntfTransactions.length
   const [expandedNTFs, setExpandedNTFs] = useState(new Set())
   const [copiedNTF, setCopiedNTF] = useState(null)
 
@@ -991,6 +987,11 @@ export default function KAMMerchantDetail() {
   const srData = useMemo(() => merchant ? generateSRTimeSeries(merchant) : [], [merchant])
   const recommendations = useMemo(() => merchant ? generateRecommendations(merchant) : [], [merchant])
   const sankeyData = useMemo(() => merchant ? generateSankeyData(merchant) : { nodes: [], links: [] }, [merchant])
+
+  const ntfTransactions = useMemo(() => {
+    return transactions.filter(t => t.isNTF)
+  }, [transactions])
+  const ntfCount = ntfTransactions.length
 
   const filteredTxns = useMemo(() => {
     let result = transactions
