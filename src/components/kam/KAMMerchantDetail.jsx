@@ -21,6 +21,7 @@ import {
   evaluateRules,
   detectNTFGaps,
   simulateTransaction,
+  simulateRoutingPipeline,
   traceNTFRuleChain,
   getTerminalDisplayId,
   getTerminalGatewayInfo,
@@ -3250,6 +3251,19 @@ function RulesTabContent({
     const result = simulateTransaction(rules, simForm, merchant)
     setSimResult(result)
   }, [rules, simForm, merchant, setSimResult])
+
+  // New pipeline simulator — auto-computes on input change
+  const [simOverrides, setSimOverrides] = useState({
+    disabledRules: new Set(),
+    disabledTerminals: new Set(),
+    srThreshold: merchant.srThresholdLow || 0,
+    routingStrategy: merchant.routingStrategy || 'success_rate',
+  })
+
+  const pipelineResult = useMemo(
+    () => simulateRoutingPipeline(merchant, simForm, rules, simOverrides),
+    [merchant, simForm, rules, simOverrides]
+  )
 
   const handleApplySuggestedSplit = useCallback(() => {
     if (!tspCompliance) return

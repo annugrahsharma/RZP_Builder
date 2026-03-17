@@ -2734,6 +2734,410 @@ function _traceTerminalLabel(terminalId) {
   return terminalId
 }
 
+// ── Routing Pipeline Simulator ─────────────
+//
+// Full step-by-step simulation of how a payment routes through the pipeline.
+// Returns every stage with terminal-level detail: initial pool → rule filters → sorter → selection.
+// Supports what-if overrides (disabled rules, downed terminals, threshold changes).
+
+/**
+ * Generate deterministic mock Doppler ML scores for terminals given a payment profile.
+ * Higher-SR terminals get higher base scores, with per-payment noise.
+ */
+function generateDopplerScores(terminals, transaction, merchant) {
+  const seed = hashCode(`${merchant.id}-${transaction.payment_method}-${transaction.card_network || ''}-${transaction.amount}`)
+  return terminals.map((t, i) => {
+    const baseSR = t.successRate || 70
+    // Doppler score = SR-weighted base (0–100) + noise (±5)
+    const noise = (seededRandom(seed + i * 37) - 0.5) * 10
+    const dopplerScore = Math.min(100, Math.max(0, baseSR * 1.1 + noise))
+    return {
+      terminalId: t.terminalId,
+      dopplerScore: Math.round(dopplerScore * 10) / 10,
+    }
+  })
+}
+
+/**
+ * Simulate the full routing pipeline for a transaction.
+ *
+ * @param {object} merchant - Merchant object
+ * @param {object} transaction - { payment_method, card_network, card_type, amount, international }
+ * @param {array}  rules - Merchant's routingRulesV2 array
+ * @param {object} overrides - {
+ *   disabledRules: Set<ruleId>,        // rules to treat as disabled
+ *   disabledTerminals: Set<terminalId>, // terminals to treat as down
+ *   srThreshold: number,                // override SR threshold
+ *   routingStrategy: string,            // 'success_rate' | 'cost_based'
+ * }
+ * @returns {object} Full pipeline trace with stages, final selection, and deltas
+ */
+export function simulateRoutingPipeline(merchant, transaction, rules, overrides = {}) {
+  const stages = []
+  const warnings = []
+  const {
+    disabledRules = new Set(),
+    disabledTerminals = new Set(),
+    srThreshold = merchant.srThresholdLow || 0,
+    routingStrategy = merchant.routingStrategy || 'success_rate',
+  } = overrides
+
+  const paymentMethod = transaction.payment_method || 'Cards'
+
+  // ─── Stage 0: Terminal Pool Assembly ───────────────────────
+  const allTerminals = merchant.gatewayMetrics.map(gm => {
+    const gw = gateways.find(g => g.id === gm.gatewayId)
+    const term = gw?.terminals.find(t => t.id === gm.terminalId)
+    return {
+      terminalId: gm.terminalId,
+      displayId: term?.terminalId || gm.terminalId,
+      gatewayId: gm.gatewayId,
+      gatewayShort: gw?.shortName || '??',
+      successRate: gm.successRate,
+      costPerTxn: gm.costPerTxn,
+      txnShare: gm.txnShare,
+      supportedMethods: gm.supportedMethods || [],
+      isZeroCost: gm.costPerTxn === 0,
+    }
+  })
+
+  // Filter by payment method support
+  const methodEligible = allTerminals.filter(t => t.supportedMethods.includes(paymentMethod))
+  const methodIneligible = allTerminals.filter(t => !t.supportedMethods.includes(paymentMethod))
+
+  // Filter by terminal availability (what-if: terminal down)
+  const downedInThisStep = methodEligible.filter(t => disabledTerminals.has(t.terminalId))
+  const eligible = methodEligible.filter(t => !disabledTerminals.has(t.terminalId))
+
+  const eliminatedInPool = [
+    ...methodIneligible.map(t => ({ ...t, status: 'eliminated', reason: `Does not support ${paymentMethod}` })),
+    ...downedInThisStep.map(t => ({ ...t, status: 'eliminated', reason: 'Terminal marked as down' })),
+  ]
+
+  stages.push({
+    id: 'pool',
+    stepNumber: 0,
+    type: 'initial',
+    label: 'Terminal Pool',
+    description: `${eligible.length} of ${allTerminals.length} terminals eligible for ${paymentMethod}`,
+    terminalsRemaining: eligible.map(t => ({ ...t, status: 'eligible' })),
+    terminalsEliminated: eliminatedInPool,
+    totalCount: allTerminals.length,
+    remainingCount: eligible.length,
+  })
+
+  if (eligible.length === 0) {
+    stages.push({
+      id: 'ntf_pool',
+      stepNumber: 1,
+      type: 'ntf',
+      label: 'NTF — No eligible terminals',
+      description: `No terminal supports ${paymentMethod}${downedInThisStep.length > 0 ? ' (some are marked down)' : ''}. Payment fails immediately.`,
+      ntfCause: downedInThisStep.length > 0 ? 'terminals_down' : 'method_unsupported',
+    })
+    return _buildResult(stages, null, true, warnings, merchant, routingStrategy)
+  }
+
+  // ─── Stage 1+: Rule Filters ────────────────────────────────
+  let remaining = [...eligible]
+  const enabledRules = [...rules]
+    .filter(r => r.enabled && !disabledRules.has(r.id))
+    .sort((a, b) => a.priority - b.priority)
+
+  const skippedByOverride = [...rules]
+    .filter(r => r.enabled && disabledRules.has(r.id))
+    .sort((a, b) => a.priority - b.priority)
+
+  let stepNum = 1
+
+  for (const rule of enabledRules) {
+    if (rule.isDefault) continue
+    if (remaining.length === 0) break
+
+    // Build transaction proxy for condition matching
+    const txnProxy = {
+      payment_method: paymentMethod,
+      amount: transaction.amount || 0,
+      card_network: transaction.card_network || null,
+      card_type: transaction.card_type || null,
+      issuer_bank: transaction.issuer_bank || null,
+      international: transaction.international || false,
+    }
+
+    const ruleMatches = matchesConditions(rule, txnProxy)
+
+    if (!ruleMatches) {
+      stages.push({
+        id: `rule_${rule.id}`,
+        stepNumber: stepNum++,
+        type: 'rule_skip',
+        label: `Rule: ${rule.name}`,
+        ruleId: rule.id,
+        ruleName: rule.name,
+        ruleType: rule.type === 'volume_split' ? 'Volume Split' : 'Conditional',
+        conditions: formatRuleConditions(rule),
+        description: 'Conditions did not match — rule skipped',
+        terminalsRemaining: remaining.map(t => ({ ...t, status: 'passed' })),
+        terminalsEliminated: [],
+        remainingCount: remaining.length,
+        delta: 0,
+      })
+      continue
+    }
+
+    // Rule matched — determine target terminals
+    const targetIds = new Set(
+      rule.action.type === 'split'
+        ? rule.action.splits.map(s => s.terminalId)
+        : rule.action.terminals || []
+    )
+
+    const kept = remaining.filter(t => targetIds.has(t.terminalId))
+    const eliminated = remaining.filter(t => !targetIds.has(t.terminalId))
+
+    if (kept.length === 0 && eliminated.length > 0) {
+      // NTF: rule eliminates all remaining terminals
+      stages.push({
+        id: `rule_${rule.id}`,
+        stepNumber: stepNum,
+        type: 'rule_ntf',
+        label: `Rule: ${rule.name}`,
+        ruleId: rule.id,
+        ruleName: rule.name,
+        ruleType: rule.type === 'volume_split' ? 'Volume Split' : 'Conditional',
+        conditions: formatRuleConditions(rule),
+        action: formatRuleAction(rule),
+        description: `Rule routes to ${[...targetIds].map(id => _traceTerminalLabel(id)).join(', ')} — none in eligible set. All eliminated.`,
+        terminalsRemaining: [],
+        terminalsEliminated: eliminated.map(t => ({
+          ...t, status: 'eliminated',
+          reason: `Not in rule target: ${[...targetIds].map(id => _traceTerminalLabel(id)).join(', ')}`,
+        })),
+        isNTFCause: true,
+        remainingCount: 0,
+        delta: -eliminated.length,
+      })
+
+      stages.push({
+        id: 'ntf_rule',
+        stepNumber: stepNum + 1,
+        type: 'ntf',
+        label: 'NTF — Payment Failed',
+        description: `Rule "${rule.name}" eliminated all eligible terminals.`,
+        ntfCause: 'rule_elimination',
+        causeRuleId: rule.id,
+        causeRuleName: rule.name,
+      })
+
+      return _buildResult(stages, null, true, warnings, merchant, routingStrategy)
+    }
+
+    if (eliminated.length > 0) {
+      stages.push({
+        id: `rule_${rule.id}`,
+        stepNumber: stepNum++,
+        type: 'rule_filter',
+        label: `Rule: ${rule.name}`,
+        ruleId: rule.id,
+        ruleName: rule.name,
+        ruleType: rule.type === 'volume_split' ? 'Volume Split' : 'Conditional',
+        conditions: formatRuleConditions(rule),
+        action: formatRuleAction(rule),
+        description: `Rule matched. ${eliminated.length} terminal(s) not in target list eliminated.`,
+        terminalsRemaining: kept.map(t => ({ ...t, status: 'passed' })),
+        terminalsEliminated: eliminated.map(t => ({
+          ...t, status: 'eliminated', reason: 'Not in rule target list',
+        })),
+        remainingCount: kept.length,
+        delta: -eliminated.length,
+      })
+      remaining = kept
+    } else {
+      stages.push({
+        id: `rule_${rule.id}`,
+        stepNumber: stepNum++,
+        type: 'rule_pass',
+        label: `Rule: ${rule.name}`,
+        ruleId: rule.id,
+        ruleName: rule.name,
+        ruleType: rule.type === 'volume_split' ? 'Volume Split' : 'Conditional',
+        conditions: formatRuleConditions(rule),
+        action: formatRuleAction(rule),
+        description: 'Rule matched. All remaining terminals are in target list.',
+        terminalsRemaining: remaining.map(t => ({ ...t, status: 'passed' })),
+        terminalsEliminated: [],
+        remainingCount: remaining.length,
+        delta: 0,
+      })
+    }
+  }
+
+  // Add any rules disabled by what-if override as visual "disabled" steps
+  for (const rule of skippedByOverride) {
+    if (rule.isDefault) continue
+    stages.push({
+      id: `rule_${rule.id}`,
+      stepNumber: stepNum++,
+      type: 'rule_disabled',
+      label: `Rule: ${rule.name}`,
+      ruleId: rule.id,
+      ruleName: rule.name,
+      ruleType: rule.type === 'volume_split' ? 'Volume Split' : 'Conditional',
+      conditions: formatRuleConditions(rule),
+      description: 'Rule disabled in simulation (what-if override)',
+      terminalsRemaining: remaining.map(t => ({ ...t, status: 'passed' })),
+      terminalsEliminated: [],
+      remainingCount: remaining.length,
+      delta: 0,
+      isWhatIfDisabled: true,
+    })
+  }
+
+  if (remaining.length === 0) {
+    // Shouldn't reach here (handled above), but safety net
+    return _buildResult(stages, null, true, warnings, merchant, routingStrategy)
+  }
+
+  // ─── Stage N: SR Threshold Filter ──────────────────────────
+  if (srThreshold > 0) {
+    const belowThreshold = remaining.filter(t => t.successRate < srThreshold)
+    const aboveThreshold = remaining.filter(t => t.successRate >= srThreshold)
+
+    if (belowThreshold.length > 0 && aboveThreshold.length > 0) {
+      stages.push({
+        id: 'sr_threshold',
+        stepNumber: stepNum++,
+        type: 'threshold_filter',
+        label: `SR Safety Net (≥${srThreshold}%)`,
+        description: `${belowThreshold.length} terminal(s) below ${srThreshold}% SR threshold removed.`,
+        terminalsRemaining: aboveThreshold.map(t => ({ ...t, status: 'passed' })),
+        terminalsEliminated: belowThreshold.map(t => ({
+          ...t, status: 'eliminated', reason: `SR ${t.successRate}% < threshold ${srThreshold}%`,
+        })),
+        remainingCount: aboveThreshold.length,
+        delta: -belowThreshold.length,
+        threshold: srThreshold,
+      })
+      remaining = aboveThreshold
+    } else if (belowThreshold.length > 0 && aboveThreshold.length === 0) {
+      // All below threshold — keep all but warn
+      warnings.push(`All ${remaining.length} terminals are below SR threshold ${srThreshold}% — threshold bypassed to prevent NTF`)
+      stages.push({
+        id: 'sr_threshold',
+        stepNumber: stepNum++,
+        type: 'threshold_bypass',
+        label: `SR Safety Net (≥${srThreshold}%)`,
+        description: `All terminals below threshold — bypassed to prevent NTF.`,
+        terminalsRemaining: remaining.map(t => ({ ...t, status: 'warning' })),
+        terminalsEliminated: [],
+        remainingCount: remaining.length,
+        delta: 0,
+        threshold: srThreshold,
+      })
+    }
+  }
+
+  // ─── Stage N+1: Sorter ─────────────────────────────────────
+  const dopplerScores = generateDopplerScores(remaining, transaction, merchant)
+  const dopplerMap = Object.fromEntries(dopplerScores.map(d => [d.terminalId, d.dopplerScore]))
+
+  const scored = remaining.map(t => {
+    const doppler = dopplerMap[t.terminalId] || 50
+    let finalScore
+
+    if (routingStrategy === 'cost_based') {
+      // Cost-based: lower cost = higher score. Normalize cost to 0–100 (inverse).
+      const maxCost = Math.max(...remaining.map(r => r.costPerTxn), 3)
+      const costScore = ((maxCost - t.costPerTxn) / maxCost) * 100
+      finalScore = Math.round((costScore * 0.6 + doppler * 0.2 + t.successRate * 0.2) * 10) / 10
+    } else {
+      // SR-based: SR is primary, Doppler is tiebreaker
+      finalScore = Math.round((t.successRate * 0.5 + doppler * 0.35 + (t.isZeroCost ? 5 : 0) * 0.15) * 10) / 10
+    }
+
+    return { ...t, dopplerScore: doppler, finalScore }
+  }).sort((a, b) => b.finalScore - a.finalScore)
+
+  const selectedTerminal = scored[0]
+
+  stages.push({
+    id: 'sorter',
+    stepNumber: stepNum++,
+    type: 'sorter',
+    label: `Sorter: ${routingStrategy === 'cost_based' ? 'Cost-Optimized' : 'SR-Optimized'}`,
+    description: `${scored.length} terminal(s) scored and ranked. ${routingStrategy === 'cost_based' ? 'Lowest cost prioritized.' : 'Highest success rate prioritized.'}`,
+    strategy: routingStrategy,
+    scored: scored.map((t, rank) => ({
+      ...t,
+      rank: rank + 1,
+      isSelected: t.terminalId === selectedTerminal.terminalId,
+    })),
+    selectedTerminal: {
+      terminalId: selectedTerminal.terminalId,
+      displayId: selectedTerminal.displayId,
+      gatewayShort: selectedTerminal.gatewayShort,
+      successRate: selectedTerminal.successRate,
+      costPerTxn: selectedTerminal.costPerTxn,
+      finalScore: selectedTerminal.finalScore,
+      dopplerScore: selectedTerminal.dopplerScore,
+    },
+    remainingCount: scored.length,
+  })
+
+  return _buildResult(stages, selectedTerminal, false, warnings, merchant, routingStrategy)
+}
+
+/**
+ * Build the final result object with deltas vs current primary terminal.
+ */
+function _buildResult(stages, selectedTerminal, isNTF, warnings, merchant, routingStrategy) {
+  // Find current primary terminal for delta comparison
+  const currentPrimary = merchant.gatewayMetrics.find(gm => gm.terminalId === merchant.currentTerminalId)
+  const currentGw = currentPrimary ? gateways.find(g => g.id === currentPrimary.gatewayId) : null
+  const currentTerm = currentGw?.terminals.find(t => t.id === currentPrimary?.terminalId)
+
+  let costDelta = null
+  let srDelta = null
+
+  if (selectedTerminal && currentPrimary) {
+    costDelta = {
+      absolute: Math.round((selectedTerminal.costPerTxn - currentPrimary.costPerTxn) * 100) / 100,
+      label: selectedTerminal.costPerTxn <= currentPrimary.costPerTxn ? 'saving' : 'increase',
+    }
+    srDelta = {
+      absolute: Math.round((selectedTerminal.successRate - currentPrimary.avgPaymentSuccessRate || currentPrimary.successRate) * 10) / 10,
+      label: selectedTerminal.successRate >= (currentPrimary.successRate || 0) ? 'improvement' : 'decrease',
+    }
+  }
+
+  return {
+    stages,
+    isNTF,
+    warnings,
+    selectedTerminal: selectedTerminal ? {
+      terminalId: selectedTerminal.terminalId,
+      displayId: selectedTerminal.displayId,
+      gatewayShort: selectedTerminal.gatewayShort,
+      successRate: selectedTerminal.successRate,
+      costPerTxn: selectedTerminal.costPerTxn,
+      dopplerScore: selectedTerminal.dopplerScore,
+      finalScore: selectedTerminal.finalScore,
+    } : null,
+    currentPrimary: currentPrimary ? {
+      terminalId: currentPrimary.terminalId,
+      displayId: currentTerm?.terminalId || currentPrimary.terminalId,
+      gatewayShort: currentGw?.shortName || '??',
+      successRate: currentPrimary.successRate,
+      costPerTxn: currentPrimary.costPerTxn,
+    } : null,
+    costDelta,
+    srDelta,
+    routingStrategy,
+    stageCount: stages.length,
+    terminalPoolSize: stages[0]?.totalCount || 0,
+  }
+}
+
 // ── AI Rule Intent Parser ─────────────────
 
 const INTENT_KEYWORDS = {
