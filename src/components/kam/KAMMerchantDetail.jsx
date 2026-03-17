@@ -2328,20 +2328,15 @@ export default function KAMMerchantDetail() {
                                         </div>
                                       )}
 
-                                      {/* Terminal chips — remaining */}
-                                      {step.terminalsRemaining && step.terminalsRemaining.length > 0 && (
+                                      {/* Terminal chips — remaining + eliminated in one row */}
+                                      {((step.terminalsRemaining && step.terminalsRemaining.length > 0) || (step.terminalsEliminated && step.terminalsEliminated.length > 0)) && (
                                         <div className="kam-ntfa-funnel-terminals">
-                                          {step.terminalsRemaining.map(t => (
+                                          {step.terminalsRemaining?.map(t => (
                                             <span key={t.terminalId || t.displayId} className="kam-ntfa-terminal-chip remaining">
                                               {t.displayId || t.terminalId}
                                             </span>
                                           ))}
-                                        </div>
-                                      )}
-                                      {/* Terminal chips — eliminated */}
-                                      {step.terminalsEliminated && step.terminalsEliminated.length > 0 && (
-                                        <div className="kam-ntfa-funnel-terminals">
-                                          {step.terminalsEliminated.map(t => (
+                                          {step.terminalsEliminated?.map(t => (
                                             <span key={t.terminalId || t.displayId} className="kam-ntfa-terminal-chip eliminated">
                                               {t.displayId || t.terminalId} ✕
                                             </span>
