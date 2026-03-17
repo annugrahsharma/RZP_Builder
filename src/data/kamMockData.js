@@ -70,9 +70,9 @@ export const merchants = [
     currentTerminalId: 'term-hdfc-001',
     routingStrategy: 'success_rate',
     gatewayMetrics: [
-      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 73.5, costPerTxn: 1.80, txnShare: 45, supportedMethods: ['CC', 'DC', 'UPI', 'NB'] },
-      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 72.1, costPerTxn: 0, txnShare: 20, supportedMethods: ['CC', 'DC'] },
-      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 72.8, costPerTxn: 1.70, txnShare: 25, supportedMethods: ['CC', 'DC', 'NB'] },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 73.5, costPerTxn: 1.80, txnShare: 45, supportedMethods: ['Cards', 'UPI', 'NB'] },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 72.1, costPerTxn: 0, txnShare: 20, supportedMethods: ['Cards'] },
+      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 72.8, costPerTxn: 1.70, txnShare: 25, supportedMethods: ['Cards', 'NB'] },
       { gatewayId: 'gw-axis', terminalId: 'term-axis-001', successRate: 71.4, costPerTxn: 1.50, txnShare: 10, supportedMethods: ['UPI', 'NB'] },
     ],
     status: 'active',
@@ -107,8 +107,8 @@ export const merchants = [
     currentTerminalId: 'term-hdfc-001',
     routingStrategy: 'success_rate',
     gatewayMetrics: [
-      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 73.5, costPerTxn: 1.80, txnShare: 70, supportedMethods: ['CC', 'DC', 'UPI', 'NB'] },
-      { gatewayId: 'gw-icici', terminalId: 'term-icici-002', successRate: 71.2, costPerTxn: 1.45, txnShare: 30, supportedMethods: ['CC', 'DC', 'NB'] },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 73.5, costPerTxn: 1.80, txnShare: 70, supportedMethods: ['Cards', 'UPI', 'NB'] },
+      { gatewayId: 'gw-icici', terminalId: 'term-icici-002', successRate: 71.2, costPerTxn: 1.45, txnShare: 30, supportedMethods: ['Cards', 'NB'] },
     ],
     status: 'active',
     routingRules: { selectRules: 2, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: true },
@@ -135,8 +135,8 @@ export const merchants = [
     currentTerminalId: 'term-hdfc-001',
     routingStrategy: 'success_rate',
     gatewayMetrics: [
-      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 73.5, costPerTxn: 1.80, txnShare: 60, supportedMethods: ['CC', 'DC', 'UPI'] },
-      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 72.1, costPerTxn: 0, txnShare: 20, supportedMethods: ['CC', 'DC'] },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 73.5, costPerTxn: 1.80, txnShare: 60, supportedMethods: ['Cards', 'UPI'] },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 72.1, costPerTxn: 0, txnShare: 20, supportedMethods: ['Cards'] },
       { gatewayId: 'gw-axis', terminalId: 'term-axis-001', successRate: 71.4, costPerTxn: 1.50, txnShare: 20, supportedMethods: ['UPI', 'NB'] },
     ],
     status: 'active',
@@ -164,8 +164,8 @@ export const merchants = [
     currentTerminalId: 'term-icici-001',
     routingStrategy: 'success_rate',
     gatewayMetrics: [
-      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 72.8, costPerTxn: 1.70, txnShare: 50, supportedMethods: ['CC', 'DC', 'NB'] },
-      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 72.1, costPerTxn: 0, txnShare: 30, supportedMethods: ['CC', 'DC', 'UPI'] },
+      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 72.8, costPerTxn: 1.70, txnShare: 50, supportedMethods: ['Cards', 'NB'] },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 72.1, costPerTxn: 0, txnShare: 30, supportedMethods: ['Cards', 'UPI'] },
       { gatewayId: 'gw-axis', terminalId: 'term-axis-001', successRate: 71.4, costPerTxn: 1.50, txnShare: 20, supportedMethods: ['UPI', 'NB'] },
     ],
     status: 'active',
@@ -193,13 +193,13 @@ export const merchants = [
     currentTerminalId: 'term-icici-001',
     routingStrategy: 'success_rate',
     gatewayMetrics: [
-      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 73.5, costPerTxn: 1.80, txnShare: 25, supportedMethods: ['CC', 'DC'] },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 73.5, costPerTxn: 1.80, txnShare: 25, supportedMethods: ['Cards'] },
       { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 72.1, costPerTxn: 0, txnShare: 15, supportedMethods: ['UPI'] },
-      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 72.8, costPerTxn: 1.70, txnShare: 20, supportedMethods: ['CC', 'DC', 'NB'] },
-      { gatewayId: 'gw-axis', terminalId: 'term-axis-001', successRate: 71.4, costPerTxn: 1.50, txnShare: 15, supportedMethods: ['CC', 'UPI'] },
-      { gatewayId: 'gw-rbl', terminalId: 'term-rbl-001', successRate: 68.8, costPerTxn: 1.10, txnShare: 10, supportedMethods: ['NB', 'DC'] },
+      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 72.8, costPerTxn: 1.70, txnShare: 20, supportedMethods: ['Cards', 'NB'] },
+      { gatewayId: 'gw-axis', terminalId: 'term-axis-001', successRate: 71.4, costPerTxn: 1.50, txnShare: 15, supportedMethods: ['Cards', 'UPI'] },
+      { gatewayId: 'gw-rbl', terminalId: 'term-rbl-001', successRate: 68.8, costPerTxn: 1.10, txnShare: 10, supportedMethods: ['NB', 'Cards'] },
       { gatewayId: 'gw-yes', terminalId: 'term-yes-001', successRate: 69.1, costPerTxn: 0, txnShare: 10, supportedMethods: ['UPI'] },
-      { gatewayId: 'gw-yes', terminalId: 'term-yes-002', successRate: 67.8, costPerTxn: 0.85, txnShare: 5, supportedMethods: ['CC', 'DC'] },
+      { gatewayId: 'gw-yes', terminalId: 'term-yes-002', successRate: 67.8, costPerTxn: 0.85, txnShare: 5, supportedMethods: ['Cards'] },
     ],
     status: 'active',
     routingRules: { selectRules: 2, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: false },
@@ -233,8 +233,8 @@ export const merchants = [
     currentTerminalId: 'term-axis-001',
     routingStrategy: 'cost_based',
     gatewayMetrics: [
-      { gatewayId: 'gw-axis', terminalId: 'term-axis-001', successRate: 71.4, costPerTxn: 1.50, txnShare: 55, supportedMethods: ['CC', 'DC', 'UPI', 'NB'] },
-      { gatewayId: 'gw-rbl', terminalId: 'term-rbl-001', successRate: 68.8, costPerTxn: 1.10, txnShare: 45, supportedMethods: ['CC', 'DC'] },
+      { gatewayId: 'gw-axis', terminalId: 'term-axis-001', successRate: 71.4, costPerTxn: 1.50, txnShare: 55, supportedMethods: ['Cards', 'UPI', 'NB'] },
+      { gatewayId: 'gw-rbl', terminalId: 'term-rbl-001', successRate: 68.8, costPerTxn: 1.10, txnShare: 45, supportedMethods: ['Cards'] },
     ],
     status: 'active',
     routingRules: { selectRules: 1, rejectRules: 2, hasFallback: false, hasCardRestrictions: false, hasNetworkRestrictions: true },
@@ -267,7 +267,7 @@ export const merchants = [
     currentTerminalId: 'term-hdfc-001',
     routingStrategy: 'success_rate',
     gatewayMetrics: [
-      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 73.5, costPerTxn: 1.80, txnShare: 75, supportedMethods: ['CC', 'DC', 'UPI', 'NB'] },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 73.5, costPerTxn: 1.80, txnShare: 75, supportedMethods: ['Cards', 'UPI', 'NB'] },
       { gatewayId: 'gw-yes', terminalId: 'term-yes-001', successRate: 69.1, costPerTxn: 0, txnShare: 25, supportedMethods: ['UPI'] },
     ],
     status: 'active',
@@ -301,8 +301,8 @@ export const merchants = [
     currentTerminalId: 'term-hdfc-002',
     routingStrategy: 'success_rate',
     gatewayMetrics: [
-      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 72.1, costPerTxn: 0, txnShare: 60, supportedMethods: ['CC', 'DC', 'UPI'] },
-      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 72.8, costPerTxn: 1.70, txnShare: 40, supportedMethods: ['CC', 'DC', 'NB'] },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 72.1, costPerTxn: 0, txnShare: 60, supportedMethods: ['Cards', 'UPI'] },
+      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 72.8, costPerTxn: 1.70, txnShare: 40, supportedMethods: ['Cards', 'NB'] },
     ],
     status: 'active',
     routingRules: { selectRules: 2, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: true },
@@ -329,8 +329,8 @@ export const merchants = [
     currentTerminalId: 'term-icici-002',
     routingStrategy: 'cost_based',
     gatewayMetrics: [
-      { gatewayId: 'gw-icici', terminalId: 'term-icici-002', successRate: 71.2, costPerTxn: 1.45, txnShare: 50, supportedMethods: ['CC', 'DC', 'NB'] },
-      { gatewayId: 'gw-rbl', terminalId: 'term-rbl-001', successRate: 68.8, costPerTxn: 1.10, txnShare: 50, supportedMethods: ['CC', 'DC', 'UPI'] },
+      { gatewayId: 'gw-icici', terminalId: 'term-icici-002', successRate: 71.2, costPerTxn: 1.45, txnShare: 50, supportedMethods: ['Cards', 'NB'] },
+      { gatewayId: 'gw-rbl', terminalId: 'term-rbl-001', successRate: 68.8, costPerTxn: 1.10, txnShare: 50, supportedMethods: ['Cards', 'UPI'] },
     ],
     status: 'active',
     routingRules: { selectRules: 1, rejectRules: 2, hasFallback: false, hasCardRestrictions: true, hasNetworkRestrictions: false },
@@ -357,7 +357,7 @@ export const merchants = [
     currentTerminalId: 'term-axis-002',
     routingStrategy: 'cost_based',
     gatewayMetrics: [
-      { gatewayId: 'gw-axis', terminalId: 'term-axis-002', successRate: 69.6, costPerTxn: 0, txnShare: 60, supportedMethods: ['CC', 'DC', 'UPI', 'NB'] },
+      { gatewayId: 'gw-axis', terminalId: 'term-axis-002', successRate: 69.6, costPerTxn: 0, txnShare: 60, supportedMethods: ['Cards', 'UPI', 'NB'] },
       { gatewayId: 'gw-yes', terminalId: 'term-yes-001', successRate: 69.1, costPerTxn: 0, txnShare: 40, supportedMethods: ['UPI'] },
     ],
     status: 'active',
@@ -385,9 +385,9 @@ export const merchants = [
     currentTerminalId: 'term-hdfc-001',
     routingStrategy: 'success_rate',
     gatewayMetrics: [
-      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 73.5, costPerTxn: 1.80, txnShare: 40, supportedMethods: ['CC', 'DC', 'UPI', 'NB'] },
-      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 72.1, costPerTxn: 0, txnShare: 15, supportedMethods: ['CC', 'DC'] },
-      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 72.8, costPerTxn: 1.70, txnShare: 30, supportedMethods: ['CC', 'DC', 'NB'] },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 73.5, costPerTxn: 1.80, txnShare: 40, supportedMethods: ['Cards', 'UPI', 'NB'] },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 72.1, costPerTxn: 0, txnShare: 15, supportedMethods: ['Cards'] },
+      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 72.8, costPerTxn: 1.70, txnShare: 30, supportedMethods: ['Cards', 'NB'] },
       { gatewayId: 'gw-yes', terminalId: 'term-yes-001', successRate: 69.1, costPerTxn: 0, txnShare: 15, supportedMethods: ['UPI'] },
     ],
     status: 'active',
@@ -415,8 +415,8 @@ export const merchants = [
     currentTerminalId: 'term-icici-001',
     routingStrategy: 'success_rate',
     gatewayMetrics: [
-      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 72.8, costPerTxn: 1.70, txnShare: 45, supportedMethods: ['CC', 'DC', 'NB'] },
-      { gatewayId: 'gw-axis', terminalId: 'term-axis-001', successRate: 71.4, costPerTxn: 1.50, txnShare: 35, supportedMethods: ['CC', 'DC', 'UPI'] },
+      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 72.8, costPerTxn: 1.70, txnShare: 45, supportedMethods: ['Cards', 'NB'] },
+      { gatewayId: 'gw-axis', terminalId: 'term-axis-001', successRate: 71.4, costPerTxn: 1.50, txnShare: 35, supportedMethods: ['Cards', 'UPI'] },
       { gatewayId: 'gw-rbl', terminalId: 'term-rbl-001', successRate: 68.8, costPerTxn: 1.10, txnShare: 20, supportedMethods: ['UPI', 'NB'] },
     ],
     status: 'active',
@@ -444,9 +444,9 @@ export const merchants = [
     currentTerminalId: 'term-hdfc-001',
     routingStrategy: 'success_rate',
     gatewayMetrics: [
-      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 73.5, costPerTxn: 1.80, txnShare: 35, supportedMethods: ['CC', 'DC', 'UPI', 'NB'] },
-      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 72.1, costPerTxn: 0, txnShare: 15, supportedMethods: ['CC', 'DC'] },
-      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 72.8, costPerTxn: 1.70, txnShare: 35, supportedMethods: ['CC', 'DC', 'NB'] },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 73.5, costPerTxn: 1.80, txnShare: 35, supportedMethods: ['Cards', 'UPI', 'NB'] },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 72.1, costPerTxn: 0, txnShare: 15, supportedMethods: ['Cards'] },
+      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 72.8, costPerTxn: 1.70, txnShare: 35, supportedMethods: ['Cards', 'NB'] },
       { gatewayId: 'gw-axis', terminalId: 'term-axis-002', successRate: 69.6, costPerTxn: 0, txnShare: 15, supportedMethods: ['UPI'] },
     ],
     status: 'active',
@@ -474,7 +474,7 @@ export const merchants = [
     currentTerminalId: 'term-rbl-001',
     routingStrategy: 'cost_based',
     gatewayMetrics: [
-      { gatewayId: 'gw-rbl', terminalId: 'term-rbl-001', successRate: 68.8, costPerTxn: 1.10, txnShare: 70, supportedMethods: ['CC', 'DC', 'NB'] },
+      { gatewayId: 'gw-rbl', terminalId: 'term-rbl-001', successRate: 68.8, costPerTxn: 1.10, txnShare: 70, supportedMethods: ['Cards', 'NB'] },
       { gatewayId: 'gw-yes', terminalId: 'term-yes-001', successRate: 69.1, costPerTxn: 0, txnShare: 30, supportedMethods: ['UPI'] },
     ],
     status: 'active',
@@ -503,7 +503,7 @@ export const merchants = [
     routingStrategy: 'cost_based',
     gatewayMetrics: [
       { gatewayId: 'gw-yes', terminalId: 'term-yes-001', successRate: 69.1, costPerTxn: 0, txnShare: 60, supportedMethods: ['UPI', 'NB'] },
-      { gatewayId: 'gw-rbl', terminalId: 'term-rbl-002', successRate: 67.5, costPerTxn: 0.95, txnShare: 40, supportedMethods: ['CC', 'DC'] },
+      { gatewayId: 'gw-rbl', terminalId: 'term-rbl-002', successRate: 67.5, costPerTxn: 0.95, txnShare: 40, supportedMethods: ['Cards'] },
     ],
     status: 'active',
     routingRules: { selectRules: 1, rejectRules: 1, hasFallback: false, hasCardRestrictions: false, hasNetworkRestrictions: false },
@@ -541,17 +541,30 @@ export const routingStrategies = [
 
 // ── Rule Engine Schema ─────────────────
 export const RULE_CONDITIONS = {
-  payment_method: { label: 'Payment Method', type: 'select', options: ['CC', 'DC', 'UPI', 'NB'], operators: ['equals', 'in'] },
+  payment_method: { label: 'Payment Method', type: 'select', options: ['Cards', 'UPI', 'EMI'], operators: ['equals', 'in'] },
   card_network:   { label: 'Card Network',   type: 'select', options: ['Visa', 'Mastercard', 'RuPay', 'Amex', 'Diners'], operators: ['equals', 'in'] },
   card_type:      { label: 'Card Type',      type: 'select', options: ['credit', 'debit'], operators: ['equals'] },
   issuer_bank:    { label: 'Issuer Bank',    type: 'select', options: ['HDFC', 'ICICI', 'SBI', 'Axis', 'Kotak'], operators: ['equals'] },
   upi_flow:       { label: 'UPI Flow',       type: 'select', options: ['one_time', 'autopay'], operators: ['equals'] },
+  amount:         { label: 'Amount',         type: 'number', operators: ['greater_than', 'less_than', 'between'] },
+  international:  { label: 'International',  type: 'boolean', operators: ['equals'] },
+  emi_type:       { label: 'EMI Type',       type: 'select', options: ['no_cost', 'standard'], operators: ['equals'] },
 }
 
 export const RULE_OPERATOR_LABELS = {
   equals: '=',
   in: 'in',
+  greater_than: '>',
+  less_than: '<',
+  between: 'between',
 }
+
+export const AMOUNT_PRESETS = [
+  { label: '> ₹1L', operator: 'greater_than', value: 100000 },
+  { label: '> ₹2L', operator: 'greater_than', value: 200000 },
+  { label: '> ₹10L', operator: 'greater_than', value: 1000000 },
+  { label: '< ₹100', operator: 'less_than', value: 100 },
+]
 
 export const PAYMENT_METHOD_GROUPS = [
   { key: 'all_txn', label: 'All Transactions', icon: 'layers',
@@ -562,22 +575,19 @@ export const PAYMENT_METHOD_GROUPS = [
       { value: 'one_time', label: 'One-time' },
       { value: 'autopay', label: 'Autopay' },
     ] },
-  { key: 'CC', label: 'Credit Cards', icon: 'credit-card',
-    methodValues: ['CC'], subMethodField: 'card_network',
+  { key: 'Cards', label: 'Cards', icon: 'credit-card',
+    methodValues: ['Cards'], subMethodField: 'card_network',
     subMethods: [
       { value: 'Visa', label: 'Visa' }, { value: 'Mastercard', label: 'Mastercard' },
       { value: 'RuPay', label: 'RuPay' }, { value: 'Amex', label: 'Amex' },
       { value: 'Diners', label: 'Diners' },
     ] },
-  { key: 'DC', label: 'Debit Cards', icon: 'credit-card',
-    methodValues: ['DC'], subMethodField: 'card_network',
+  { key: 'EMI', label: 'EMI', icon: 'calendar',
+    methodValues: ['EMI'], subMethodField: 'emi_type',
     subMethods: [
-      { value: 'Visa', label: 'Visa' }, { value: 'Mastercard', label: 'Mastercard' },
-      { value: 'RuPay', label: 'RuPay' }, { value: 'Amex', label: 'Amex' },
-      { value: 'Diners', label: 'Diners' },
+      { value: 'no_cost', label: 'No-Cost EMI' },
+      { value: 'standard', label: 'Standard EMI' },
     ] },
-  { key: 'NB', label: 'Net Banking', icon: 'globe',
-    methodValues: ['NB'], subMethodField: null, subMethods: [] },
   { key: 'all_methods', label: 'All Methods', icon: 'grid',
     methodValues: 'catch_all', subMethodField: null, subMethods: [] },
 ]
@@ -935,23 +945,17 @@ export function computeCBROrder(merchant) {
 
 // ── Sankey Data Generator ─────────────────
 const SANKEY_COLORS = {
-  CC: '#E65100',
-  DC: '#1565C0',
+  Cards: '#E65100',
   UPI: '#2E7D32',
   NB: '#7B1FA2',
   terminal: '#528FF0',
 }
 
 const SANKEY_SUBTYPES = {
-  CC: [
-    { id: 'visa-cc', name: 'Visa CC', weight: 55 },
-    { id: 'mc-cc', name: 'Mastercard CC', weight: 35 },
-    { id: 'rupay-cc', name: 'RuPay CC', weight: 10 },
-  ],
-  DC: [
-    { id: 'visa-dc', name: 'Visa DC', weight: 25 },
-    { id: 'rupay-dc', name: 'RuPay DC', weight: 65 },
-    { id: 'mc-dc', name: 'Mastercard DC', weight: 10 },
+  Cards: [
+    { id: 'visa-card', name: 'Visa', weight: 45 },
+    { id: 'mc-card', name: 'Mastercard', weight: 30 },
+    { id: 'rupay-card', name: 'RuPay', weight: 25 },
   ],
   UPI: [
     { id: 'upi-collect', name: 'UPI Collect', weight: 40 },
@@ -972,12 +976,12 @@ export function generateSankeyData(merchant) {
   merchant.gatewayMetrics.forEach((gm) => {
     if (gm.supportedMethods) gm.supportedMethods.forEach((m) => methodSet.add(m))
   })
-  const activeMethods = ['CC', 'DC', 'UPI', 'NB'].filter((m) => methodSet.has(m))
+  const activeMethods = ['Cards', 'UPI', 'NB'].filter((m) => methodSet.has(m))
 
   // Seed-based payment method split (varies per merchant)
   const seed0 = hashCode(merchant.id + '-sankey')
   const rawWeights = activeMethods.map((m, i) => {
-    const base = m === 'CC' ? 30 : m === 'DC' ? 20 : m === 'UPI' ? 35 : 15
+    const base = m === 'Cards' ? 45 : m === 'UPI' ? 35 : 20
     const jitter = (seededRandom(seed0 + i * 7) - 0.5) * 20
     return Math.max(5, base + jitter)
   })
@@ -991,7 +995,7 @@ export function generateSankeyData(merchant) {
   activeMethods.forEach((m, i) => {
     const vol = Math.round(totalTxn * (rawWeights[i] / wTotal))
     methodVolumes[m] = vol
-    nodes.push({ id: m, name: m === 'CC' ? 'Credit Cards' : m === 'DC' ? 'Debit Cards' : m === 'UPI' ? 'UPI' : 'Net Banking', column: 0, value: vol, color: SANKEY_COLORS[m] })
+    nodes.push({ id: m, name: m === 'Cards' ? 'Cards' : m === 'UPI' ? 'UPI' : 'Net Banking', column: 0, value: vol, color: SANKEY_COLORS[m] })
   })
 
   // Build column-1 nodes (Sub-types) + links from col-0 → col-1
@@ -1419,9 +1423,9 @@ export function generateRecommendations(merchant) {
     })
   }
 
-  // 7. Card network routing — route Visa CC to preferred gateway
+  // 7. Card network routing — route Visa cards to preferred gateway
   const ccTerminals = merchant.gatewayMetrics.filter(
-    (t) => (t.supportedMethods || []).includes('CC')
+    (t) => (t.supportedMethods || []).includes('Cards')
   )
   if (ccTerminals.length >= 2 && merchant.monthlyGMV >= 500000000) {
     const sortedCC = [...ccTerminals].sort((a, b) => a.costPerTxn - b.costPerTxn)
@@ -1544,7 +1548,7 @@ export function generateSRTimeSeries(merchant) {
       gatewayShort: gw?.shortName || 'Unknown',
       baseSR: gm.successRate,
       txnShare: gm.txnShare,
-      supportedMethods: gm.supportedMethods || ['CC', 'DC', 'UPI', 'NB'],
+      supportedMethods: gm.supportedMethods || ['Cards', 'UPI', 'NB'],
     }
   })
 
@@ -1562,7 +1566,7 @@ export function generateSRTimeSeries(merchant) {
 
   // Generate per-terminal, per-method, per-day SR
   const byMethod = {}
-  const methodOrder = ['CC', 'DC', 'UPI', 'NB']
+  const methodOrder = ['Cards', 'UPI', 'NB']
 
   methodOrder.forEach((method) => {
     if (!allMethods.has(method)) return
@@ -1621,10 +1625,9 @@ export function generateSRTimeSeries(merchant) {
 // ── Transaction Generator ───────────────
 
 const PAYMENT_METHODS = [
-  { type: 'Visa Credit', short: 'CC', network: 'Visa', cardType: 'credit' },
-  { type: 'Mastercard Credit', short: 'CC', network: 'Mastercard', cardType: 'credit' },
-  { type: 'Visa Debit', short: 'DC', network: 'Visa', cardType: 'debit' },
-  { type: 'RuPay Debit', short: 'DC', network: 'RuPay', cardType: 'debit' },
+  { type: 'Visa Card', short: 'Cards', network: 'Visa', cardType: 'card' },
+  { type: 'Mastercard Card', short: 'Cards', network: 'Mastercard', cardType: 'card' },
+  { type: 'RuPay Card', short: 'Cards', network: 'RuPay', cardType: 'card' },
   { type: 'UPI', short: 'UPI', network: null, cardType: null },
   { type: 'Net Banking', short: 'NB', network: null, cardType: null },
 ]
@@ -1794,7 +1797,7 @@ export function generateMerchantTransactions(merchant) {
         isNTF = true
         // Assign reasons based on payment method and merchant context for realism
         const pm = paymentMethod.short
-        const reasons = pm === 'DC' || pm === 'NB'
+        const reasons = pm === 'NB'
           ? [
               'No SELECT rule for payment method — terminal unavailable',
               'Network/card type restriction — no eligible terminal',
@@ -1916,7 +1919,7 @@ const SEED_RULES = {
     {
       id: 'rule-merch-001-001', name: 'Visa CC High Value → HDFC', type: 'conditional', enabled: true, priority: 1,
       conditions: [
-        { field: 'payment_method', operator: 'equals', value: 'CC' },
+        { field: 'payment_method', operator: 'equals', value: 'Cards' },
         { field: 'card_network', operator: 'equals', value: 'Visa' },
         { field: 'amount', operator: 'greater_than', value: 5000 },
       ],
@@ -1947,7 +1950,7 @@ const SEED_RULES = {
     {
       id: 'rule-merch-002-002', name: 'High Value Visa CC → HDFC', type: 'conditional', enabled: true, priority: 2,
       conditions: [
-        { field: 'payment_method', operator: 'equals', value: 'CC' },
+        { field: 'payment_method', operator: 'equals', value: 'Cards' },
         { field: 'card_network', operator: 'equals', value: 'Visa' },
         { field: 'amount', operator: 'greater_than', value: 5000 },
       ],
@@ -1960,7 +1963,7 @@ const SEED_RULES = {
   'merch-003': [
     {
       id: 'rule-merch-003-001', name: 'CC → HDFC Terminals', type: 'conditional', enabled: true, priority: 1,
-      conditions: [{ field: 'payment_method', operator: 'equals', value: 'CC' }],
+      conditions: [{ field: 'payment_method', operator: 'equals', value: 'Cards' }],
       conditionLogic: 'AND',
       action: { type: 'route', terminals: ['term-hdfc-001', 'term-hdfc-002'], splits: [], srThreshold: 93, minPaymentCount: 150 },
       isDefault: false, createdAt: '2026-02-05T09:00:00Z', createdBy: 'anugrah.sharma@razorpay.com',
@@ -1978,7 +1981,7 @@ const SEED_RULES = {
     {
       id: 'rule-merch-004-001', name: 'Mastercard CC → ICICI', type: 'conditional', enabled: true, priority: 1,
       conditions: [
-        { field: 'payment_method', operator: 'equals', value: 'CC' },
+        { field: 'payment_method', operator: 'equals', value: 'Cards' },
         { field: 'card_network', operator: 'equals', value: 'Mastercard' },
       ],
       conditionLogic: 'AND',
@@ -1986,21 +1989,46 @@ const SEED_RULES = {
       isDefault: false, createdAt: '2026-02-01T11:00:00Z', createdBy: 'anugrah.sharma@razorpay.com',
     },
     {
-      id: 'rule-merch-004-002', name: 'UPI → HDFC + Axis', type: 'conditional', enabled: true, priority: 2,
+      id: 'rule-merch-004-002', name: 'UPI → HDFC + Axis + ICICI', type: 'conditional', enabled: true, priority: 2,
       conditions: [{ field: 'payment_method', operator: 'equals', value: 'UPI' }],
       conditionLogic: 'AND',
-      action: { type: 'route', terminals: ['term-hdfc-002', 'term-axis-001'], splits: [], srThreshold: 90, minPaymentCount: 100 },
+      action: { type: 'route', terminals: ['term-hdfc-002', 'term-axis-001', 'term-icici-001'], splits: [], srThreshold: 90, minPaymentCount: 100 },
       isDefault: false, createdAt: '2026-02-01T11:15:00Z', createdBy: 'anugrah.sharma@razorpay.com',
     },
     {
       id: 'rule-merch-004-003', name: 'RuPay Debit → ICICI', type: 'conditional', enabled: true, priority: 3,
       conditions: [
-        { field: 'payment_method', operator: 'equals', value: 'DC' },
+        { field: 'payment_method', operator: 'equals', value: 'Cards' },
         { field: 'card_network', operator: 'equals', value: 'RuPay' },
       ],
       conditionLogic: 'AND',
       action: { type: 'route', terminals: ['term-icici-001'], splits: [], srThreshold: 90, minPaymentCount: 100 },
       isDefault: false, createdAt: '2026-02-01T11:30:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+    {
+      id: 'rule-merch-004-004', name: 'Intl Visa/MC High Value → HDFC', type: 'conditional', enabled: true, priority: 4,
+      conditions: [
+        { field: 'payment_method', operator: 'equals', value: 'Cards' },
+        { field: 'card_network', operator: 'in', value: ['Visa', 'Mastercard'] },
+        { field: 'international', operator: 'equals', value: true },
+        { field: 'amount', operator: 'greater_than', value: 100000 },
+      ],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-hdfc-002', 'term-icici-001', 'term-axis-001'], splits: [] },
+      isDefault: false, createdAt: '2026-03-10T09:00:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+      expiresAt: '2026-09-30T23:59:59Z',
+    },
+    {
+      id: 'rule-merch-004-005', name: 'No-Cost EMI > ₹1L → HDFC', type: 'conditional', enabled: true, priority: 5,
+      conditions: [
+        { field: 'payment_method', operator: 'equals', value: 'EMI' },
+        { field: 'emi_type', operator: 'equals', value: 'no_cost' },
+        { field: 'amount', operator: 'greater_than', value: 100000 },
+      ],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-hdfc-001', 'term-hdfc-002'], splits: [] },
+      isDefault: false, createdAt: '2026-03-01T10:00:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+      expiresAt: '2026-06-30T23:59:59Z',
     },
   ],
   // BigBasket — standard, 2 terminals
@@ -2018,7 +2046,7 @@ const SEED_RULES = {
     {
       id: 'rule-merch-006-001', name: 'High Value CC → Axis', type: 'conditional', enabled: true, priority: 1,
       conditions: [
-        { field: 'payment_method', operator: 'equals', value: 'CC' },
+        { field: 'payment_method', operator: 'equals', value: 'Cards' },
         { field: 'amount', operator: 'greater_than', value: 3000 },
       ],
       conditionLogic: 'AND',
@@ -2030,10 +2058,21 @@ const SEED_RULES = {
   'merch-007': [
     {
       id: 'rule-merch-007-001', name: 'CC → HDFC (Cashback Offer)', type: 'conditional', enabled: true, priority: 1,
-      conditions: [{ field: 'payment_method', operator: 'equals', value: 'CC' }],
+      conditions: [{ field: 'payment_method', operator: 'equals', value: 'Cards' }],
       conditionLogic: 'AND',
       action: { type: 'route', terminals: ['term-hdfc-001'], splits: [], srThreshold: 90, minPaymentCount: 100 },
       isDefault: false, createdAt: '2026-02-20T10:00:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+      expiresAt: '2026-04-30T23:59:59Z',
+    },
+    {
+      id: 'rule-merch-007-002', name: 'EMI > ₹2L → HDFC + ICICI', type: 'conditional', enabled: true, priority: 2,
+      conditions: [
+        { field: 'payment_method', operator: 'equals', value: 'EMI' },
+        { field: 'amount', operator: 'greater_than', value: 200000 },
+      ],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-hdfc-001', 'term-icici-001', 'term-axis-001'], splits: [] },
+      isDefault: false, createdAt: '2026-03-05T14:00:00Z', createdBy: 'anugrah.sharma@razorpay.com',
     },
   ],
   // MakeMyTrip — offer_linked, Axis EMI (but Axis NOT in merchant's terminals!)
@@ -2041,12 +2080,25 @@ const SEED_RULES = {
     {
       id: 'rule-merch-008-001', name: 'High Value CC → ICICI', type: 'conditional', enabled: true, priority: 1,
       conditions: [
-        { field: 'payment_method', operator: 'equals', value: 'CC' },
+        { field: 'payment_method', operator: 'equals', value: 'Cards' },
         { field: 'amount', operator: 'greater_than', value: 10000 },
       ],
       conditionLogic: 'AND',
       action: { type: 'route', terminals: ['term-icici-001'], splits: [] },
       isDefault: false, createdAt: '2026-02-18T15:30:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+    },
+    {
+      id: 'rule-merch-008-002', name: 'No-Cost EMI Intl → HDFC', type: 'conditional', enabled: true, priority: 2,
+      conditions: [
+        { field: 'payment_method', operator: 'equals', value: 'EMI' },
+        { field: 'emi_type', operator: 'equals', value: 'no_cost' },
+        { field: 'international', operator: 'equals', value: true },
+        { field: 'amount', operator: 'greater_than', value: 100000 },
+      ],
+      conditionLogic: 'AND',
+      action: { type: 'route', terminals: ['term-hdfc-001', 'term-icici-001'], splits: [] },
+      isDefault: false, createdAt: '2026-03-01T12:00:00Z', createdBy: 'anugrah.sharma@razorpay.com',
+      expiresAt: '2026-08-31T23:59:59Z',
     },
   ],
   // Nykaa — standard, cost_based
@@ -2054,7 +2106,7 @@ const SEED_RULES = {
     {
       id: 'rule-merch-009-001', name: 'Visa CC → ICICI', type: 'conditional', enabled: true, priority: 1,
       conditions: [
-        { field: 'payment_method', operator: 'equals', value: 'CC' },
+        { field: 'payment_method', operator: 'equals', value: 'Cards' },
         { field: 'card_network', operator: 'equals', value: 'Visa' },
       ],
       conditionLogic: 'AND',
@@ -2077,7 +2129,7 @@ const SEED_RULES = {
     {
       id: 'rule-merch-011-001', name: 'CC High Value → HDFC', type: 'conditional', enabled: true, priority: 1,
       conditions: [
-        { field: 'payment_method', operator: 'equals', value: 'CC' },
+        { field: 'payment_method', operator: 'equals', value: 'Cards' },
         { field: 'amount', operator: 'greater_than', value: 2000 },
       ],
       conditionLogic: 'AND',
@@ -2096,7 +2148,7 @@ const SEED_RULES = {
   'merch-012': [
     {
       id: 'rule-merch-012-001', name: 'CC → ICICI + Axis', type: 'conditional', enabled: true, priority: 1,
-      conditions: [{ field: 'payment_method', operator: 'equals', value: 'CC' }],
+      conditions: [{ field: 'payment_method', operator: 'equals', value: 'Cards' }],
       conditionLogic: 'AND',
       action: { type: 'route', terminals: ['term-icici-001', 'term-axis-001'], splits: [] },
       isDefault: false, createdAt: '2026-02-12T14:00:00Z', createdBy: 'anugrah.sharma@razorpay.com',
@@ -2114,7 +2166,7 @@ const SEED_RULES = {
     {
       id: 'rule-merch-013-001', name: 'Visa CC → HDFC + ICICI', type: 'conditional', enabled: true, priority: 1,
       conditions: [
-        { field: 'payment_method', operator: 'equals', value: 'CC' },
+        { field: 'payment_method', operator: 'equals', value: 'Cards' },
         { field: 'card_network', operator: 'equals', value: 'Visa' },
       ],
       conditionLogic: 'AND',
@@ -2143,7 +2195,7 @@ const SEED_RULES = {
   'merch-015': [
     {
       id: 'rule-merch-015-001', name: 'CC → RBL', type: 'conditional', enabled: true, priority: 1,
-      conditions: [{ field: 'payment_method', operator: 'equals', value: 'CC' }],
+      conditions: [{ field: 'payment_method', operator: 'equals', value: 'Cards' }],
       conditionLogic: 'AND',
       action: { type: 'route', terminals: ['term-rbl-002'], splits: [] },
       isDefault: false, createdAt: '2026-03-05T11:30:00Z', createdBy: 'anugrah.sharma@razorpay.com',
@@ -2666,8 +2718,9 @@ function _traceTerminalLabel(terminalId) {
 
 const INTENT_KEYWORDS = {
   payment_method: {
-    'credit card': 'CC', 'credit cards': 'CC', 'cc': 'CC',
-    'debit card': 'DC', 'debit cards': 'DC', 'dc': 'DC',
+    'credit card': 'Cards', 'credit cards': 'Cards', 'cc': 'Cards',
+    'debit card': 'Cards', 'debit cards': 'Cards', 'dc': 'Cards',
+    'card': 'Cards', 'cards': 'Cards',
     'upi': 'UPI', 'upi payments': 'UPI',
     'net banking': 'NB', 'netbanking': 'NB', 'nb': 'NB',
   },
@@ -3163,8 +3216,8 @@ export function generateNTFAnalysis(merchant, ntfTransactions, rules) {
         revenueLost,
         srImpact: Math.round(srImpact * 10) / 10,
         tradeOff: ntfCause === 'rule_elimination' && causeStep
-          ? `Rule "${causeStep.ruleName}" is saving backward cost but causing ${txns.length} NTF failures worth ₹${formatINR(revenueLost)} in lost revenue.`
-          : `${txns.length} transactions worth ₹${formatINR(totalAmount)} failed due to ${NTF_CAUSE_LABELS[ntfCause] || 'routing issues'}.`,
+          ? `Rule "${causeStep.ruleName}" is saving backward cost but causing ${txns.length} NTF failures worth ${formatINR(revenueLost)} in lost revenue.`
+          : `${txns.length} transactions worth ${formatINR(totalAmount)} failed due to ${NTF_CAUSE_LABELS[ntfCause] || 'routing issues'}.`,
         alternativeTerminals: missingGateways,
       },
       actions,
@@ -3199,7 +3252,7 @@ export function generateNTFAnalysis(merchant, ntfTransactions, rules) {
 function generateEscalationTemplate(merchant, profile, actionType, terminal) {
   const mid = merchant.id
   const name = merchant.name
-  const base = `Merchant: ${name} (${mid})\nAffected Profile: ${profile.profileLabel}\nFailed Transactions: ${profile.txnCount}\nEstimated Revenue Impact: ₹${formatINR(profile.revenueLost)}\n`
+  const base = `Merchant: ${name} (${mid})\nAffected Profile: ${profile.profileLabel}\nFailed Transactions: ${profile.txnCount}\nEstimated Revenue Impact: ${formatINR(profile.revenueLost)}\n`
 
   if (actionType === 'procure_terminal' && terminal) {
     return {

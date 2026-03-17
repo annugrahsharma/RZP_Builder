@@ -1,6 +1,6 @@
 /* ==========================================================================
    KAM Dashboard - Shared Components
-   Reusable UI components for the Razorpay KAM Dashboard
+   Reusable UI components — Blade Design System aligned
    ========================================================================== */
 
 /* Card
@@ -8,27 +8,27 @@
 
 .kam-card {
   background: var(--rzp-card-bg);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   border: 1px solid var(--rzp-border);
-  padding: var(--space-lg);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  padding: var(--spacing-7);
+  box-shadow: var(--shadow-low);
 }
 
 .kam-card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--space-md);
+  margin-bottom: var(--spacing-5);
 }
 
 .kam-card-title {
-  font-size: 16px;
-  font-weight: 600;
+  font-size: var(--font-size-16);
+  font-weight: var(--font-weight-semibold);
   color: var(--rzp-text-primary);
   font-family: var(--font-secondary);
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
+  gap: var(--spacing-3);
 }
 
 /* Badge
@@ -37,13 +37,13 @@
 .kam-badge {
   display: inline-flex;
   align-items: center;
-  padding: 2px 10px;
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: 600;
+  padding: var(--spacing-1) 10px;
+  border-radius: var(--radius-round);
+  font-size: var(--font-size-11);
+  font-weight: var(--font-weight-semibold);
   font-family: var(--font-secondary);
   letter-spacing: 0.02em;
-  line-height: 1.6;
+  line-height: var(--line-height-l);
   white-space: nowrap;
 }
 
@@ -63,26 +63,26 @@
 }
 
 .kam-badge.info {
-  background: var(--rzp-blue-light);
-  color: var(--rzp-blue);
+  background: var(--rzp-info-light);
+  color: var(--rzp-info);
 }
 
 .kam-badge.neutral {
-  background: #F1F5F9;
+  background: var(--rzp-neutral-light);
   color: var(--rzp-text-secondary);
 }
 
 /* Deal Type Badges */
 .kam-badge.deal-tsp {
-  background: #FFF3E0;
-  color: #E65100;
-  gap: 4px;
+  background: var(--rzp-deal-tsp-bg);
+  color: var(--rzp-deal-tsp-text);
+  gap: var(--spacing-2);
 }
 
 .kam-badge.deal-offer {
-  background: #F3E5F5;
-  color: #7B1FA2;
-  gap: 4px;
+  background: var(--rzp-deal-offer-bg);
+  color: var(--rzp-deal-offer-text);
+  gap: var(--spacing-2);
 }
 
 .kam-badge.deal-tsp svg,
@@ -96,36 +96,36 @@
 .kam-zero-cost-tag {
   display: inline-flex;
   align-items: center;
-  padding: 1px 6px;
-  border-radius: 4px;
-  font-size: 10px;
-  font-weight: 700;
+  padding: var(--spacing-1) 6px;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-10);
+  font-weight: var(--font-weight-bold);
   background: rgba(30, 166, 114, 0.12);
-  color: #1EA672;
+  color: var(--rzp-success);
   font-family: var(--font-secondary);
   letter-spacing: 0.02em;
-  margin-left: 4px;
+  margin-left: var(--spacing-2);
   white-space: nowrap;
 }
 
 /* Deal Constraint Banner */
 .kam-deal-banner {
-  border-radius: 10px;
-  padding: 16px 20px;
-  margin-bottom: var(--space-md);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-5) var(--spacing-6);
+  margin-bottom: var(--spacing-5);
   display: flex;
-  gap: 14px;
+  gap: var(--spacing-4);
   align-items: flex-start;
   font-family: var(--font-secondary);
 }
 
 .kam-deal-banner.tsp {
-  background: #FFF8E1;
+  background: var(--rzp-warning-light);
   border: 1px solid #FFE082;
 }
 
 .kam-deal-banner.offer {
-  background: #F3E5F5;
+  background: var(--rzp-deal-offer-bg);
   border: 1px solid #CE93D8;
 }
 
@@ -147,33 +147,33 @@
 }
 
 .kam-deal-banner-title {
-  font-size: 14px;
-  font-weight: 700;
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-bold);
   color: var(--rzp-text-primary);
-  margin-bottom: 4px;
+  margin-bottom: var(--spacing-2);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--spacing-3);
 }
 
 .kam-deal-banner-desc {
-  font-size: 13px;
+  font-size: var(--font-size-14);
   color: var(--rzp-text-secondary);
-  line-height: 1.5;
-  margin-bottom: 8px;
+  line-height: var(--line-height-m);
+  margin-bottom: var(--spacing-3);
 }
 
 .kam-deal-banner-meta {
   display: flex;
-  gap: 20px;
+  gap: var(--spacing-6);
   flex-wrap: wrap;
-  font-size: 12px;
+  font-size: var(--font-size-12);
   color: var(--rzp-text-muted);
 }
 
 .kam-deal-banner-meta strong {
   color: var(--rzp-text-primary);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .kam-deal-banner-meta a {
@@ -193,15 +193,19 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: var(--space-sm) var(--space-md);
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
+  padding: var(--spacing-3) var(--spacing-5);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-semibold);
   border: none;
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+  transition: background var(--duration-quick) var(--easing-standard),
+              color var(--duration-quick) var(--easing-standard),
+              border-color var(--duration-quick) var(--easing-standard),
+              transform 0.1s var(--easing-standard),
+              box-shadow var(--duration-quick) var(--easing-standard);
   font-family: var(--font-secondary);
-  line-height: 1.4;
+  line-height: var(--line-height-m);
   text-decoration: none;
   white-space: nowrap;
 }
@@ -221,7 +225,7 @@
 /* Primary */
 .kam-btn-primary {
   background: var(--rzp-blue);
-  color: #fff;
+  color: var(--rzp-text-on-dark);
 }
 
 .kam-btn-primary:hover {
@@ -234,7 +238,7 @@
 
 /* Secondary */
 .kam-btn-secondary {
-  background: #fff;
+  background: var(--rzp-card-bg);
   color: var(--rzp-text-primary);
   border: 1px solid var(--rzp-border);
 }
@@ -251,11 +255,11 @@
 /* Danger */
 .kam-btn-danger {
   background: var(--rzp-danger);
-  color: #fff;
+  color: var(--rzp-text-on-dark);
 }
 
 .kam-btn-danger:hover {
-  background: #D13B2E;
+  background: var(--rzp-danger-hover);
 }
 
 .kam-btn-danger:active {
@@ -279,13 +283,13 @@
 
 /* Size Variants */
 .kam-btn-sm {
-  padding: 6px 12px;
-  font-size: 12px;
+  padding: 6px var(--spacing-4);
+  font-size: var(--font-size-12);
 }
 
 .kam-btn-lg {
-  padding: 12px var(--space-lg);
-  font-size: 14px;
+  padding: var(--spacing-4) var(--spacing-7);
+  font-size: var(--font-size-14);
 }
 
 /* Progress Bar
@@ -293,16 +297,16 @@
 
 .kam-progress-bar {
   width: 100%;
-  height: 8px;
-  background: #EDF2F7;
-  border-radius: 4px;
+  height: var(--spacing-3);
+  background: var(--rzp-bg-muted);
+  border-radius: var(--radius-sm);
   overflow: hidden;
 }
 
 .kam-progress-fill {
   height: 100%;
-  border-radius: 4px;
-  transition: width 0.5s ease;
+  border-radius: var(--radius-sm);
+  transition: width var(--duration-gentle) var(--easing-standard);
 }
 
 /* Metric Card
@@ -310,27 +314,28 @@
 
 .kam-metric-card {
   background: var(--rzp-card-bg);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   border: 1px solid var(--rzp-border);
-  padding: 20px var(--space-lg);
+  padding: var(--spacing-6) var(--spacing-7);
   position: relative;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  box-shadow: var(--shadow-low);
+  transition: box-shadow var(--duration-moderate) var(--easing-standard),
+              transform var(--duration-moderate) var(--easing-standard);
 }
 
 .kam-metric-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-mid);
 }
 
 .kam-metric-card .metric-icon {
-  width: 40px;
-  height: 40px;
+  width: var(--spacing-9);
+  height: var(--spacing-9);
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 12px;
+  margin-bottom: var(--spacing-4);
 }
 
 .kam-metric-card .metric-icon svg {
@@ -339,28 +344,28 @@
 }
 
 .kam-metric-card .metric-label {
-  font-size: 13px;
+  font-size: var(--font-size-14);
   color: var(--rzp-text-secondary);
-  margin-bottom: 4px;
-  font-weight: 500;
+  margin-bottom: var(--spacing-2);
+  font-weight: var(--font-weight-medium);
   font-family: var(--font-secondary);
 }
 
 .kam-metric-card .metric-value {
-  font-size: 28px;
-  font-weight: 700;
+  font-size: var(--font-size-28);
+  font-weight: var(--font-weight-bold);
   color: var(--rzp-text-primary);
-  line-height: 1.2;
+  line-height: var(--line-height-s);
   font-family: var(--font-primary);
 }
 
 .kam-metric-card .metric-delta {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  margin-top: var(--space-sm);
-  font-size: 12px;
-  font-weight: 600;
+  gap: var(--spacing-2);
+  margin-top: var(--spacing-3);
+  font-size: var(--font-size-12);
+  font-weight: var(--font-weight-semibold);
   font-family: var(--font-secondary);
 }
 
@@ -382,12 +387,12 @@
 
 .kam-select {
   height: 36px;
-  padding: 0 32px 0 12px;
-  border-radius: 8px;
+  padding: 0 var(--spacing-8) 0 var(--spacing-4);
+  border-radius: var(--radius-md);
   border: 1px solid var(--rzp-border);
-  font-size: 13px;
+  font-size: var(--font-size-14);
   font-family: var(--font-secondary);
-  background: #fff;
+  background: var(--rzp-card-bg);
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -396,13 +401,14 @@
   background-position: right 10px center;
   cursor: pointer;
   color: var(--rzp-text-primary);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: border-color var(--duration-quick) var(--easing-standard),
+              box-shadow var(--duration-quick) var(--easing-standard);
 }
 
 .kam-select:focus {
   border-color: var(--rzp-blue);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(82, 143, 240, 0.1);
+  box-shadow: var(--focus-ring);
 }
 
 .kam-select:hover {
@@ -414,20 +420,20 @@
 
 .kam-toast {
   position: fixed;
-  bottom: var(--space-lg);
-  right: var(--space-lg);
-  padding: 12px 20px;
+  bottom: var(--spacing-7);
+  right: var(--spacing-7);
+  padding: var(--spacing-4) var(--spacing-6);
   border-radius: var(--radius-md);
-  font-size: 14px;
-  font-weight: 500;
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-medium);
   font-family: var(--font-secondary);
-  color: #fff;
+  color: var(--rzp-text-on-dark);
   z-index: 10000;
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-  animation: kamToastIn 0.3s ease;
+  gap: var(--spacing-3);
+  box-shadow: var(--shadow-high);
+  animation: kamToastIn 0.3s var(--easing-entrance);
   max-width: 400px;
 }
 
@@ -451,7 +457,7 @@
 
 @keyframes kamToastIn {
   from {
-    transform: translateY(16px);
+    transform: translateY(var(--spacing-5));
     opacity: 0;
   }
   to {
@@ -473,16 +479,16 @@
   bottom: calc(100% + 6px);
   left: 50%;
   transform: translateX(-50%);
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 11px;
-  font-weight: 500;
+  padding: var(--spacing-2) var(--spacing-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-11);
+  font-weight: var(--font-weight-medium);
   white-space: nowrap;
   background: var(--rzp-text-primary);
-  color: #fff;
+  color: var(--rzp-text-on-dark);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.15s ease;
+  transition: opacity var(--duration-quick) var(--easing-standard);
 }
 
 .kam-tooltip:hover::after {
@@ -497,27 +503,27 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 48px var(--space-lg);
+  padding: var(--spacing-10) var(--spacing-7);
   text-align: center;
   color: var(--rzp-text-secondary);
 }
 
 .kam-empty-state svg {
-  width: 48px;
-  height: 48px;
+  width: var(--spacing-10);
+  height: var(--spacing-10);
   color: var(--rzp-text-muted);
-  margin-bottom: var(--space-md);
+  margin-bottom: var(--spacing-5);
 }
 
 .kam-empty-state h4 {
-  font-size: 16px;
-  font-weight: 600;
+  font-size: var(--font-size-16);
+  font-weight: var(--font-weight-semibold);
   color: var(--rzp-text-primary);
-  margin-bottom: 4px;
+  margin-bottom: var(--spacing-2);
 }
 
 .kam-empty-state p {
-  font-size: 14px;
+  font-size: var(--font-size-14);
   max-width: 320px;
 }
 
@@ -528,10 +534,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 16px;
+  padding: var(--spacing-4) var(--spacing-5);
   border-bottom: 1px solid var(--rzp-border);
   cursor: pointer;
-  transition: background 0.1s ease;
+  transition: background 0.1s var(--easing-standard);
 }
 
 .kam-tsp-compliance-row:hover {
@@ -547,14 +553,14 @@
 }
 
 .kam-tsp-compliance-row .kam-merchant-info .name {
-  font-weight: 600;
-  font-size: 14px;
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-14);
   color: var(--rzp-text-primary);
   display: block;
 }
 
 .kam-tsp-compliance-row .kam-merchant-info .mid {
-  font-size: 11px;
+  font-size: var(--font-size-11);
   color: var(--rzp-text-muted);
   font-family: var(--font-secondary);
 }
@@ -562,26 +568,26 @@
 .kam-tsp-gauge {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--spacing-4);
   flex: 1;
   max-width: 340px;
-  margin: 0 24px;
+  margin: 0 var(--spacing-7);
 }
 
 .kam-tsp-gauge-bar {
   flex: 1;
-  height: 8px;
-  background: #EDF2F7;
-  border-radius: 4px;
+  height: var(--spacing-3);
+  background: var(--rzp-bg-muted);
+  border-radius: var(--radius-sm);
   position: relative;
   overflow: visible;
 }
 
 .kam-tsp-gauge-fill {
   height: 100%;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   background: var(--rzp-success);
-  transition: width 0.3s ease;
+  transition: width 0.3s var(--easing-standard);
 }
 
 .kam-tsp-gauge-fill.violation {
@@ -596,13 +602,13 @@
   position: absolute;
   top: -4px;
   width: 2px;
-  height: 16px;
+  height: var(--spacing-5);
   background: var(--rzp-text-primary);
   border-radius: 1px;
 }
 
 .kam-tsp-gauge-label {
-  font-size: 12px;
+  font-size: var(--font-size-12);
   font-family: var(--font-secondary);
   color: var(--rzp-text-secondary);
   white-space: nowrap;
@@ -615,28 +621,28 @@
 .kam-ntf-score-bar {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin: 16px 0;
+  gap: var(--spacing-4);
+  margin: var(--spacing-5) 0;
 }
 
 .kam-ntf-score-track {
   flex: 1;
   height: 10px;
-  background: #EDF2F7;
-  border-radius: 5px;
+  background: var(--rzp-bg-muted);
+  border-radius: var(--radius-sm);
   overflow: hidden;
 }
 
 .kam-ntf-score-fill {
   height: 100%;
-  border-radius: 5px;
-  transition: width 0.4s ease;
+  border-radius: var(--radius-sm);
+  transition: width var(--duration-gentle) var(--easing-standard);
   background: linear-gradient(90deg, var(--rzp-success) 0%, var(--rzp-warning) 40%, var(--rzp-danger) 80%);
 }
 
 .kam-ntf-score-label {
-  font-size: 14px;
-  font-weight: 700;
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-bold);
   font-family: var(--font-secondary);
   color: var(--rzp-text-primary);
   white-space: nowrap;
@@ -644,25 +650,25 @@
 }
 
 .kam-ntf-factors {
-  padding: 0 0 4px;
+  padding: 0 0 var(--spacing-2);
 }
 
 .kam-ntf-factors-title {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--font-size-12);
+  font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--rzp-text-muted);
   font-family: var(--font-secondary);
-  margin-bottom: 8px;
+  margin-bottom: var(--spacing-3);
 }
 
 .kam-ntf-factor-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--spacing-3);
   padding: 6px 0;
-  font-size: 13px;
+  font-size: var(--font-size-14);
   font-family: var(--font-secondary);
   color: var(--rzp-text-secondary);
 }
@@ -680,31 +686,31 @@
 .kam-conflicts-section {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-bottom: var(--space-md);
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-5);
 }
 
 .kam-conflict-banner {
-  border-radius: 8px;
-  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  padding: var(--spacing-4) var(--spacing-5);
   display: flex;
-  gap: 10px;
+  gap: var(--spacing-3);
   align-items: flex-start;
   font-family: var(--font-secondary);
 }
 
 .kam-conflict-banner.critical {
-  background: #FEF2F2;
+  background: var(--rzp-danger-light);
   border: 1px solid #FECACA;
 }
 
 .kam-conflict-banner.high {
-  background: #FFFBEB;
+  background: var(--rzp-warning-light);
   border: 1px solid #FDE68A;
 }
 
 .kam-conflict-banner.medium {
-  background: #EFF6FF;
+  background: var(--rzp-info-light);
   border: 1px solid #BFDBFE;
 }
 
@@ -733,25 +739,25 @@
 }
 
 .kam-conflict-message {
-  font-weight: 600;
-  font-size: 13px;
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-14);
   color: var(--rzp-text-primary);
-  line-height: 1.4;
+  line-height: var(--line-height-m);
 }
 
 .kam-conflict-recommendation {
-  font-size: 12px;
+  font-size: var(--font-size-12);
   color: var(--rzp-text-secondary);
-  margin-top: 2px;
-  line-height: 1.4;
+  margin-top: var(--spacing-1);
+  line-height: var(--line-height-m);
 }
 
 /* Routing Alert Row (Overview) */
 .kam-alert-row {
-  padding: 12px 16px;
+  padding: var(--spacing-4) var(--spacing-5);
   border-bottom: 1px solid var(--rzp-border);
   cursor: pointer;
-  transition: background 0.1s ease;
+  transition: background 0.1s var(--easing-standard);
 }
 
 .kam-alert-row:hover {
@@ -766,20 +772,20 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 4px;
+  margin-bottom: var(--spacing-2);
 }
 
 .kam-alert-row-header .name {
-  font-weight: 600;
-  font-size: 14px;
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-14);
   color: var(--rzp-text-primary);
 }
 
 .kam-alert-row-message {
-  font-size: 12px;
+  font-size: var(--font-size-12);
   color: var(--rzp-text-secondary);
   font-family: var(--font-secondary);
-  line-height: 1.4;
+  line-height: var(--line-height-m);
 }
 
 /* SR Sensitive Badge
@@ -788,10 +794,10 @@
 .kam-badge-sr {
   display: inline-flex;
   align-items: center;
-  padding: 1px 7px;
-  border-radius: 4px;
-  font-size: 10px;
-  font-weight: 700;
+  padding: var(--spacing-1) 7px;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-10);
+  font-weight: var(--font-weight-bold);
   background: rgba(82, 143, 240, 0.12);
   color: var(--rzp-blue);
   font-family: var(--font-secondary);
@@ -814,11 +820,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
+  padding: var(--spacing-4) var(--spacing-5);
   border-bottom: 1px solid var(--rzp-border);
   cursor: pointer;
-  transition: background 0.1s ease;
-  gap: 12px;
+  transition: background 0.1s var(--easing-standard);
+  gap: var(--spacing-4);
 }
 
 .kam-risk-row:hover {
@@ -834,14 +840,14 @@
 }
 
 .kam-risk-row .kam-merchant-info .name {
-  font-weight: 600;
-  font-size: 14px;
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-14);
   color: var(--rzp-text-primary);
   display: block;
 }
 
 .kam-risk-row .kam-merchant-info .mid {
-  font-size: 11px;
+  font-size: var(--font-size-11);
   color: var(--rzp-text-muted);
   font-family: var(--font-secondary);
 }
@@ -849,11 +855,11 @@
 .kam-risk-stats {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: var(--spacing-7);
   flex: 1;
   justify-content: flex-end;
   font-family: var(--font-secondary);
-  font-size: 13px;
+  font-size: var(--font-size-14);
 }
 
 .kam-risk-stats .stat-item {
@@ -864,12 +870,12 @@
 }
 
 .kam-risk-stats .stat-label {
-  font-size: 11px;
+  font-size: var(--font-size-11);
   color: var(--rzp-text-muted);
 }
 
 .kam-risk-stats .stat-value {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--rzp-text-primary);
 }
 
@@ -885,7 +891,7 @@
    ========================================================================== */
 
 .kam-skeleton {
-  background: linear-gradient(90deg, #EDF2F7 25%, #F7FAFC 50%, #EDF2F7 75%);
+  background: linear-gradient(90deg, var(--rzp-bg-muted) 25%, var(--rzp-bg) 50%, var(--rzp-bg-muted) 75%);
   background-size: 200% 100%;
   animation: kamShimmer 1.5s infinite;
   border-radius: 6px;

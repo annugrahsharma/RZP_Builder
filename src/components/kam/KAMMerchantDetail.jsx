@@ -15,6 +15,7 @@ import {
   generateSankeyData,
   RULE_CONDITIONS,
   RULE_OPERATOR_LABELS,
+  AMOUNT_PRESETS,
   PAYMENT_METHOD_GROUPS,
   groupRulesByMethod,
   evaluateRules,
@@ -41,9 +42,9 @@ function hashStr(str) {
 }
 
 const METHOD_MAP = {
-  HDFC: 'CC',
+  HDFC: 'Cards',
   ICICI: 'UPI',
-  AXIS: 'DC',
+  AXIS: 'Cards',
   RBL: 'NB',
   YES: 'UPI',
 }
@@ -907,7 +908,7 @@ export default function KAMMerchantDetail() {
   const [showRuleBuilder, setShowRuleBuilder] = useState(false)
   const [editingRule, setEditingRule] = useState(null)
   const [showSimulator, setShowSimulator] = useState(false)
-  const [simForm, setSimForm] = useState({ payment_method: 'CC', card_network: 'Visa', card_type: 'credit', issuer_bank: 'HDFC', amount: 5000 })
+  const [simForm, setSimForm] = useState({ payment_method: 'Cards', card_network: 'Visa', card_type: 'card', issuer_bank: 'HDFC', amount: 5000 })
   const [simResult, setSimResult] = useState(null)
   // Rule builder form state
   const [ruleForm, setRuleForm] = useState({ name: '', type: 'conditional', conditions: [], conditionLogic: 'AND', terminals: [], splits: [], srThreshold: 90, minPaymentCount: 100 })
@@ -981,8 +982,8 @@ export default function KAMMerchantDetail() {
   }, [terminals, terminalSearch])
 
   // Group terminals by payment method
-  const METHOD_ORDER = ['CC', 'DC', 'UPI', 'NB']
-  const METHOD_LABELS = { CC: 'Credit Card', DC: 'Debit Card', UPI: 'UPI', NB: 'Net Banking' }
+  const METHOD_ORDER = ['Cards', 'UPI', 'NB']
+  const METHOD_LABELS = { Cards: 'Cards', UPI: 'UPI', NB: 'Net Banking' }
   const groupedTerminals = useMemo(() => {
     const groups = {}
     filteredTerminals.forEach((t) => {
@@ -1886,7 +1887,7 @@ export default function KAMMerchantDetail() {
             icon={<RoutingIcon />}
             iconBg={dopplerRoutePercent >= 80 ? 'var(--rzp-blue-light)' : 'var(--rzp-warning-light)'}
             iconColor={dopplerRoutePercent >= 80 ? 'var(--rzp-blue)' : 'var(--rzp-warning)'}
-            label="ML Routed"
+            label="SR Based Routing"
             value={`${dopplerRoutePercent}%`}
             delta={dopplerRoutePercent >= 80 ? 'Healthy' : 'Below 80% threshold'}
             deltaType={dopplerRoutePercent >= 80 ? 'positive' : 'negative'}
@@ -1970,7 +1971,7 @@ export default function KAMMerchantDetail() {
               </button>
               {openTxnDropdown === 'method' && (
                 <div className="kam-txn-filter-dropdown">
-                  {['CC', 'DC', 'UPI', 'NB'].map(m => (
+                  {['Cards', 'UPI', 'NB'].map(m => (
                     <label key={m} className="kam-txn-filter-option">
                       <input type="checkbox" checked={txnMethodFilter.includes(m)} onChange={() => toggleTxnFilter('method', m)} />
                       <span className={`kam-method-badge ${m.toLowerCase()}`}>{m}</span>
@@ -2177,7 +2178,7 @@ export default function KAMMerchantDetail() {
                   </div>
                   <div className="kam-ntfa-summary-metric">
                     <span className="kam-ntfa-metric-label">Revenue Lost</span>
-                    <span className="kam-ntfa-metric-value danger">₹{formatINR(ntfAnalysis.summary.totalRevenueLost)}</span>
+                    <span className="kam-ntfa-metric-value danger">{formatINR(ntfAnalysis.summary.totalRevenueLost)}</span>
                   </div>
                   <div className="kam-ntfa-summary-metric">
                     <span className="kam-ntfa-metric-label">SR Impact</span>
@@ -2216,7 +2217,7 @@ export default function KAMMerchantDetail() {
                         </div>
                         <div className="kam-ntfa-profile-stats">
                           <span className="kam-badge danger">{profile.txnCount} txns</span>
-                          <span className="kam-ntfa-revenue-lost">₹{formatINR(profile.totalAmount)} failed</span>
+                          <span className="kam-ntfa-revenue-lost">{formatINR(profile.totalAmount)} failed</span>
                           <ChevronIcon className={`kam-ntfa-chevron ${isExpanded ? 'expanded' : ''}`} />
                         </div>
                       </div>
@@ -2236,37 +2237,125 @@ export default function KAMMerchantDetail() {
                             ))}
                           </div>
 
-                          {/* Layer 1: Isolate — Rule chain waterfall */}
-                          {activeLayer === 'isolate' && (
-                            <div className="kam-ntfa-waterfall">
-                              {profile.ruleChainTrace.steps.map((step, si) => (
-                                <div key={si} className={`kam-ntfa-step ${step.type === 'ntf' || step.type === 'rule_ntf' || step.type === 'pipeline_filter' ? 'ntf-cause' : step.type === 'rule_filter' ? 'filtered' : ''}`}>
-                                  <div className={`kam-ntfa-step-marker ${step.type === 'ntf' || step.type === 'rule_ntf' ? 'danger' : step.type === 'rule_filter' || step.type === 'pipeline_filter' ? 'warning' : step.type === 'rule_skip' ? 'neutral' : 'success'}`} />
-                                  <div className="kam-ntfa-step-content">
-                                    <div className="kam-ntfa-step-header">
-                                      <span className="kam-ntfa-step-label">{step.label}</span>
-                                      {step.ruleType && <span className="kam-badge neutral" style={{ fontSize: 10 }}>{step.ruleType}</span>}
+                          {/* Layer 1: Isolate — Visual rule chain funnel */}
+                          {activeLayer === 'isolate' && (() => {
+                            const steps = profile.ruleChainTrace.steps
+                            const initialCount = steps[0]?.terminalsRemaining?.length || 0
+                            const totalTerminals = initialCount + (steps[0]?.terminalsEliminated?.length || 0)
+                            return (
+                            <div className="kam-ntfa-funnel">
+                              {/* Funnel header */}
+                              <div className="kam-ntfa-funnel-header">
+                                <span className="kam-ntfa-funnel-title">Terminal Elimination Funnel</span>
+                                <span className="kam-ntfa-funnel-subtitle">{totalTerminals} total terminals → {initialCount} eligible → 0 remaining</span>
+                              </div>
+
+                              {steps.map((step, si) => {
+                                const remainCount = step.terminalsRemaining?.length || 0
+                                const elimCount = step.terminalsEliminated?.length || 0
+                                const barWidth = initialCount > 0 ? Math.max((remainCount / initialCount) * 100, 0) : 0
+                                const elimWidth = initialCount > 0 ? (elimCount / initialCount) * 100 : 0
+                                const isNTF = step.type === 'ntf'
+                                const isNTFCause = step.type === 'rule_ntf' || step.type === 'pipeline_filter'
+                                const isFilter = step.type === 'rule_filter'
+                                const isSkip = step.type === 'rule_skip'
+                                const isInitial = step.type === 'initial'
+                                const isPass = step.type === 'rule_pass'
+
+                                if (isNTF) {
+                                  return (
+                                    <div key={si} className="kam-ntfa-funnel-ntf">
+                                      <div className="kam-ntfa-funnel-ntf-icon">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                                      </div>
+                                      <div className="kam-ntfa-funnel-ntf-content">
+                                        <span className="kam-ntfa-funnel-ntf-label">{step.label}</span>
+                                        <span className="kam-ntfa-funnel-ntf-desc">{step.description}</span>
+                                      </div>
                                     </div>
-                                    <p className="kam-ntfa-step-desc">{step.description}</p>
-                                    {step.terminalsRemaining && step.terminalsRemaining.length > 0 && (
-                                      <div className="kam-ntfa-step-terminals">
-                                        {step.terminalsRemaining.map(t => (
-                                          <span key={t.terminalId || t.displayId} className="kam-ntfa-terminal-chip remaining">{t.displayId || t.terminalId}</span>
-                                        ))}
+                                  )
+                                }
+
+                                return (
+                                  <div key={si} className={`kam-ntfa-funnel-step ${isNTFCause ? 'ntf-cause' : isFilter ? 'filtered' : isSkip ? 'skipped' : ''}`}>
+                                    {/* Step number + connector */}
+                                    <div className="kam-ntfa-funnel-left">
+                                      <div className={`kam-ntfa-funnel-num ${isNTFCause ? 'danger' : isFilter ? 'warning' : isSkip ? 'neutral' : 'success'}`}>
+                                        {step.stepNumber}
                                       </div>
-                                    )}
-                                    {step.terminalsEliminated && step.terminalsEliminated.length > 0 && (
-                                      <div className="kam-ntfa-step-terminals">
-                                        {step.terminalsEliminated.map(t => (
-                                          <span key={t.terminalId || t.displayId} className="kam-ntfa-terminal-chip eliminated">{t.displayId || t.terminalId} ✕</span>
-                                        ))}
+                                      {si < steps.length - 1 && <div className="kam-ntfa-funnel-connector" />}
+                                    </div>
+
+                                    <div className="kam-ntfa-funnel-body">
+                                      {/* Step header with label and counts */}
+                                      <div className="kam-ntfa-funnel-step-header">
+                                        <div className="kam-ntfa-funnel-step-info">
+                                          <span className="kam-ntfa-funnel-step-label">{step.label}</span>
+                                          {step.ruleType && <span className="kam-badge neutral" style={{ fontSize: 10 }}>{step.ruleType}</span>}
+                                          {isSkip && <span className="kam-badge neutral" style={{ fontSize: 10 }}>Skipped</span>}
+                                        </div>
+                                        <div className="kam-ntfa-funnel-counts">
+                                          {!isInitial && elimCount > 0 && (
+                                            <span className="kam-ntfa-count-elim">−{elimCount}</span>
+                                          )}
+                                          <span className={`kam-ntfa-count-remain ${remainCount === 0 ? 'zero' : ''}`}>
+                                            {remainCount} left
+                                          </span>
+                                        </div>
                                       </div>
-                                    )}
+
+                                      {/* Description */}
+                                      <p className="kam-ntfa-funnel-desc">{step.description}</p>
+
+                                      {/* Visual funnel bar */}
+                                      {!isSkip && (
+                                        <div className="kam-ntfa-funnel-bar-wrapper">
+                                          <div className="kam-ntfa-funnel-bar">
+                                            <div
+                                              className={`kam-ntfa-funnel-bar-fill ${remainCount === 0 ? 'empty' : isFilter || isNTFCause ? 'warning' : 'success'}`}
+                                              style={{ width: `${barWidth}%` }}
+                                            />
+                                            {elimCount > 0 && (
+                                              <div
+                                                className="kam-ntfa-funnel-bar-elim"
+                                                style={{ width: `${elimWidth}%` }}
+                                              />
+                                            )}
+                                          </div>
+                                          <span className="kam-ntfa-funnel-bar-label">
+                                            {remainCount}/{initialCount}
+                                          </span>
+                                        </div>
+                                      )}
+
+                                      {/* Terminal chips — remaining */}
+                                      {step.terminalsRemaining && step.terminalsRemaining.length > 0 && (
+                                        <div className="kam-ntfa-funnel-terminals">
+                                          {step.terminalsRemaining.map(t => (
+                                            <span key={t.terminalId || t.displayId} className="kam-ntfa-terminal-chip remaining">
+                                              {t.displayId || t.terminalId}
+                                            </span>
+                                          ))}
+                                        </div>
+                                      )}
+                                      {/* Terminal chips — eliminated */}
+                                      {step.terminalsEliminated && step.terminalsEliminated.length > 0 && (
+                                        <div className="kam-ntfa-funnel-terminals">
+                                          {step.terminalsEliminated.map(t => (
+                                            <span key={t.terminalId || t.displayId} className="kam-ntfa-terminal-chip eliminated">
+                                              {t.displayId || t.terminalId} ✕
+                                            </span>
+                                          ))}
+                                        </div>
+                                      )}
+                                    </div>
                                   </div>
-                                </div>
-                              ))}
+                                )
+                              })}
                             </div>
-                          )}
+                            )
+                          })()
+                          }
 
                           {/* Layer 2: Understand — Impact */}
                           {activeLayer === 'understand' && (
@@ -2274,7 +2363,7 @@ export default function KAMMerchantDetail() {
                               <div className="kam-ntfa-impact-grid">
                                 <div className="kam-ntfa-impact-card">
                                   <span className="kam-ntfa-metric-label">Revenue Lost</span>
-                                  <span className="kam-ntfa-metric-value danger">₹{formatINR(profile.impact.revenueLost)}</span>
+                                  <span className="kam-ntfa-metric-value danger">{formatINR(profile.impact.revenueLost)}</span>
                                 </div>
                                 <div className="kam-ntfa-impact-card">
                                   <span className="kam-ntfa-metric-label">SR Impact</span>
@@ -2700,10 +2789,20 @@ function RulesTabContent({
   const [wizardStepErrors, setWizardStepErrors] = useState({})
 
   // Guided state — drives the visual Step 0 + Step 1 UI, syncs to ruleForm.conditions
-  const INITIAL_GUIDED = { paymentMethod: null, upiFlow: null, cardType: null, cardNetworks: [], issuerBank: null, objective: null }
+  const INITIAL_GUIDED = { paymentMethod: null, upiFlow: null, cardType: null, cardNetworks: [], issuerBank: null, international: null, amountOperator: null, amountValue: null, amountValueTo: null, emiType: null, expiresAt: null, neverExpires: true, objectiveCategory: null, objective: null }
 
+  // Two-level objective: first pick category, then sub-option for "save_costs"
+  const OBJECTIVE_CATEGORIES = [
+    { value: 'save_costs', label: 'Save Costs', icon: 'cost', desc: 'Override ML routing to reduce per-transaction cost or meet bank volume commitments.' },
+    { value: 'enable_offers', label: 'Enable Bank Offers', icon: 'offer', desc: 'Route to specific terminals required for cashback, EMI, or promotional bank offers.' },
+  ]
+  const COST_SUB_OPTIONS = [
+    { value: 'reduce_cost', label: 'Reduce Per-Txn Cost', desc: 'Route to cheapest or zero-cost terminals to minimize backward pricing.', suggestion: 'Conditional routing → terminals sorted by cost (lowest first), zero-cost highlighted.' },
+    { value: 'meet_tsp', label: 'Meet TSP/GMV Target', desc: 'Allocate traffic % to committed bank terminals to fulfill volume commitments.', suggestion: 'Volume Split → committed terminal pre-selected with minimum traffic %.' },
+  ]
+  // Flatten for lookup (used in review + transition logic)
   const OBJECTIVES = [
-    { value: 'reduce_cost', label: 'Reduce Cost', icon: 'cost', desc: 'Route through the cheapest or zero-cost gateway terminals to minimize backward pricing.', suggestion: 'Conditional routing → terminals sorted by cost (lowest first), zero-cost highlighted.' },
+    { value: 'reduce_cost', label: 'Reduce Per-Txn Cost', icon: 'cost', desc: 'Route through the cheapest or zero-cost gateway terminals to minimize backward pricing.', suggestion: 'Conditional routing → terminals sorted by cost (lowest first), zero-cost highlighted.' },
     { value: 'meet_tsp', label: 'Meet TSP/GMV Target', icon: 'tsp', desc: 'Ensure minimum traffic percentage through committed bank terminals to fulfill volume commitments.', suggestion: 'Volume Split → committed terminal pre-selected with minimum traffic %.' },
     { value: 'enable_offers', label: 'Enable Bank Offers', icon: 'offer', desc: 'Route to specific terminals required for cashback, EMI, or promotional bank offers.', suggestion: 'Conditional routing → offer-eligible terminal as primary, with SR fallback.' },
   ]
@@ -2715,27 +2814,35 @@ function RulesTabContent({
       conditions.push({ field: 'payment_method', operator: 'equals', value: 'UPI' })
       if (gs.upiFlow) conditions.push({ field: 'upi_flow', operator: 'equals', value: gs.upiFlow })
     } else if (gs.paymentMethod === 'cards') {
-      if (gs.cardType === 'credit') conditions.push({ field: 'payment_method', operator: 'equals', value: 'CC' })
-      else if (gs.cardType === 'debit') conditions.push({ field: 'payment_method', operator: 'equals', value: 'DC' })
-      else conditions.push({ field: 'payment_method', operator: 'in', value: ['CC', 'DC'] })
+      conditions.push({ field: 'payment_method', operator: 'equals', value: 'Cards' })
+      if (gs.cardType) conditions.push({ field: 'card_type', operator: 'equals', value: gs.cardType })
       if (gs.cardNetworks.length === 1) conditions.push({ field: 'card_network', operator: 'equals', value: gs.cardNetworks[0] })
       else if (gs.cardNetworks.length > 1) conditions.push({ field: 'card_network', operator: 'in', value: [...gs.cardNetworks] })
       if (gs.issuerBank) conditions.push({ field: 'issuer_bank', operator: 'equals', value: gs.issuerBank })
+      if (gs.international !== null) conditions.push({ field: 'international', operator: 'equals', value: gs.international })
+    } else if (gs.paymentMethod === 'EMI') {
+      conditions.push({ field: 'payment_method', operator: 'equals', value: 'EMI' })
+      if (gs.emiType) conditions.push({ field: 'emi_type', operator: 'equals', value: gs.emiType })
+    }
+    // Amount (applies to all payment methods)
+    if (gs.amountOperator) {
+      if (gs.amountOperator === 'between') {
+        conditions.push({ field: 'amount', operator: 'between', value: [gs.amountValue, gs.amountValueTo] })
+      } else {
+        conditions.push({ field: 'amount', operator: gs.amountOperator, value: gs.amountValue })
+      }
     }
     return conditions
   }, [])
 
-  const reverseMapConditionsToGuided = useCallback((conditions) => {
+  const reverseMapConditionsToGuided = useCallback((conditions, rule) => {
     const gs = { ...INITIAL_GUIDED }
     conditions.forEach(c => {
       switch (c.field) {
         case 'payment_method':
           if (c.value === 'UPI') gs.paymentMethod = 'UPI'
-          else if (c.value === 'CC') { gs.paymentMethod = 'cards'; gs.cardType = 'credit' }
-          else if (c.value === 'DC') { gs.paymentMethod = 'cards'; gs.cardType = 'debit' }
-          else if (c.operator === 'in' && Array.isArray(c.value)) {
-            if (c.value.includes('CC') || c.value.includes('DC')) gs.paymentMethod = 'cards'
-          }
+          else if (c.value === 'Cards') gs.paymentMethod = 'cards'
+          else if (c.value === 'EMI') gs.paymentMethod = 'EMI'
           break
         case 'upi_flow': gs.upiFlow = c.value; break
         case 'card_network':
@@ -2745,8 +2852,22 @@ function RulesTabContent({
           break
         case 'card_type': gs.paymentMethod = 'cards'; gs.cardType = c.value; break
         case 'issuer_bank': gs.paymentMethod = gs.paymentMethod || 'cards'; gs.issuerBank = c.value; break
+        case 'international': gs.international = c.value; break
+        case 'emi_type': gs.paymentMethod = gs.paymentMethod || 'EMI'; gs.emiType = c.value; break
+        case 'amount':
+          if (c.operator === 'between' && Array.isArray(c.value)) {
+            gs.amountOperator = 'between'; gs.amountValue = c.value[0]; gs.amountValueTo = c.value[1]
+          } else {
+            gs.amountOperator = c.operator; gs.amountValue = c.value
+          }
+          break
       }
     })
+    // Expiry from rule
+    if (rule?.expiresAt) {
+      gs.expiresAt = rule.expiresAt
+      gs.neverExpires = false
+    }
     return gs
   }, [])
 
@@ -2762,7 +2883,15 @@ function RulesTabContent({
       else parts.push('Card')
       if (guidedState.cardNetworks.length > 0 && guidedState.cardNetworks.length <= 2) parts.push(guidedState.cardNetworks.join('+'))
       if (guidedState.issuerBank) parts.push(guidedState.issuerBank)
+      if (guidedState.international === true) parts.push('Intl')
+      else if (guidedState.international === false) parts.push('Domestic')
+    } else if (guidedState.paymentMethod === 'EMI') {
+      if (guidedState.emiType === 'no_cost') parts.push('No-Cost EMI')
+      else if (guidedState.emiType === 'standard') parts.push('Standard EMI')
+      else parts.push('EMI')
     }
+    if (guidedState.amountOperator === 'greater_than' && guidedState.amountValue) parts.push(`> ₹${(guidedState.amountValue / 100000) >= 1 ? (guidedState.amountValue / 100000) + 'L' : guidedState.amountValue.toLocaleString('en-IN')}`)
+    else if (guidedState.amountOperator === 'less_than' && guidedState.amountValue) parts.push(`< ₹${guidedState.amountValue.toLocaleString('en-IN')}`)
     const condStr = parts.join(' ') || 'All Txns'
     // Add objective tag
     const objLabel = guidedState.objective ? { reduce_cost: 'Low-Cost', meet_tsp: 'TSP', enable_offers: 'Offer' }[guidedState.objective] : ''
@@ -2819,7 +2948,7 @@ function RulesTabContent({
         srThreshold: rule.action.srThreshold || 90,
         minPaymentCount: rule.action.minPaymentCount || 100,
       })
-      const gs = reverseMapConditionsToGuided(rule.conditions)
+      const gs = reverseMapConditionsToGuided(rule.conditions, rule)
       // Infer objective from existing rule type
       if (rule.type === 'volume_split') gs.objective = 'meet_tsp'
       else gs.objective = 'reduce_cost' // default for conditional
@@ -2903,6 +3032,7 @@ function RulesTabContent({
       isDefault: false,
       createdAt: editingRule ? editingRule.createdAt : new Date().toISOString(),
       createdBy: editingRule ? editingRule.createdBy : 'anugrah.sharma@razorpay.com',
+      expiresAt: guidedState.neverExpires ? null : guidedState.expiresAt || null,
     }
 
     if (editingRule) {
@@ -2990,7 +3120,7 @@ function RulesTabContent({
         // Sort available terminals by objective
         if (obj === 'reduce_cost') {
           const sorted = [...availableTerminals].sort((a, b) => a.costPerTxn - b.costPerTxn).map(t => t.terminalId)
-          setRuleForm(prev => ({ ...prev, terminals: prev.terminals.length > 0 ? prev.terminals : sorted.slice(0, 2) }))
+          setRuleForm(prev => ({ ...prev, terminals: prev.terminals.length > 0 ? prev.terminals : sorted.slice(0, 3) }))
         } else if (obj === 'enable_offers') {
           // Pre-select first terminal (user should pick the offer-eligible one)
           setRuleForm(prev => ({ ...prev, terminals: prev.terminals.length > 0 ? prev.terminals : [] }))
@@ -3130,7 +3260,7 @@ function RulesTabContent({
   const addCondition = useCallback(() => {
     setRuleForm(prev => ({
       ...prev,
-      conditions: [...prev.conditions, { field: 'payment_method', operator: 'equals', value: 'CC' }],
+      conditions: [...prev.conditions, { field: 'payment_method', operator: 'equals', value: 'Cards' }],
     }))
   }, [setRuleForm])
 
@@ -3204,7 +3334,7 @@ function RulesTabContent({
       type: 'conditional',
       enabled: true,
       priority: 0,
-      conditions: [{ field: 'payment_method', operator: 'equals', value: 'CC' }],
+      conditions: [{ field: 'payment_method', operator: 'equals', value: 'Cards' }],
       conditionLogic: 'AND',
       action: { type: 'route', terminals: [lockedTerminals[0].terminalId], splits: [] },
       isDefault: false,
@@ -3224,7 +3354,17 @@ function RulesTabContent({
 
         {/* Active strategy display */}
         <div className="kam-routing-active">
-          <div className={`kam-routing-strategy-card ${routingMode === 'sr' ? 'active' : 'inactive'}`}>
+          <div
+            className={`kam-routing-strategy-card ${routingMode === 'sr' ? 'active' : 'inactive'}`}
+            onClick={() => {
+              if (routingMode !== 'sr') {
+                setRoutingMode('sr')
+                showToast('Switched to SR-optimized routing')
+                addAuditEntry('routing_strategy_change', 'Switched routing strategy to Success Rate optimized', merchant.id)
+              }
+            }}
+            style={routingMode !== 'sr' ? { cursor: 'pointer' } : {}}
+          >
             <div className="kam-routing-strategy-top">
               <div className="kam-routing-strategy-card-icon sr">
                 <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
@@ -3256,7 +3396,13 @@ function RulesTabContent({
 
           </div>
 
-          <div className={`kam-routing-strategy-card ${routingMode === 'cost' ? 'active' : 'inactive'}`}>
+          <div
+            className={`kam-routing-strategy-card ${routingMode === 'cost' ? 'active' : 'inactive'}`}
+            onClick={() => {
+              if (routingMode !== 'cost') setShowSwitchWarning(true)
+            }}
+            style={routingMode !== 'cost' ? { cursor: 'pointer' } : {}}
+          >
             <div className="kam-routing-strategy-top">
               <div className="kam-routing-strategy-card-icon cost">
                 <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
@@ -3496,7 +3642,11 @@ function RulesTabContent({
                           {ci > 0 && <span className="kam-rule-logic">{rule.conditionLogic}</span>}
                           <span className="kam-rule-condition-chip">
                             {RULE_CONDITIONS[c.field]?.label || c.field} {RULE_OPERATOR_LABELS[c.operator] || c.operator} {
-                              Array.isArray(c.value) ? `${c.value[0]}–${c.value[1]}` : c.value
+                              c.operator === 'in' && Array.isArray(c.value) ? c.value.join(', ')
+                              : c.operator === 'between' && Array.isArray(c.value) ? `₹${c.value[0]?.toLocaleString('en-IN')}–₹${c.value[1]?.toLocaleString('en-IN')}`
+                              : c.field === 'amount' ? `₹${Number(c.value)?.toLocaleString('en-IN')}`
+                              : c.field === 'international' ? (c.value === true ? 'Yes' : 'No')
+                              : String(c.value)
                             }
                           </span>
                         </React.Fragment>
@@ -3542,6 +3692,11 @@ function RulesTabContent({
                   )}
                   <div className="kam-rule-meta">
                     Created {new Date(rule.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })} by {rule.createdBy.split('@')[0]}
+                    {rule.expiresAt && (
+                      <span className={`kam-badge ${new Date(rule.expiresAt) < new Date() ? 'danger' : 'warning'}`} style={{ marginLeft: 8, fontSize: 10 }}>
+                        {new Date(rule.expiresAt) < new Date() ? 'Expired' : `Expires ${new Date(rule.expiresAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}`}
+                      </span>
+                    )}
                   </div>
                 </div>
               )
@@ -3896,6 +4051,21 @@ function RulesTabContent({
                           <strong>Cards</strong>
                           <span>Credit and debit card transactions — Visa, Mastercard, RuPay, Amex, Diners</span>
                         </div>
+                        <div
+                          className={`kam-guided-method-card${guidedState.paymentMethod === 'EMI' ? ' selected' : ''}`}
+                          onClick={() => setGuidedState(prev => ({ ...INITIAL_GUIDED, paymentMethod: 'EMI' }))}
+                        >
+                          <div className="kam-guided-method-icon">
+                            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                              <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+                              <line x1="3" y1="10" x2="21" y2="10"/>
+                              <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/>
+                            </svg>
+                          </div>
+                          <strong>EMI</strong>
+                          <span>No-cost and standard EMI via bank partners — installment transactions</span>
+                        </div>
                       </div>
                       {wizardStepErrors[0] && wizardStepErrors[0].length > 0 && (
                         <div className="kam-wizard-step-errors">
@@ -3909,10 +4079,10 @@ function RulesTabContent({
                   {wizardStep === 1 && (
                     <div className="kam-wizard-step-panel">
                       <h3 className="kam-wizard-step-title">
-                        {guidedState.paymentMethod === 'UPI' ? 'Refine UPI Transactions' : 'Refine Card Transactions'}
+                        {guidedState.paymentMethod === 'UPI' ? 'Refine UPI Transactions' : guidedState.paymentMethod === 'EMI' ? 'Refine EMI Transactions' : 'Refine Card Transactions'}
                       </h3>
                       <p className="kam-wizard-step-desc">
-                        Narrow down which transactions this rule targets. All filters are optional — skip to match all {guidedState.paymentMethod === 'UPI' ? 'UPI' : 'card'} transactions.
+                        Narrow down which transactions this rule targets. All filters are optional — skip to match all {guidedState.paymentMethod === 'UPI' ? 'UPI' : guidedState.paymentMethod === 'EMI' ? 'EMI' : 'card'} transactions.
                       </p>
 
                       <div className="kam-guided-filter-section">
@@ -4000,8 +4170,100 @@ function RulesTabContent({
                                 ))}
                               </div>
                             </div>
+
+                            {/* International */}
+                            <div className="kam-guided-filter-group">
+                              <div className="kam-guided-filter-label">International</div>
+                              <div className="kam-guided-filter-hint">Filter by domestic or international transactions.</div>
+                              <div className="kam-guided-chip-group">
+                                {[{ value: null, label: 'Any' }, { value: false, label: 'Domestic' }, { value: true, label: 'International' }].map(opt => (
+                                  <button
+                                    key={opt.label}
+                                    className={`kam-guided-chip${guidedState.international === opt.value ? ' selected' : ''}`}
+                                    onClick={() => setGuidedState(prev => ({ ...prev, international: opt.value }))}
+                                  >
+                                    {opt.label}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
                           </>
                         )}
+
+                        {/* ── EMI Path ── */}
+                        {guidedState.paymentMethod === 'EMI' && (
+                          <div className="kam-guided-filter-group">
+                            <div className="kam-guided-filter-label">EMI Type</div>
+                            <div className="kam-guided-filter-hint">Filter by EMI type, or leave on "Any" for all EMI transactions.</div>
+                            <div className="kam-guided-chip-group">
+                              {[{ value: null, label: 'Any' }, { value: 'no_cost', label: 'No-Cost EMI' }, { value: 'standard', label: 'Standard EMI' }].map(opt => (
+                                <button
+                                  key={opt.label}
+                                  className={`kam-guided-chip${guidedState.emiType === opt.value ? ' selected' : ''}`}
+                                  onClick={() => setGuidedState(prev => ({ ...prev, emiType: opt.value }))}
+                                >
+                                  {opt.label}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* ── Amount Threshold (all methods) ── */}
+                        <div className="kam-guided-filter-group">
+                          <div className="kam-guided-filter-label">Amount Threshold</div>
+                          <div className="kam-guided-filter-hint">Filter by transaction amount. Use presets or enter a custom value.</div>
+                          <div className="kam-guided-chip-group">
+                            <button
+                              className={`kam-guided-chip${guidedState.amountOperator === null ? ' selected' : ''}`}
+                              onClick={() => setGuidedState(prev => ({ ...prev, amountOperator: null, amountValue: null, amountValueTo: null }))}
+                            >
+                              Any
+                            </button>
+                            {AMOUNT_PRESETS.map(preset => (
+                              <button
+                                key={preset.label}
+                                className={`kam-guided-chip${guidedState.amountOperator === preset.operator && guidedState.amountValue === preset.value ? ' selected' : ''}`}
+                                onClick={() => setGuidedState(prev => ({
+                                  ...prev,
+                                  amountOperator: prev.amountOperator === preset.operator && prev.amountValue === preset.value ? null : preset.operator,
+                                  amountValue: prev.amountOperator === preset.operator && prev.amountValue === preset.value ? null : preset.value,
+                                }))}
+                              >
+                                {preset.label}
+                              </button>
+                            ))}
+                          </div>
+                          {guidedState.amountOperator && (
+                            <div className="kam-guided-amount-custom">
+                              <select
+                                value={guidedState.amountOperator}
+                                onChange={e => setGuidedState(prev => ({ ...prev, amountOperator: e.target.value }))}
+                              >
+                                <option value="greater_than">&gt; Greater than</option>
+                                <option value="less_than">&lt; Less than</option>
+                                <option value="between">Between</option>
+                              </select>
+                              <input
+                                type="number"
+                                value={guidedState.amountValue || ''}
+                                onChange={e => setGuidedState(prev => ({ ...prev, amountValue: Number(e.target.value) }))}
+                                placeholder="Amount in ₹"
+                              />
+                              {guidedState.amountOperator === 'between' && (
+                                <>
+                                  <span>to</span>
+                                  <input
+                                    type="number"
+                                    value={guidedState.amountValueTo || ''}
+                                    onChange={e => setGuidedState(prev => ({ ...prev, amountValueTo: Number(e.target.value) }))}
+                                    placeholder="Max ₹"
+                                  />
+                                </>
+                              )}
+                            </div>
+                          )}
+                        </div>
 
                       </div>
 
@@ -4013,37 +4275,46 @@ function RulesTabContent({
                     </div>
                   )}
 
-                  {/* ── Step 2: Objective ── */}
+                  {/* ── Step 2: Objective (Two-Level) ── */}
                   {wizardStep === 2 && (
                     <div className="kam-wizard-step-panel">
-                      <h3 className="kam-wizard-step-title">What's Your Routing Objective?</h3>
-                      <p className="kam-wizard-step-desc">Select the goal for this routing rule. This determines the recommended strategy in the next step.</p>
+                      <h3 className="kam-wizard-step-title">Why Override ML Routing?</h3>
+                      <p className="kam-wizard-step-desc">ML routing optimizes for success rate by default. Select why you need a manual rule.</p>
+
+                      {/* Level 1: Category selection */}
                       <div className="kam-guided-objective-cards">
-                        {OBJECTIVES.map(obj => (
+                        {OBJECTIVE_CATEGORIES.map(cat => (
                           <div
-                            key={obj.value}
-                            className={`kam-guided-objective-card${guidedState.objective === obj.value ? ' selected' : ''}`}
-                            onClick={() => setGuidedState(prev => ({ ...prev, objective: obj.value }))}
+                            key={cat.value}
+                            className={`kam-guided-objective-card${guidedState.objectiveCategory === cat.value ? ' selected' : ''}`}
+                            onClick={() => {
+                              const isAlreadySelected = guidedState.objectiveCategory === cat.value
+                              if (cat.value === 'enable_offers') {
+                                // Direct selection — no sub-options
+                                setGuidedState(prev => ({ ...prev, objectiveCategory: cat.value, objective: 'enable_offers' }))
+                              } else {
+                                // Save costs — show sub-options, clear objective if switching category
+                                setGuidedState(prev => ({
+                                  ...prev,
+                                  objectiveCategory: cat.value,
+                                  objective: isAlreadySelected ? prev.objective : null,
+                                }))
+                              }
+                            }}
                           >
                             <div className="kam-guided-objective-icon">
-                              {obj.icon === 'sr' && (
-                                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
-                              )}
-                              {obj.icon === 'cost' && (
+                              {cat.icon === 'cost' && (
                                 <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                               )}
-                              {obj.icon === 'tsp' && (
-                                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
-                              )}
-                              {obj.icon === 'offer' && (
+                              {cat.icon === 'offer' && (
                                 <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
                               )}
                             </div>
                             <div className="kam-guided-objective-content">
-                              <strong>{obj.label}</strong>
-                              <span>{obj.desc}</span>
+                              <strong>{cat.label}</strong>
+                              <span>{cat.desc}</span>
                             </div>
-                            {guidedState.objective === obj.value && (
+                            {guidedState.objectiveCategory === cat.value && (
                               <div className="kam-guided-objective-check">
                                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                               </div>
@@ -4051,6 +4322,31 @@ function RulesTabContent({
                           </div>
                         ))}
                       </div>
+
+                      {/* Level 2: Sub-options for Save Costs */}
+                      {guidedState.objectiveCategory === 'save_costs' && (
+                        <div className="kam-guided-cost-suboptions">
+                          <p className="kam-guided-cost-suboptions-label">How do you want to save costs?</p>
+                          <div className="kam-guided-cost-suboptions-grid">
+                            {COST_SUB_OPTIONS.map(sub => (
+                              <div
+                                key={sub.value}
+                                className={`kam-guided-cost-subcard${guidedState.objective === sub.value ? ' selected' : ''}`}
+                                onClick={() => setGuidedState(prev => ({ ...prev, objective: sub.value }))}
+                              >
+                                <div className="kam-guided-cost-subcard-radio">
+                                  <div className={`kam-guided-cost-subcard-dot${guidedState.objective === sub.value ? ' active' : ''}`} />
+                                </div>
+                                <div className="kam-guided-cost-subcard-content">
+                                  <strong>{sub.label}</strong>
+                                  <span>{sub.desc}</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
                       {guidedState.objective && (
                         <div className="kam-guided-objective-suggestion">
                           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
@@ -4087,31 +4383,39 @@ function RulesTabContent({
                         </div>
                       </div>
 
-                      {/* SR Threshold Fallback (conditional only) */}
+                      {/* SR Safety Net (conditional only) — prominent callout before terminal selection */}
                       {ruleForm.type === 'conditional' && (
-                        <div className="kam-rule-builder-field" style={{ marginBottom: 20 }}>
-                          <label>SR Threshold Fallback</label>
-                          <div className="kam-rule-builder-threshold">
-                            <p className="kam-rule-builder-threshold-desc">
-                              If a terminal's SR drops below the threshold (with enough payment data), traffic automatically falls to the next terminal in the stack.
-                            </p>
-                            <div className="kam-rule-builder-threshold-inputs">
-                              <div className="kam-rule-builder-threshold-field">
-                                <label>Min SR</label>
-                                <div className="kam-rule-builder-threshold-input-wrap">
-                                  <input type="number" min="0" max="100" value={ruleForm.srThreshold} onChange={e => setRuleForm(p => ({ ...p, srThreshold: Number(e.target.value) || 0 }))} />
-                                  <span className="kam-rule-builder-threshold-unit">%</span>
-                                </div>
+                        <div className="kam-sr-safety-net">
+                          <div className="kam-sr-safety-net-header">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                            <strong>SR Safety Net</strong>
+                            <span className="kam-badge warning" style={{ marginLeft: 'auto' }}>Recommended</span>
+                          </div>
+                          <p className="kam-sr-safety-net-desc">
+                            Set a minimum success rate threshold. If a terminal's SR drops below this (after enough transactions), traffic automatically falls to the next terminal — preventing SR degradation.
+                          </p>
+                          <div className="kam-sr-safety-net-inputs">
+                            <div className="kam-sr-safety-net-field">
+                              <label>Min SR</label>
+                              <div className="kam-rule-builder-threshold-input-wrap">
+                                <input type="number" min="0" max="100" value={ruleForm.srThreshold} onChange={e => setRuleForm(p => ({ ...p, srThreshold: Number(e.target.value) || 0 }))} placeholder="e.g. 65" />
+                                <span className="kam-rule-builder-threshold-unit">%</span>
                               </div>
-                              <div className="kam-rule-builder-threshold-field">
-                                <label>Min Payments</label>
-                                <div className="kam-rule-builder-threshold-input-wrap">
-                                  <input type="number" min="0" value={ruleForm.minPaymentCount} onChange={e => setRuleForm(p => ({ ...p, minPaymentCount: Number(e.target.value) || 0 }))} />
-                                  <span className="kam-rule-builder-threshold-unit">txns</span>
-                                </div>
+                            </div>
+                            <div className="kam-sr-safety-net-field">
+                              <label>Min Payments</label>
+                              <div className="kam-rule-builder-threshold-input-wrap">
+                                <input type="number" min="0" value={ruleForm.minPaymentCount} onChange={e => setRuleForm(p => ({ ...p, minPaymentCount: Number(e.target.value) || 0 }))} placeholder="e.g. 100" />
+                                <span className="kam-rule-builder-threshold-unit">txns</span>
                               </div>
                             </div>
                           </div>
+                          {ruleForm.srThreshold === 0 && (
+                            <div className="kam-sr-safety-net-warning">
+                              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                              No safety net set — if a terminal's SR drops, traffic will still be routed to it. This may impact merchant SR and wallet share.
+                            </div>
+                          )}
                         </div>
                       )}
 
@@ -4205,9 +4509,40 @@ function RulesTabContent({
                       <p className="kam-wizard-step-desc">Review your rule configuration. Click any section to jump back and edit.</p>
 
                       {/* Rule Name */}
-                      <div className="kam-rule-builder-field" style={{ marginBottom: 20 }}>
+                      <div className="kam-rule-builder-field" style={{ marginBottom: 12 }}>
                         <label>Rule Name</label>
                         <input type="text" value={ruleForm.name} onChange={e => setRuleForm(p => ({ ...p, name: e.target.value }))} placeholder="e.g. UPI One-time [SR-Opt] → HDFC" />
+                      </div>
+
+                      {/* Rule Expiry */}
+                      <div className="kam-rule-builder-field" style={{ marginBottom: 20 }}>
+                        <label>Rule Expiry</label>
+                        <div className="kam-guided-chip-group" style={{ marginBottom: 8 }}>
+                          <button
+                            className={`kam-guided-chip${guidedState.neverExpires ? ' selected' : ''}`}
+                            onClick={() => setGuidedState(prev => ({ ...prev, neverExpires: true, expiresAt: null }))}
+                          >
+                            Never expires
+                          </button>
+                          <button
+                            className={`kam-guided-chip${!guidedState.neverExpires ? ' selected' : ''}`}
+                            onClick={() => setGuidedState(prev => ({ ...prev, neverExpires: false }))}
+                          >
+                            Set expiry date
+                          </button>
+                        </div>
+                        {!guidedState.neverExpires && (
+                          <div className="kam-guided-amount-custom">
+                            <input
+                              type="date"
+                              value={guidedState.expiresAt ? guidedState.expiresAt.split('T')[0] : ''}
+                              onChange={e => setGuidedState(prev => ({ ...prev, expiresAt: e.target.value ? e.target.value + 'T23:59:59Z' : null }))}
+                              min={new Date().toISOString().split('T')[0]}
+                              style={{ flex: 1 }}
+                            />
+                            <span style={{ fontSize: 12, color: 'var(--rzp-text-muted)' }}>After this date, traffic reverts to SR-optimized routing</span>
+                          </div>
+                        )}
                       </div>
 
                       {/* Summary Card */}
@@ -4216,7 +4551,7 @@ function RulesTabContent({
                         <div className="kam-wizard-review-row" onClick={() => handleWizardJump(0)} style={{ cursor: 'pointer' }}>
                           <span className="kam-wizard-review-label">Payment Method</span>
                           <span className="kam-wizard-review-value">
-                            <span className="kam-badge info">{guidedState.paymentMethod === 'UPI' ? 'UPI' : 'Cards'}</span>
+                            <span className="kam-badge info">{guidedState.paymentMethod === 'UPI' ? 'UPI' : guidedState.paymentMethod === 'EMI' ? 'EMI' : 'Cards'}</span>
                           </span>
                           <span className="kam-wizard-review-edit">Edit</span>
                         </div>
@@ -4234,9 +4569,23 @@ function RulesTabContent({
                                 if (guidedState.cardType) chips.push(guidedState.cardType === 'credit' ? 'Credit' : 'Debit')
                                 if (guidedState.cardNetworks.length > 0) chips.push(guidedState.cardNetworks.join(', '))
                                 if (guidedState.issuerBank) chips.push(guidedState.issuerBank)
+                                if (guidedState.international === true) chips.push('International')
+                                else if (guidedState.international === false) chips.push('Domestic')
+                              }
+                              if (guidedState.paymentMethod === 'EMI' && guidedState.emiType) {
+                                chips.push(guidedState.emiType === 'no_cost' ? 'No-Cost' : 'Standard')
+                              }
+                              if (guidedState.amountOperator) {
+                                const v = guidedState.amountValue?.toLocaleString('en-IN')
+                                if (guidedState.amountOperator === 'greater_than') chips.push(`> ₹${v}`)
+                                else if (guidedState.amountOperator === 'less_than') chips.push(`< ₹${v}`)
+                                else if (guidedState.amountOperator === 'between') chips.push(`₹${v} – ₹${guidedState.amountValueTo?.toLocaleString('en-IN')}`)
+                              }
+                              if (!guidedState.neverExpires && guidedState.expiresAt) {
+                                chips.push(`Expires: ${new Date(guidedState.expiresAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}`)
                               }
                               return chips.length === 0 ? (
-                                <span style={{ color: 'var(--rzp-text-muted)' }}>No filters (all {guidedState.paymentMethod === 'UPI' ? 'UPI' : 'card'} transactions)</span>
+                                <span style={{ color: 'var(--rzp-text-muted)' }}>No filters (all {guidedState.paymentMethod === 'UPI' ? 'UPI' : guidedState.paymentMethod === 'EMI' ? 'EMI' : 'card'} transactions)</span>
                               ) : (
                                 <div className="kam-wizard-review-chips">
                                   {chips.map((c, i) => <span key={i} className="kam-wizard-review-chip">{c}</span>)}
@@ -4247,13 +4596,18 @@ function RulesTabContent({
                           <span className="kam-wizard-review-edit">Edit</span>
                         </div>
 
-                        {/* Objective */}
+                        {/* Objective (two-level display) */}
                         <div className="kam-wizard-review-row" onClick={() => handleWizardJump(2)} style={{ cursor: 'pointer' }}>
                           <span className="kam-wizard-review-label">Objective</span>
                           <span className="kam-wizard-review-value">
-                            <span className="kam-badge neutral">
-                              {OBJECTIVES.find(o => o.value === guidedState.objective)?.label || '—'}
+                            <span className="kam-badge neutral" style={{ marginRight: 4 }}>
+                              {guidedState.objectiveCategory === 'save_costs' ? 'Save Costs' : 'Bank Offers'}
                             </span>
+                            {guidedState.objectiveCategory === 'save_costs' && (
+                              <span className="kam-badge info">
+                                {guidedState.objective === 'reduce_cost' ? 'Reduce Per-Txn Cost' : 'TSP/GMV Target'}
+                              </span>
+                            )}
                           </span>
                           <span className="kam-wizard-review-edit">Edit</span>
                         </div>
@@ -4298,12 +4652,16 @@ function RulesTabContent({
                           <span className="kam-wizard-review-edit">Edit</span>
                         </div>
 
-                        {/* SR Threshold (conditional only) */}
-                        {ruleForm.type === 'conditional' && ruleForm.srThreshold > 0 && (
+                        {/* SR Safety Net (conditional only — always shown) */}
+                        {ruleForm.type === 'conditional' && (
                           <div className="kam-wizard-review-row" onClick={() => handleWizardJump(3)} style={{ cursor: 'pointer' }}>
-                            <span className="kam-wizard-review-label">SR Fallback</span>
+                            <span className="kam-wizard-review-label">SR Safety Net</span>
                             <span className="kam-wizard-review-value">
-                              Below {ruleForm.srThreshold}% (min {ruleForm.minPaymentCount} payments)
+                              {ruleForm.srThreshold > 0 ? (
+                                <span>Below {ruleForm.srThreshold}% (min {ruleForm.minPaymentCount} txns)</span>
+                              ) : (
+                                <span style={{ color: 'var(--rzp-warning)' }}>Not set</span>
+                              )}
                             </span>
                             <span className="kam-wizard-review-edit">Edit</span>
                           </div>

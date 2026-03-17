@@ -12,11 +12,11 @@
   gap: 6px;
   color: var(--rzp-text-secondary);
   text-decoration: none;
-  font-size: 14px;
+  font-size: var(--font-size-14);
   font-family: var(--font-secondary);
   margin-bottom: 20px;
-  font-weight: 500;
-  transition: color 0.15s ease;
+  font-weight: var(--font-weight-medium);
+  transition: color var(--duration-quick) var(--easing-standard);
 }
 
 .kam-detail-back:hover {
@@ -46,22 +46,22 @@
 }
 
 .kam-detail-title h2 {
-  font-size: 24px;
-  font-weight: 700;
+  font-size: var(--font-size-24);
+  font-weight: var(--font-weight-bold);
   color: var(--rzp-text-primary);
   font-family: var(--font-primary);
 }
 
 .kam-detail-title .mid {
-  font-size: 14px;
+  font-size: var(--font-size-14);
   color: var(--rzp-text-muted);
-  font-weight: 400;
+  font-weight: var(--font-weight-regular);
   font-family: var(--font-secondary);
 }
 
 .kam-detail-actions {
   display: flex;
-  gap: var(--space-sm);
+  gap: var(--spacing-3);
   flex-shrink: 0;
 }
 
@@ -71,7 +71,7 @@
 .kam-detail-metrics {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-md);
+  gap: var(--spacing-5);
   margin-bottom: 28px;
 }
 
@@ -102,12 +102,12 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--space-md);
+  margin-bottom: var(--spacing-5);
 }
 
 .kam-detail-section-header h3 {
-  font-size: 16px;
-  font-weight: 600;
+  font-size: var(--font-size-16);
+  font-weight: var(--font-weight-semibold);
   color: var(--rzp-text-primary);
   font-family: var(--font-secondary);
 }
@@ -117,18 +117,18 @@
 
 .kam-doppler-card {
   background: var(--rzp-card-bg);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   border: 1px solid var(--rzp-border);
-  padding: var(--space-lg);
+  padding: var(--spacing-7);
   margin-bottom: 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow-low);
 }
 
 .kam-doppler-models {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
-  margin-bottom: var(--space-lg);
+  margin-bottom: var(--spacing-7);
 }
 
 .kam-doppler-model {
@@ -137,7 +137,7 @@
   padding: 20px;
   text-align: center;
   cursor: pointer;
-  transition: border-color 0.2s ease, background 0.2s ease, transform 0.15s ease;
+  transition: border-color 0.2s ease, background var(--duration-moderate) var(--easing-standard), transform var(--duration-quick) var(--easing-standard);
 }
 
 .kam-doppler-model:hover {
@@ -151,34 +151,34 @@
 }
 
 .kam-doppler-model .model-icon {
-  font-size: 28px;
-  margin-bottom: var(--space-sm);
+  font-size: var(--font-size-28);
+  margin-bottom: var(--spacing-3);
   line-height: 1;
 }
 
 .kam-doppler-model .model-name {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-semibold);
   color: var(--rzp-text-primary);
   font-family: var(--font-secondary);
 }
 
 .kam-doppler-model .model-desc {
-  font-size: 12px;
+  font-size: var(--font-size-12);
   color: var(--rzp-text-secondary);
   font-family: var(--font-secondary);
   margin-top: 4px;
-  line-height: 1.4;
+  line-height: var(--line-height-m);
 }
 
 /* Slider Container
    ========================================================================== */
 
 .kam-slider-container {
-  padding: 20px var(--space-lg);
-  background: #F8FAFC;
+  padding: 20px var(--spacing-7);
+  background: var(--rzp-bg-subtle);
   border-radius: var(--radius-md);
-  margin-bottom: var(--space-md);
+  margin-bottom: var(--spacing-5);
 }
 
 .kam-slider-header {
@@ -189,15 +189,15 @@
 }
 
 .kam-slider-header .label {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-semibold);
   color: var(--rzp-text-primary);
   font-family: var(--font-secondary);
 }
 
 .kam-slider-header .value {
-  font-size: 14px;
-  font-weight: 700;
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-bold);
   color: var(--rzp-blue);
   font-family: var(--font-secondary);
 }
@@ -221,11 +221,11 @@
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #fff;
+  background: var(--rzp-card-bg);
   border: 2px solid var(--rzp-blue);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
   cursor: pointer;
-  transition: box-shadow 0.15s ease, transform 0.15s ease;
+  transition: box-shadow 0.15s ease, transform var(--duration-quick) var(--easing-standard);
 }
 
 .kam-slider input[type="range"]::-webkit-slider-thumb:hover {
@@ -241,7 +241,7 @@
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #fff;
+  background: var(--rzp-card-bg);
   border: 2px solid var(--rzp-blue);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
   cursor: pointer;
@@ -251,12 +251,12 @@
 .kam-slider-labels {
   display: flex;
   justify-content: space-between;
-  margin-top: var(--space-sm);
+  margin-top: var(--spacing-3);
 }
 
 .kam-slider-labels span {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--font-size-12);
+  font-weight: var(--font-weight-semibold);
   font-family: var(--font-secondary);
 }
 
@@ -274,7 +274,7 @@
   justify-content: space-between;
   padding: 12px 16px;
   background: var(--rzp-card-bg);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   border: 1px solid var(--rzp-border);
   margin-top: 12px;
 }
@@ -286,17 +286,17 @@
 }
 
 .kam-slider-values .val-label {
-  font-size: 12px;
+  font-size: var(--font-size-12);
   color: var(--rzp-text-secondary);
   font-family: var(--font-secondary);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 .kam-slider-values .val {
-  font-size: 20px;
-  font-weight: 700;
+  font-size: var(--font-size-20);
+  font-weight: var(--font-weight-bold);
   font-family: var(--font-primary);
-  line-height: 1.3;
+  line-height: var(--line-height-m);
 }
 
 .kam-slider-values .val.threshold {
@@ -318,8 +318,8 @@
 .kam-terminal-table th {
   text-align: left;
   padding: 10px 16px;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--font-size-12);
+  font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--rzp-text-secondary);
@@ -330,7 +330,7 @@
 
 .kam-terminal-table td {
   padding: 12px 16px;
-  font-size: 14px;
+  font-size: var(--font-size-14);
   font-family: var(--font-secondary);
   border-bottom: 1px solid var(--rzp-border);
   color: var(--rzp-text-primary);
@@ -345,7 +345,7 @@
 }
 
 .kam-terminal-table tr:hover td {
-  background: #F8FAFC;
+  background: var(--rzp-bg-subtle);
 }
 
 .kam-terminal-table .kam-pricing-expanded-row td {
@@ -361,13 +361,13 @@
 /* Expanded Pricing Breakdown */
 .kam-pricing-breakdown {
   padding: 16px 24px 20px;
-  background: #F8FAFC;
+  background: var(--rzp-bg-subtle);
   border-top: 1px solid var(--rzp-border);
 }
 
 .kam-pricing-breakdown-title {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--font-size-12);
+  font-weight: var(--font-weight-semibold);
   color: var(--rzp-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -383,8 +383,8 @@
 .kam-pricing-table th {
   text-align: left;
   padding: 6px 12px;
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--font-size-11);
+  font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--rzp-text-muted);
@@ -394,7 +394,7 @@
 
 .kam-pricing-table td {
   padding: 8px 12px;
-  font-size: 13px;
+  font-size: var(--font-size-14);
   font-family: var(--font-secondary);
   color: var(--rzp-text-primary);
   border-bottom: 1px solid #EDF2F7;
@@ -407,10 +407,10 @@
 .kam-network-badge {
   display: inline-flex;
   padding: 1px 6px;
-  border-radius: 4px;
-  font-size: 11px;
-  font-weight: 600;
-  background: #F1F5F9;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-11);
+  font-weight: var(--font-weight-semibold);
+  background: var(--rzp-neutral-light);
   color: var(--rzp-text-secondary);
   font-family: var(--font-secondary);
 }
@@ -421,12 +421,12 @@
 .kam-toggle {
   width: 44px;
   height: 24px;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   background: var(--rzp-border);
   border: none;
   cursor: pointer;
   position: relative;
-  transition: background 0.2s ease;
+  transition: background var(--duration-moderate) var(--easing-standard);
   flex-shrink: 0;
 }
 
@@ -440,10 +440,10 @@
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: #fff;
+  background: var(--rzp-card-bg);
   top: 3px;
   left: 3px;
-  transition: left 0.2s ease, box-shadow 0.2s ease;
+  transition: left 0.2s ease, box-shadow var(--duration-moderate) var(--easing-standard);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
@@ -461,42 +461,37 @@
 .kam-method-badge {
   display: inline-flex;
   padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 11px;
-  font-weight: 700;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-11);
+  font-weight: var(--font-weight-bold);
   font-family: var(--font-secondary);
   letter-spacing: 0.03em;
   text-transform: uppercase;
 }
 
 .kam-method-badge.upi {
-  background: #E8F5E9;
-  color: #2E7D32;
+  background: var(--rzp-method-upi-bg);
+  color: var(--rzp-method-upi-text);
 }
 
-.kam-method-badge.cc {
-  background: #FFF3E0;
-  color: #E65100;
-}
-
-.kam-method-badge.dc {
-  background: #E3F2FD;
-  color: #1565C0;
+.kam-method-badge.cards {
+  background: var(--rzp-deal-tsp-bg);
+  color: var(--rzp-deal-tsp-text);
 }
 
 .kam-method-badge.nb {
-  background: #F3E5F5;
-  color: #7B1FA2;
+  background: var(--rzp-deal-offer-bg);
+  color: var(--rzp-deal-offer-text);
 }
 
 .kam-method-badge.wallet {
-  background: #FFF8E1;
-  color: #F9A825;
+  background: var(--rzp-method-wallet-bg);
+  color: var(--rzp-method-wallet-text);
 }
 
 .kam-method-badge.emi {
-  background: #E0F2F1;
-  color: #00695C;
+  background: var(--rzp-method-emi-bg);
+  color: var(--rzp-method-emi-text);
 }
 
 /* Audit Timeline
@@ -504,7 +499,7 @@
 
 .kam-audit-timeline {
   position: relative;
-  padding-left: var(--space-lg);
+  padding-left: var(--spacing-7);
 }
 
 .kam-audit-timeline::before {
@@ -519,12 +514,12 @@
 
 .kam-audit-entry {
   position: relative;
-  margin-bottom: var(--space-md);
-  padding: var(--space-md);
-  background: #F8FAFC;
+  margin-bottom: var(--spacing-5);
+  padding: var(--spacing-5);
+  background: var(--rzp-bg-subtle);
   border-radius: var(--radius-md);
   border: 1px solid var(--rzp-border);
-  transition: box-shadow 0.15s ease;
+  transition: box-shadow var(--duration-quick) var(--easing-standard);
 }
 
 .kam-audit-entry:hover {
@@ -556,40 +551,40 @@
 }
 
 .kam-audit-entry .audit-time {
-  font-size: 12px;
+  font-size: var(--font-size-12);
   color: var(--rzp-text-muted);
   font-family: monospace;
 }
 
 .kam-audit-entry .audit-user {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--font-size-12);
+  font-weight: var(--font-weight-semibold);
   color: var(--rzp-text-secondary);
   font-family: var(--font-secondary);
 }
 
 .kam-audit-entry .audit-action {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-medium);
   color: var(--rzp-text-primary);
   font-family: var(--font-secondary);
-  line-height: 1.4;
+  line-height: var(--line-height-m);
 }
 
 .kam-audit-entry .audit-reason {
-  font-size: 13px;
+  font-size: var(--font-size-14);
   color: var(--rzp-text-secondary);
   font-family: var(--font-secondary);
   margin-top: 4px;
-  line-height: 1.4;
+  line-height: var(--line-height-m);
 }
 
 .kam-audit-entry .audit-tag {
   display: inline-flex;
   padding: 1px 6px;
-  border-radius: 4px;
-  font-size: 10px;
-  font-weight: 600;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-10);
+  font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   margin-top: 6px;
@@ -600,16 +595,16 @@
 
 .kam-warning-box {
   padding: 12px 16px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: var(--rzp-warning-light);
   border: 1px solid #FFE0A0;
   display: flex;
   align-items: flex-start;
-  gap: var(--space-sm);
-  font-size: 13px;
+  gap: var(--spacing-3);
+  font-size: var(--font-size-14);
   font-family: var(--font-secondary);
   color: #92400E;
-  line-height: 1.5;
+  line-height: var(--line-height-m);
 }
 
 .kam-warning-box svg {
@@ -626,16 +621,16 @@
 .kam-reason-input {
   width: 100%;
   padding: 10px 12px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   border: 1px solid var(--rzp-border);
-  font-size: 14px;
+  font-size: var(--font-size-14);
   font-family: var(--font-secondary);
   color: var(--rzp-text-primary);
   resize: vertical;
   min-height: 60px;
   margin-top: 12px;
-  line-height: 1.5;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  line-height: var(--line-height-m);
+  transition: border-color 0.15s ease, box-shadow var(--duration-quick) var(--easing-standard);
 }
 
 .kam-reason-input::placeholder {
@@ -645,7 +640,7 @@
 .kam-reason-input:focus {
   border-color: var(--rzp-blue);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(82, 143, 240, 0.1);
+  box-shadow: var(--focus-ring);
 }
 
 /* Detail Tabs
@@ -655,14 +650,14 @@
   display: flex;
   gap: 0;
   border-bottom: 2px solid var(--rzp-border);
-  margin-bottom: var(--space-lg);
+  margin-bottom: var(--spacing-7);
 }
 
 .kam-detail-tabs-sticky {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: #f7f8fa;
+  background: var(--rzp-bg);
   margin-left: -24px;
   margin-right: -24px;
   padding-left: 24px;
@@ -684,15 +679,15 @@
 
 .kam-detail-tab {
   padding: 10px 20px;
-  font-size: 14px;
-  font-weight: 500;
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-medium);
   color: var(--rzp-text-secondary);
   font-family: var(--font-secondary);
   background: transparent;
   border: none;
   cursor: pointer;
   position: relative;
-  transition: color 0.15s ease;
+  transition: color var(--duration-quick) var(--easing-standard);
 }
 
 .kam-detail-tab:hover {
@@ -701,7 +696,7 @@
 
 .kam-detail-tab.active {
   color: var(--rzp-blue);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .kam-detail-tab.active::after {
@@ -729,8 +724,8 @@
 }
 
 .kam-info-item .info-label {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--font-size-12);
+  font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--rzp-text-secondary);
@@ -738,8 +733,8 @@
 }
 
 .kam-info-item .info-value {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-medium);
   color: var(--rzp-text-primary);
   font-family: var(--font-secondary);
 }
@@ -749,11 +744,11 @@
 
 .kam-sr-card {
   background: var(--rzp-card-bg);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   border: 1px solid var(--rzp-border);
-  padding: 20px var(--space-lg);
-  margin-bottom: var(--space-lg);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  padding: 20px var(--spacing-7);
+  margin-bottom: var(--spacing-7);
+  box-shadow: var(--shadow-low);
 }
 
 .kam-sr-card-header {
@@ -764,8 +759,8 @@
 }
 
 .kam-sr-card-title {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: var(--font-size-16);
+  font-weight: var(--font-weight-semibold);
   color: var(--rzp-text-primary);
   font-family: var(--font-secondary);
   display: flex;
@@ -780,14 +775,14 @@
 }
 
 .kam-sr-info-banner {
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   padding: 12px 16px;
   display: flex;
   gap: 10px;
   align-items: flex-start;
   font-family: var(--font-secondary);
-  font-size: 13px;
-  line-height: 1.5;
+  font-size: var(--font-size-14);
+  line-height: var(--line-height-m);
 }
 
 .kam-sr-info-banner.locked {
@@ -822,14 +817,14 @@
 }
 
 .kam-sr-threshold-label .label {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-semibold);
   color: var(--rzp-text-primary);
 }
 
 .kam-sr-threshold-label .value {
-  font-size: 14px;
-  font-weight: 700;
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-bold);
   color: var(--rzp-blue);
   font-family: var(--font-primary);
 }
@@ -839,7 +834,7 @@
   height: 6px;
   -webkit-appearance: none;
   appearance: none;
-  background: #EDF2F7;
+  background: var(--rzp-bg-muted);
   border-radius: 3px;
   outline: none;
 }
@@ -869,7 +864,7 @@
   display: flex;
   justify-content: space-between;
   margin-top: 4px;
-  font-size: 11px;
+  font-size: var(--font-size-11);
   color: var(--rzp-text-muted);
   font-family: var(--font-secondary);
 }
@@ -894,20 +889,20 @@
   align-items: flex-end;
 }
 .kam-sr-range-label .label {
-  font-size: 12px;
+  font-size: var(--font-size-12);
   font-family: var(--font-secondary);
   color: var(--rzp-text-muted);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   text-transform: uppercase;
   letter-spacing: 0.3px;
 }
 .kam-sr-range-label .value {
   font-size: 22px;
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   font-family: var(--font-secondary);
 }
 .kam-sr-range-label .value.low {
-  color: #E65100;
+  color: var(--rzp-deal-tsp-text);
 }
 
 .kam-sr-range-track-wrapper {
@@ -922,7 +917,7 @@
   left: 0;
   right: 0;
   height: 8px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   background: #E8E8E8;
 }
 
@@ -933,7 +928,7 @@
 }
 .kam-sr-range-zone.danger {
   background: #FFCDD2;
-  border-radius: 4px 0 0 4px;
+  border-radius: var(--radius-sm) 0 0 4px;
 }
 .kam-sr-range-zone.eligible {
   background: #C8E6C9;
@@ -959,12 +954,12 @@
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #fff;
+  background: var(--rzp-card-bg);
   border: 3px solid #E65100;
   box-shadow: 0 1px 4px rgba(0,0,0,0.18);
   cursor: pointer;
   pointer-events: all;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition: transform 0.15s ease, box-shadow var(--duration-quick) var(--easing-standard);
 }
 .kam-sr-range-input::-webkit-slider-thumb:hover {
   transform: scale(1.15);
@@ -975,7 +970,7 @@
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #fff;
+  background: var(--rzp-card-bg);
   border: 3px solid #E65100;
   box-shadow: 0 1px 4px rgba(0,0,0,0.18);
   cursor: pointer;
@@ -985,7 +980,7 @@
 .kam-sr-range-scale {
   display: flex;
   justify-content: space-between;
-  font-size: 10px;
+  font-size: var(--font-size-10);
   color: var(--rzp-text-muted);
   font-family: var(--font-secondary);
   margin-bottom: 14px;
@@ -1000,7 +995,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 11px;
+  font-size: var(--font-size-11);
   font-family: var(--font-secondary);
   color: var(--rzp-text-secondary);
 }
@@ -1039,8 +1034,8 @@
   cursor: pointer;
   inset: 0;
   background: #CBD5E0;
-  border-radius: 12px;
-  transition: background 0.2s ease;
+  border-radius: var(--radius-lg);
+  transition: background var(--duration-moderate) var(--easing-standard);
 }
 
 .kam-toggle-slider::before {
@@ -1050,9 +1045,9 @@
   width: 18px;
   left: 3px;
   bottom: 3px;
-  background: #fff;
+  background: var(--rzp-card-bg);
   border-radius: 50%;
-  transition: transform 0.2s ease;
+  transition: transform var(--duration-moderate) var(--easing-standard);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
@@ -1074,8 +1069,8 @@
   padding: 8px 14px;
   background: var(--rzp-bg);
   border: 1px solid var(--rzp-border);
-  border-radius: 8px;
-  margin-bottom: var(--space-md);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-5);
 }
 
 .kam-txn-search svg {
@@ -1088,7 +1083,7 @@
 .kam-txn-search input {
   border: none;
   background: transparent;
-  font-size: 13px;
+  font-size: var(--font-size-14);
   font-family: var(--font-secondary);
   color: var(--rzp-text-primary);
   width: 100%;
@@ -1108,8 +1103,8 @@
 .kam-txn-table th {
   text-align: left;
   padding: 10px 12px;
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--font-size-11);
+  font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--rzp-text-muted);
@@ -1119,7 +1114,7 @@
 
 .kam-txn-table td {
   padding: 10px 12px;
-  font-size: 13px;
+  font-size: var(--font-size-14);
   color: var(--rzp-text-primary);
   border-bottom: 1px solid var(--rzp-border);
   white-space: nowrap;
@@ -1136,8 +1131,8 @@
 
 .kam-txn-table .txn-id {
   font-family: var(--font-primary);
-  font-weight: 500;
-  font-size: 12px;
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-12);
   color: var(--rzp-blue);
 }
 
@@ -1147,8 +1142,8 @@
   gap: 4px;
   padding: 2px 8px;
   border-radius: 10px;
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--font-size-11);
+  font-weight: var(--font-weight-semibold);
 }
 
 .kam-txn-status.success {
@@ -1168,7 +1163,7 @@
 
 .kam-txn-footer {
   padding: 12px 0;
-  font-size: 12px;
+  font-size: var(--font-size-12);
   color: var(--rzp-text-muted);
   font-family: var(--font-secondary);
   text-align: center;
@@ -1215,14 +1210,14 @@
   display: flex;
   gap: 0;
   border: 1px solid var(--rzp-border);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   overflow: hidden;
 }
 
 .kam-txn-date-btn {
   padding: 6px 12px;
-  font-size: 12px;
-  font-weight: 500;
+  font-size: var(--font-size-12);
+  font-weight: var(--font-weight-medium);
   background: white;
   border: none;
   border-right: 1px solid var(--rzp-border);
@@ -1239,7 +1234,7 @@
 .kam-txn-date-btn.active {
   background: var(--rzp-blue);
   color: white;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 /* Transaction Filters
@@ -1262,11 +1257,11 @@
   align-items: center;
   gap: 6px;
   padding: 5px 12px;
-  font-size: 12px;
-  font-weight: 500;
+  font-size: var(--font-size-12);
+  font-weight: var(--font-weight-medium);
   background: white;
   border: 1px solid var(--rzp-border);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   color: var(--rzp-text-secondary);
   font-family: var(--font-secondary);
@@ -1287,11 +1282,11 @@
   justify-content: center;
   min-width: 16px;
   height: 16px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: var(--rzp-blue);
   color: white;
-  font-size: 10px;
-  font-weight: 700;
+  font-size: var(--font-size-10);
+  font-weight: var(--font-weight-bold);
   padding: 0 4px;
 }
 
@@ -1302,7 +1297,7 @@
   min-width: 160px;
   background: white;
   border: 1px solid var(--rzp-border);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   z-index: 100;
   padding: 6px 0;
@@ -1313,7 +1308,7 @@
   align-items: center;
   gap: 8px;
   padding: 6px 12px;
-  font-size: 13px;
+  font-size: var(--font-size-14);
   cursor: pointer;
   color: var(--rzp-text-primary);
   font-family: var(--font-secondary);
@@ -1333,14 +1328,14 @@
   align-items: center;
   gap: 4px;
   padding: 5px 10px;
-  font-size: 12px;
-  font-weight: 500;
+  font-size: var(--font-size-12);
+  font-weight: var(--font-weight-medium);
   background: none;
   border: none;
   cursor: pointer;
   color: var(--rzp-danger);
   font-family: var(--font-secondary);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
 }
 
 .kam-txn-clear-filters:hover { background: var(--rzp-danger-light); }
@@ -1380,7 +1375,7 @@
 }
 
 .kam-txn-pagination-info {
-  font-size: 12px;
+  font-size: var(--font-size-12);
   color: var(--rzp-text-muted);
   font-family: var(--font-secondary);
 }
@@ -1399,11 +1394,11 @@
   height: 28px;
   padding: 0 6px;
   border: 1px solid transparent;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   background: none;
   cursor: pointer;
-  font-size: 12px;
-  font-weight: 500;
+  font-size: var(--font-size-12);
+  font-weight: var(--font-weight-medium);
   color: var(--rzp-text-secondary);
   font-family: var(--font-secondary);
   transition: all 0.15s;
@@ -1417,7 +1412,7 @@
 .kam-txn-page-btn.active {
   background: var(--rzp-blue);
   color: white;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .kam-txn-page-btn:disabled {
@@ -1432,9 +1427,9 @@
 
 .kam-txn-page-size {
   padding: 4px 8px;
-  font-size: 12px;
+  font-size: var(--font-size-12);
   border: 1px solid var(--rzp-border);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   background: white;
   color: var(--rzp-text-secondary);
   font-family: var(--font-secondary);
@@ -1449,11 +1444,11 @@
   align-items: center;
   gap: 6px;
   padding: 6px 14px;
-  font-size: 12px;
-  font-weight: 500;
+  font-size: var(--font-size-12);
+  font-weight: var(--font-weight-medium);
   background: white;
   border: 1px solid var(--rzp-border);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   color: var(--rzp-text-secondary);
   font-family: var(--font-secondary);
@@ -1531,8 +1526,8 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-drawer-header h3 {
-  font-size: 16px;
-  font-weight: 600;
+  font-size: var(--font-size-16);
+  font-weight: var(--font-weight-semibold);
   color: var(--rzp-text-primary);
   font-family: var(--font-secondary);
 }
@@ -1543,7 +1538,7 @@ h3.kam-sr-chart-card-title {
   border: none;
   background: transparent;
   cursor: pointer;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1571,8 +1566,8 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-drawer-section-title {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--font-size-12);
+  font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--rzp-text-muted);
@@ -1593,25 +1588,25 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-drawer-info-item .label {
-  font-size: 11px;
+  font-size: var(--font-size-11);
   color: var(--rzp-text-muted);
   font-family: var(--font-secondary);
 }
 
 .kam-drawer-info-item .value {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-semibold);
   color: var(--rzp-text-primary);
   font-family: var(--font-secondary);
 }
 
 /* Routing Explanation Banner */
 .kam-routing-explanation {
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   padding: 14px 16px;
   font-family: var(--font-secondary);
-  font-size: 13px;
-  line-height: 1.5;
+  font-size: var(--font-size-14);
+  line-height: var(--line-height-m);
   display: flex;
   gap: 10px;
   align-items: flex-start;
@@ -1650,10 +1645,10 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-pipeline-item {
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   padding: 12px 14px;
   border: 1px solid var(--rzp-border);
-  background: #fff;
+  background: var(--rzp-card-bg);
   font-family: var(--font-secondary);
   transition: border-color 0.1s ease;
 }
@@ -1675,8 +1670,8 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-pipeline-item-terminal {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-semibold);
   color: var(--rzp-text-primary);
 }
 
@@ -1686,8 +1681,8 @@ h3.kam-sr-chart-card-title {
   gap: 4px;
   padding: 2px 8px;
   border-radius: 10px;
-  font-size: 10px;
-  font-weight: 700;
+  font-size: var(--font-size-10);
+  font-weight: var(--font-weight-bold);
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
@@ -1705,20 +1700,20 @@ h3.kam-sr-chart-card-title {
 .kam-pipeline-item-metrics {
   display: flex;
   gap: 16px;
-  font-size: 12px;
+  font-size: var(--font-size-12);
   color: var(--rzp-text-secondary);
   margin-bottom: 4px;
 }
 
 .kam-pipeline-item-metrics strong {
   color: var(--rzp-text-primary);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .kam-pipeline-item-reason {
-  font-size: 12px;
+  font-size: var(--font-size-12);
   color: var(--rzp-text-muted);
-  line-height: 1.4;
+  line-height: var(--line-height-m);
   font-style: italic;
 }
 
@@ -1726,11 +1721,11 @@ h3.kam-sr-chart-card-title {
 
 .kam-sr-chart-card {
   background: var(--rzp-card-bg);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   border: 1px solid var(--rzp-border);
   padding: 0;
   margin-bottom: 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow-low);
   overflow: hidden;
 }
 
@@ -1742,8 +1737,8 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-sr-chart-card-title {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: var(--font-size-16);
+  font-weight: var(--font-weight-semibold);
   color: var(--rzp-text-primary);
   display: flex;
   align-items: center;
@@ -1757,9 +1752,9 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-sr-chart-period {
-  font-size: 12px;
+  font-size: var(--font-size-12);
   color: var(--rzp-text-muted);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 .kam-sr-chart-body {
@@ -1782,9 +1777,9 @@ h3.kam-sr-chart-card-title {
   gap: 6px;
   padding: 6px 12px;
   cursor: pointer;
-  font-size: 12px;
+  font-size: var(--font-size-12);
   color: var(--rzp-text-primary);
-  transition: background 0.15s ease;
+  transition: background var(--duration-quick) var(--easing-standard);
   user-select: none;
 }
 
@@ -1793,7 +1788,7 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-sr-method-item.overall {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   padding-bottom: 8px;
   margin-bottom: 4px;
   border-bottom: 1px solid var(--rzp-border);
@@ -1822,8 +1817,8 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-sr-method-value {
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--font-size-11);
+  font-weight: var(--font-weight-semibold);
   color: var(--rzp-text-secondary);
   flex-shrink: 0;
   font-variant-numeric: tabular-nums;
@@ -1837,7 +1832,7 @@ h3.kam-sr-chart-card-title {
   justify-content: center;
   cursor: pointer;
   color: var(--rzp-text-muted);
-  transition: transform 0.2s ease;
+  transition: transform var(--duration-moderate) var(--easing-standard);
   flex-shrink: 0;
   margin-left: -2px;
 }
@@ -1853,7 +1848,7 @@ h3.kam-sr-chart-card-title {
 
 .kam-sr-terminal-list {
   overflow: hidden;
-  transition: max-height 0.25s ease;
+  transition: max-height var(--duration-moderate) var(--easing-standard);
 }
 
 .kam-sr-terminal-list.collapsed {
@@ -1870,9 +1865,9 @@ h3.kam-sr-chart-card-title {
   gap: 6px;
   padding: 4px 12px 4px 32px;
   cursor: pointer;
-  font-size: 11px;
+  font-size: var(--font-size-11);
   color: var(--rzp-text-secondary);
-  transition: background 0.15s ease;
+  transition: background var(--duration-quick) var(--easing-standard);
   user-select: none;
 }
 
@@ -1904,22 +1899,22 @@ h3.kam-sr-chart-card-title {
 .kam-sr-chart-tooltip {
   position: absolute;
   pointer-events: none;
-  background: #fff;
+  background: var(--rzp-card-bg);
   border: 1px solid var(--rzp-border);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   padding: 10px 14px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-  font-size: 12px;
+  font-size: var(--font-size-12);
   z-index: 10;
   white-space: nowrap;
   min-width: 130px;
 }
 
 .kam-sr-tooltip-date {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--rzp-text-primary);
   margin-bottom: 6px;
-  font-size: 12px;
+  font-size: var(--font-size-12);
 }
 
 .kam-sr-tooltip-row {
@@ -1942,7 +1937,7 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-sr-tooltip-value {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--rzp-text-primary);
   font-variant-numeric: tabular-nums;
 }
@@ -1985,8 +1980,8 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-recs-pending-count {
-  font-size: 12px;
-  font-weight: 500;
+  font-size: var(--font-size-12);
+  font-weight: var(--font-weight-medium);
   color: var(--rzp-text-muted);
   font-family: var(--font-secondary);
 }
@@ -2050,9 +2045,9 @@ h3.kam-sr-chart-card-title {
   display: inline-flex;
   align-items: center;
   padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 10px;
-  font-weight: 700;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-10);
+  font-weight: var(--font-weight-bold);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   font-family: var(--font-secondary);
@@ -2064,18 +2059,18 @@ h3.kam-sr-chart-card-title {
 .kam-rec-badge.info { background: var(--rzp-blue-light); color: var(--rzp-blue); }
 
 .kam-rec-signal {
-  font-size: 11px;
+  font-size: var(--font-size-11);
   color: var(--rzp-text-muted);
   font-family: var(--font-secondary);
   background: var(--rzp-bg-secondary, #f7f8fa);
   padding: 2px 8px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
 }
 
 /* Title */
 .kam-rec-section-label {
-  font-size: 10px;
-  font-weight: 600;
+  font-size: var(--font-size-10);
+  font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
   letter-spacing: 0.8px;
   color: var(--rzp-text-muted, #999);
@@ -2088,12 +2083,12 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-rec-title {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: var(--font-size-16);
+  font-weight: var(--font-weight-semibold);
   color: var(--rzp-text-primary);
   font-family: var(--font-primary);
   margin-bottom: 4px;
-  line-height: 1.4;
+  line-height: var(--line-height-m);
 }
 
 .kam-rec-evidence {
@@ -2119,8 +2114,8 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-rec-confidence-label {
-  font-size: 11px;
-  font-weight: 500;
+  font-size: var(--font-size-11);
+  font-weight: var(--font-weight-medium);
   color: var(--rzp-text-muted);
   font-family: var(--font-secondary);
   white-space: nowrap;
@@ -2137,7 +2132,7 @@ h3.kam-sr-chart-card-title {
 .kam-rec-confidence-fill {
   height: 100%;
   border-radius: 3px;
-  transition: width 0.3s ease;
+  transition: width var(--duration-gentle) var(--easing-standard);
 }
 
 .kam-rec-confidence-fill.high   { background: linear-gradient(90deg, #38A169, #48BB78); }
@@ -2145,8 +2140,8 @@ h3.kam-sr-chart-card-title {
 .kam-rec-confidence-fill.low    { background: linear-gradient(90deg, #E53E3E, #FC8181); }
 
 .kam-rec-confidence-value {
-  font-size: 12px;
-  font-weight: 700;
+  font-size: var(--font-size-12);
+  font-weight: var(--font-weight-bold);
   color: var(--rzp-text-primary);
   font-family: var(--font-primary);
   min-width: 30px;
@@ -2156,13 +2151,13 @@ h3.kam-sr-chart-card-title {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: 11px;
-  font-weight: 500;
+  font-size: var(--font-size-11);
+  font-weight: var(--font-weight-medium);
   color: var(--rzp-text-secondary);
   font-family: var(--font-secondary);
   padding: 3px 10px;
   background: var(--rzp-bg-secondary, #f7f8fa);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--rzp-border);
 }
 
@@ -2173,10 +2168,10 @@ h3.kam-sr-chart-card-title {
 
 /* Description */
 .kam-rec-desc {
-  font-size: 13px;
+  font-size: var(--font-size-14);
   color: var(--rzp-text-secondary);
   font-family: var(--font-secondary);
-  line-height: 1.6;
+  line-height: var(--line-height-l);
   margin-bottom: 10px;
 }
 
@@ -2185,13 +2180,13 @@ h3.kam-sr-chart-card-title {
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  font-size: 12px;
+  font-size: var(--font-size-12);
   color: var(--rzp-text-secondary);
   font-family: var(--font-secondary);
   margin-bottom: 14px;
   padding: 8px 12px;
   background: var(--rzp-bg-secondary, #f7f8fa);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--rzp-border);
 }
 
@@ -2203,7 +2198,7 @@ h3.kam-sr-chart-card-title {
 
 .kam-rec-impact strong {
   color: var(--rzp-text-primary);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 /* Actions */
@@ -2219,13 +2214,13 @@ h3.kam-sr-chart-card-title {
   gap: 6px;
   padding: 7px 18px;
   border: none;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 600;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-semibold);
   font-family: var(--font-primary);
   cursor: pointer;
   background: var(--rzp-blue);
-  color: #fff;
+  color: var(--rzp-text-on-dark);
   transition: background 0.15s, transform 0.1s;
 }
 
@@ -2237,9 +2232,9 @@ h3.kam-sr-chart-card-title {
   align-items: center;
   padding: 7px 14px;
   border: 1px solid var(--rzp-border);
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 500;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-12);
+  font-weight: var(--font-weight-medium);
   font-family: var(--font-secondary);
   cursor: pointer;
   background: transparent;
@@ -2270,9 +2265,9 @@ h3.kam-sr-chart-card-title {
   align-items: center;
   gap: 4px;
   padding: 5px 14px;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 600;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-semibold);
   font-family: var(--font-primary);
   background: #C6F6D5;
   color: #276749;
@@ -2287,9 +2282,9 @@ h3.kam-sr-chart-card-title {
   gap: 4px;
   padding: 2px 8px;
   background: linear-gradient(135deg, #EBF4FF 0%, #F0E6FF 100%);
-  border-radius: 4px;
-  font-size: 10px;
-  font-weight: 600;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-10);
+  font-weight: var(--font-weight-semibold);
   color: #6B46C1;
   font-family: var(--font-secondary);
   letter-spacing: 0.3px;
@@ -2300,8 +2295,8 @@ h3.kam-sr-chart-card-title {
 /* Footer severity summary */
 .kam-recs-footer {
   padding: 10px 16px;
-  font-size: 11px;
-  font-weight: 500;
+  font-size: var(--font-size-11);
+  font-weight: var(--font-weight-medium);
   color: var(--rzp-text-muted);
   font-family: var(--font-secondary);
   text-align: center;
@@ -2315,11 +2310,11 @@ h3.kam-sr-chart-card-title {
 
 .kam-cbr-preview-card {
   background: var(--rzp-card-bg);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   border: 1px solid var(--rzp-border);
-  padding: 20px var(--space-lg);
+  padding: 20px var(--spacing-7);
   margin-top: 16px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow-low);
 }
 
 .kam-cbr-preview-header {
@@ -2330,8 +2325,8 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-cbr-preview-title {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: var(--font-size-16);
+  font-weight: var(--font-weight-semibold);
   color: var(--rzp-text-primary);
   font-family: var(--font-secondary);
   display: flex;
@@ -2358,8 +2353,8 @@ h3.kam-sr-chart-card-title {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--font-size-11);
+  font-weight: var(--font-weight-semibold);
   font-family: var(--font-secondary);
   text-transform: uppercase;
   letter-spacing: 0.4px;
@@ -2383,10 +2378,10 @@ h3.kam-sr-chart-card-title {
   padding: 12px 16px;
   text-align: center;
   color: var(--rzp-text-muted);
-  font-size: 13px;
+  font-size: var(--font-size-14);
   font-family: var(--font-secondary);
   background: var(--rzp-bg);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
 }
 
 /* Terminal Row */
@@ -2401,13 +2396,13 @@ h3.kam-sr-chart-card-title {
   align-items: center;
   gap: 12px;
   padding: 8px 12px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   background: var(--rzp-bg);
-  transition: background 0.15s ease;
+  transition: background var(--duration-quick) var(--easing-standard);
 }
 
 .kam-cbr-terminal-row:hover {
-  background: #EDF2F7;
+  background: var(--rzp-bg-muted);
 }
 
 .kam-cbr-terminal-row.fallback {
@@ -2415,8 +2410,8 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-cbr-rank {
-  font-size: 12px;
-  font-weight: 700;
+  font-size: var(--font-size-12);
+  font-weight: var(--font-weight-bold);
   color: var(--rzp-blue);
   font-family: var(--font-secondary);
   min-width: 28px;
@@ -2428,22 +2423,22 @@ h3.kam-sr-chart-card-title {
 
 .kam-cbr-terminal-id {
   font-family: monospace;
-  font-weight: 600;
-  font-size: 13px;
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-14);
   color: var(--rzp-text-primary);
   min-width: 80px;
 }
 
 .kam-cbr-gateway {
-  font-size: 12px;
+  font-size: var(--font-size-12);
   font-family: var(--font-secondary);
   color: var(--rzp-text-secondary);
   min-width: 50px;
 }
 
 .kam-cbr-sr {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-semibold);
   font-family: var(--font-secondary);
   color: var(--rzp-text-primary);
   min-width: 50px;
@@ -2451,7 +2446,7 @@ h3.kam-sr-chart-card-title {
 
 .kam-cbr-cost {
   font-family: monospace;
-  font-size: 13px;
+  font-size: var(--font-size-14);
   color: var(--rzp-text-secondary);
   display: flex;
   align-items: center;
@@ -2463,10 +2458,10 @@ h3.kam-sr-chart-card-title {
   display: inline-flex;
   padding: 1px 6px;
   border-radius: 3px;
-  font-size: 10px;
-  font-weight: 600;
-  background: #E8F5E9;
-  color: #2E7D32;
+  font-size: var(--font-size-10);
+  font-weight: var(--font-weight-semibold);
+  background: var(--rzp-method-upi-bg);
+  color: var(--rzp-method-upi-text);
   font-family: var(--font-secondary);
 }
 
@@ -2476,10 +2471,10 @@ h3.kam-sr-chart-card-title {
   gap: 4px;
   padding: 2px 8px;
   border-radius: 10px;
-  font-size: 10px;
-  font-weight: 700;
-  background: #FFF3E0;
-  color: #E65100;
+  font-size: var(--font-size-10);
+  font-weight: var(--font-weight-bold);
+  background: var(--rzp-deal-tsp-bg);
+  color: var(--rzp-deal-tsp-text);
   font-family: var(--font-secondary);
   letter-spacing: 0.02em;
   white-space: nowrap;
@@ -2487,7 +2482,7 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-cbr-gmv-badge svg {
-  color: #E65100;
+  color: var(--rzp-deal-tsp-text);
 }
 
 /* ==========================================================================
@@ -2496,11 +2491,11 @@ h3.kam-sr-chart-card-title {
 
 .kam-cbr-gmv-card {
   background: var(--rzp-card-bg);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   border: 1px solid var(--rzp-border);
-  padding: 20px var(--space-lg);
-  margin-bottom: var(--space-lg);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  padding: 20px var(--spacing-7);
+  margin-bottom: var(--spacing-7);
+  box-shadow: var(--shadow-low);
 }
 
 .kam-cbr-gmv-header {
@@ -2511,8 +2506,8 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-cbr-gmv-title {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: var(--font-size-16);
+  font-weight: var(--font-weight-semibold);
   color: var(--rzp-text-primary);
   font-family: var(--font-secondary);
   display: flex;
@@ -2546,14 +2541,14 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-cbr-gmv-label {
-  font-size: 13px;
+  font-size: var(--font-size-14);
   font-family: var(--font-secondary);
   color: var(--rzp-text-secondary);
 }
 
 .kam-cbr-gmv-value {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-semibold);
   font-family: var(--font-secondary);
   color: var(--rzp-text-primary);
 }
@@ -2566,10 +2561,10 @@ h3.kam-sr-chart-card-title {
   display: flex;
   justify-content: space-between;
   margin-bottom: 6px;
-  font-size: 12px;
+  font-size: var(--font-size-12);
   font-family: var(--font-secondary);
   color: var(--rzp-text-secondary);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 .kam-cbr-gmv-progress-bar {
@@ -2582,7 +2577,7 @@ h3.kam-sr-chart-card-title {
 .kam-cbr-gmv-progress-fill {
   height: 100%;
   border-radius: 5px;
-  transition: width 0.3s ease;
+  transition: width var(--duration-gentle) var(--easing-standard);
 }
 
 /* Sankey Chart
@@ -2600,8 +2595,8 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-sankey-col-header {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--font-size-12);
+  font-weight: var(--font-weight-semibold);
   fill: var(--rzp-text-secondary);
   font-family: var(--font-secondary);
   text-transform: uppercase;
@@ -2610,20 +2605,20 @@ h3.kam-sr-chart-card-title {
 
 .kam-sankey-node {
   cursor: pointer;
-  transition: opacity 0.2s ease;
+  transition: opacity var(--duration-moderate) var(--easing-standard);
 }
 
 .kam-sankey-node rect {
-  transition: opacity 0.2s ease;
+  transition: opacity var(--duration-moderate) var(--easing-standard);
 }
 
 .kam-sankey-link {
-  transition: opacity 0.2s ease;
+  transition: opacity var(--duration-moderate) var(--easing-standard);
 }
 
 .kam-sankey-label {
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--font-size-11);
+  font-weight: var(--font-weight-semibold);
   fill: #fff;
   font-family: var(--font-secondary);
   pointer-events: none;
@@ -2631,7 +2626,7 @@ h3.kam-sr-chart-card-title {
 
 .kam-sankey-value {
   font-size: 9px;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   fill: rgba(255, 255, 255, 0.75);
   font-family: var(--font-secondary);
   pointer-events: none;
@@ -2641,7 +2636,7 @@ h3.kam-sr-chart-card-title {
   position: absolute;
   background: var(--rzp-card-bg);
   border: 1px solid var(--rzp-border);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   padding: 10px 14px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
   pointer-events: none;
@@ -2650,27 +2645,27 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-sankey-tooltip-name {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-semibold);
   color: var(--rzp-text-primary);
   font-family: var(--font-secondary);
   margin-bottom: 4px;
 }
 
 .kam-sankey-tooltip-detail {
-  font-size: 12px;
+  font-size: var(--font-size-12);
   color: var(--rzp-text-secondary);
   font-family: var(--font-secondary);
-  line-height: 1.5;
+  line-height: var(--line-height-m);
 }
 
 .kam-detail-card {
   background: var(--rzp-card-bg);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   border: 1px solid var(--rzp-border);
-  padding: 20px var(--space-lg);
-  margin-bottom: var(--space-lg);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  padding: 20px var(--spacing-7);
+  margin-bottom: var(--spacing-7);
+  box-shadow: var(--shadow-low);
 }
 
 /* ==========================================================================
@@ -2682,7 +2677,7 @@ h3.kam-sr-chart-card-title {
 .kam-rules-ntf-banner {
   background: #FFF4E5;
   border: 1px solid #FFB74D;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   padding: 16px 20px;
   margin-bottom: 16px;
 }
@@ -2692,21 +2687,21 @@ h3.kam-sr-chart-card-title {
   align-items: center;
   gap: 8px;
   margin-bottom: 8px;
-  color: #E65100;
+  color: var(--rzp-deal-tsp-text);
   font-family: var(--font-primary);
-  font-size: 14px;
+  font-size: var(--font-size-14);
 }
 
 .kam-rules-ntf-header svg {
-  color: #E65100;
+  color: var(--rzp-deal-tsp-text);
   flex-shrink: 0;
 }
 
 .kam-rules-ntf-banner > p {
-  font-size: 13px;
+  font-size: var(--font-size-14);
   font-family: var(--font-secondary);
   color: #BF360C;
-  line-height: 1.5;
+  line-height: var(--line-height-m);
   margin-bottom: 8px;
 }
 
@@ -2717,7 +2712,7 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-rules-ntf-list li {
-  font-size: 13px;
+  font-size: var(--font-size-14);
   font-family: var(--font-secondary);
   color: #BF360C;
   padding: 4px 0;
@@ -2728,8 +2723,8 @@ h3.kam-sr-chart-card-title {
 
 .kam-rules-ntf-list li::before {
   content: '•';
-  color: #E65100;
-  font-weight: 700;
+  color: var(--rzp-deal-tsp-text);
+  font-weight: var(--font-weight-bold);
   margin-right: 4px;
 }
 
@@ -2737,11 +2732,11 @@ h3.kam-sr-chart-card-title {
 
 .kam-rules-commitment-card {
   background: var(--rzp-card-bg);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   border: 1px solid var(--rzp-border);
-  padding: 20px var(--space-lg);
+  padding: 20px var(--spacing-7);
   margin-bottom: 16px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow-low);
 }
 
 .kam-rules-commitment-body {
@@ -2762,7 +2757,7 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-rules-commitment-metric .label {
-  font-size: 12px;
+  font-size: var(--font-size-12);
   font-family: var(--font-secondary);
   color: var(--rzp-text-muted);
   text-transform: uppercase;
@@ -2770,9 +2765,9 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-rules-commitment-metric .value {
-  font-size: 18px;
+  font-size: var(--font-size-18);
   font-family: var(--font-primary);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--rzp-text-primary);
 }
 
@@ -2786,14 +2781,14 @@ h3.kam-sr-chart-card-title {
   flex: 1;
   height: 8px;
   background: var(--rzp-bg-secondary);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   overflow: hidden;
 }
 
 .kam-rules-progress-fill {
   height: 100%;
-  border-radius: 4px;
-  transition: width 0.3s ease;
+  border-radius: var(--radius-sm);
+  transition: width var(--duration-gentle) var(--easing-standard);
 }
 
 .kam-rules-progress-fill.on_track { background: var(--rzp-success); }
@@ -2801,7 +2796,7 @@ h3.kam-sr-chart-card-title {
 .kam-rules-progress-fill.off_track { background: var(--rzp-danger); }
 
 .kam-rules-progress-label {
-  font-size: 13px;
+  font-size: var(--font-size-14);
   font-family: var(--font-secondary);
   color: var(--rzp-text-secondary);
   white-space: nowrap;
@@ -2811,17 +2806,17 @@ h3.kam-sr-chart-card-title {
 
 .kam-rules-offer-card {
   background: var(--rzp-card-bg);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   border: 1px solid var(--rzp-border);
-  padding: 20px var(--space-lg);
+  padding: 20px var(--spacing-7);
   margin-bottom: 16px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow-low);
 }
 
 /* ── Rule List ───────────────────────────────────────────────────────────── */
 
 .kam-rules-add-btn {
-  font-size: 13px !important;
+  font-size: var(--font-size-14) !important;
   padding: 6px 14px !important;
 }
 
@@ -2853,7 +2848,7 @@ h3.kam-sr-chart-card-title {
   padding: 10px 16px;
   cursor: pointer;
   user-select: none;
-  transition: background 0.15s ease;
+  transition: background var(--duration-quick) var(--easing-standard);
 }
 
 .kam-rule-group-header:hover {
@@ -2873,7 +2868,7 @@ h3.kam-sr-chart-card-title {
   width: 14px;
   height: 14px;
   color: var(--rzp-text-muted);
-  transition: transform 0.2s ease;
+  transition: transform var(--duration-moderate) var(--easing-standard);
   flex-shrink: 0;
 }
 
@@ -2892,8 +2887,8 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-rule-group-label {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-semibold);
   font-family: var(--font-primary);
   color: var(--rzp-text-primary);
 }
@@ -2925,8 +2920,8 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-rule-submethod-label {
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--font-size-11);
+  font-weight: var(--font-weight-semibold);
   font-family: var(--font-primary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -2939,9 +2934,9 @@ h3.kam-sr-chart-card-title {
   justify-content: space-between;
   padding: 10px 14px;
   border: 1.5px dashed color-mix(in srgb, var(--rzp-border) 80%, transparent);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: var(--rzp-bg-secondary);
-  font-size: 12px;
+  font-size: var(--font-size-12);
   font-family: var(--font-secondary);
   color: var(--rzp-text-muted);
 }
@@ -2950,13 +2945,13 @@ h3.kam-sr-chart-card-title {
   background: none;
   border: none;
   color: var(--rzp-blue);
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--font-size-12);
+  font-weight: var(--font-weight-semibold);
   font-family: var(--font-primary);
   cursor: pointer;
   padding: 4px 10px;
-  border-radius: 6px;
-  transition: background 0.15s ease;
+  border-radius: var(--radius-sm);
+  transition: background var(--duration-quick) var(--easing-standard);
   white-space: nowrap;
 }
 
@@ -2969,7 +2964,7 @@ h3.kam-sr-chart-card-title {
   align-items: center;
   gap: 5px;
   color: var(--rzp-success);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   font-family: var(--font-primary);
 }
 
@@ -2986,11 +2981,11 @@ h3.kam-sr-chart-card-title {
   padding: 14px 16px;
   background: var(--rzp-card-bg);
   border-left: 4px solid var(--rzp-blue);
-  transition: opacity 0.2s ease, border-color 0.2s ease;
+  transition: opacity 0.2s ease, border-color var(--duration-moderate) var(--easing-standard);
 }
 
 .kam-rule-card.volume-split {
-  border-left-color: #E65100;
+  border-left-color: var(--rzp-deal-tsp-text);
 }
 
 .kam-rule-card.disabled {
@@ -3024,19 +3019,19 @@ h3.kam-sr-chart-card-title {
   justify-content: center;
   min-width: 28px;
   height: 24px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   background: var(--rzp-blue);
-  color: #fff;
-  font-size: 12px;
-  font-weight: 600;
+  color: var(--rzp-text-on-dark);
+  font-size: var(--font-size-12);
+  font-weight: var(--font-weight-semibold);
   font-family: var(--font-primary);
   padding: 0 6px;
 }
 
 .kam-rule-name {
-  font-size: 14px;
+  font-size: var(--font-size-14);
   font-family: var(--font-primary);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--rzp-text-primary);
   white-space: nowrap;
   overflow: hidden;
@@ -3054,15 +3049,15 @@ h3.kam-sr-chart-card-title {
   width: 26px;
   height: 26px;
   border: 1px solid var(--rzp-border);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   background: var(--rzp-card-bg);
   color: var(--rzp-text-secondary);
-  font-size: 14px;
+  font-size: var(--font-size-14);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.15s ease;
+  transition: all var(--duration-quick) var(--easing-standard);
 }
 
 .kam-rule-move-btn:hover:not(:disabled) {
@@ -3095,7 +3090,7 @@ h3.kam-sr-chart-card-title {
   background: #ccc;
   border-radius: 20px;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: background var(--duration-moderate) var(--easing-standard);
 }
 
 .kam-rule-toggle-slider::before {
@@ -3105,9 +3100,9 @@ h3.kam-sr-chart-card-title {
   height: 16px;
   left: 2px;
   bottom: 2px;
-  background: #fff;
+  background: var(--rzp-card-bg);
   border-radius: 50%;
-  transition: transform 0.2s ease;
+  transition: transform var(--duration-moderate) var(--easing-standard);
 }
 
 .kam-rule-toggle input:checked + .kam-rule-toggle-slider {
@@ -3123,14 +3118,14 @@ h3.kam-sr-chart-card-title {
   width: 28px;
   height: 28px;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   background: transparent;
   color: var(--rzp-text-muted);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.15s ease;
+  transition: all var(--duration-quick) var(--easing-standard);
 }
 
 .kam-rule-edit-btn:hover {
@@ -3155,13 +3150,13 @@ h3.kam-sr-chart-card-title {
 
 .kam-rule-if,
 .kam-rule-then {
-  font-size: 11px;
-  font-weight: 700;
+  font-size: var(--font-size-11);
+  font-weight: var(--font-weight-bold);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   font-family: var(--font-primary);
   padding: 2px 8px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   flex-shrink: 0;
 }
 
@@ -3171,24 +3166,24 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-rule-then {
-  color: #2E7D32;
-  background: #E8F5E9;
+  color: var(--rzp-method-upi-text);
+  background: var(--rzp-method-upi-bg);
 }
 
 .kam-rule-logic {
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--font-size-11);
+  font-weight: var(--font-weight-semibold);
   color: var(--rzp-text-muted);
   font-family: var(--font-primary);
 }
 
 .kam-rule-condition-chip {
-  font-size: 13px;
+  font-size: var(--font-size-14);
   font-family: var(--font-secondary);
   color: var(--rzp-text-primary);
   background: var(--rzp-bg-secondary);
   padding: 3px 10px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   white-space: nowrap;
 }
 
@@ -3203,36 +3198,36 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-rule-terminal-chip {
-  font-size: 13px;
+  font-size: var(--font-size-14);
   font-family: var(--font-secondary);
   color: var(--rzp-text-primary);
   background: #E3F2FD;
   padding: 3px 10px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   white-space: nowrap;
 }
 
 .kam-rule-terminal-chip .muted {
   color: var(--rzp-text-muted);
-  font-size: 12px;
+  font-size: var(--font-size-12);
 }
 
 .kam-rule-arrow {
   color: var(--rzp-text-muted);
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-semibold);
 }
 
 .kam-rule-split-dot {
   color: var(--rzp-text-muted);
-  font-size: 18px;
-  font-weight: 700;
+  font-size: var(--font-size-18);
+  font-weight: var(--font-weight-bold);
 }
 
 /* ── Rule Meta ───────────────────────────────────────────────────────────── */
 
 .kam-rule-meta {
-  font-size: 12px;
+  font-size: var(--font-size-12);
   font-family: var(--font-secondary);
   color: var(--rzp-text-muted);
 }
@@ -3262,7 +3257,7 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-rules-sim-field label {
-  font-size: 12px;
+  font-size: var(--font-size-12);
   font-family: var(--font-secondary);
   color: var(--rzp-text-muted);
   text-transform: uppercase;
@@ -3273,9 +3268,9 @@ h3.kam-sr-chart-card-title {
 .kam-rules-sim-field input {
   height: 34px;
   border: 1px solid var(--rzp-border);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   padding: 0 10px;
-  font-size: 13px;
+  font-size: var(--font-size-14);
   font-family: var(--font-secondary);
   background: var(--rzp-card-bg);
   color: var(--rzp-text-primary);
@@ -3306,8 +3301,8 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-rules-sim-label {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--font-size-12);
+  font-weight: var(--font-weight-semibold);
   font-family: var(--font-primary);
   color: var(--rzp-text-muted);
   text-transform: uppercase;
@@ -3316,9 +3311,9 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-rules-sim-value {
-  font-size: 14px;
+  font-size: var(--font-size-14);
   font-family: var(--font-primary);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--rzp-text-primary);
 }
 
@@ -3326,10 +3321,10 @@ h3.kam-sr-chart-card-title {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 14px;
+  font-size: var(--font-size-14);
   font-family: var(--font-secondary);
   color: var(--rzp-danger);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .kam-rules-sim-no-match svg {
@@ -3343,9 +3338,9 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-rules-sim-warning {
-  font-size: 13px;
+  font-size: var(--font-size-14);
   font-family: var(--font-secondary);
-  color: #E65100;
+  color: var(--rzp-deal-tsp-text);
   padding: 2px 0;
 }
 
@@ -3357,8 +3352,8 @@ h3.kam-sr-chart-card-title {
 
 .kam-rule-builder-field > label {
   display: block;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-semibold);
   font-family: var(--font-primary);
   color: var(--rzp-text-primary);
   margin-bottom: 8px;
@@ -3368,9 +3363,9 @@ h3.kam-sr-chart-card-title {
   width: 100%;
   height: 38px;
   border: 1px solid var(--rzp-border);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   padding: 0 12px;
-  font-size: 14px;
+  font-size: var(--font-size-14);
   font-family: var(--font-secondary);
   color: var(--rzp-text-primary);
   background: var(--rzp-card-bg);
@@ -3395,7 +3390,7 @@ h3.kam-sr-chart-card-title {
   border-radius: 10px;
   padding: 14px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all var(--duration-quick) var(--easing-standard);
 }
 
 .kam-rule-type-card:hover {
@@ -3409,14 +3404,14 @@ h3.kam-sr-chart-card-title {
 
 .kam-rule-type-card strong {
   display: block;
-  font-size: 14px;
+  font-size: var(--font-size-14);
   font-family: var(--font-primary);
   color: var(--rzp-text-primary);
   margin-bottom: 4px;
 }
 
 .kam-rule-type-card span {
-  font-size: 12px;
+  font-size: var(--font-size-12);
   font-family: var(--font-secondary);
   color: var(--rzp-text-secondary);
 }
@@ -3425,7 +3420,7 @@ h3.kam-sr-chart-card-title {
 .kam-rule-builder-logic-toggle {
   display: inline-flex;
   border: 1px solid var(--rzp-border);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   overflow: hidden;
   margin-bottom: 8px;
 }
@@ -3435,16 +3430,16 @@ h3.kam-sr-chart-card-title {
   border: none;
   background: var(--rzp-card-bg);
   color: var(--rzp-text-secondary);
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--font-size-12);
+  font-weight: var(--font-weight-semibold);
   font-family: var(--font-primary);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all var(--duration-quick) var(--easing-standard);
 }
 
 .kam-rule-builder-logic-toggle button.active {
   background: var(--rzp-blue);
-  color: #fff;
+  color: var(--rzp-text-on-dark);
 }
 
 /* Condition Rows */
@@ -3464,9 +3459,9 @@ h3.kam-sr-chart-card-title {
 .kam-rule-builder-condition-row input {
   height: 34px;
   border: 1px solid var(--rzp-border);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   padding: 0 10px;
-  font-size: 13px;
+  font-size: var(--font-size-14);
   font-family: var(--font-secondary);
   background: var(--rzp-card-bg);
   color: var(--rzp-text-primary);
@@ -3484,10 +3479,10 @@ h3.kam-sr-chart-card-title {
   width: 28px;
   height: 28px;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   background: transparent;
   color: var(--rzp-text-muted);
-  font-size: 18px;
+  font-size: var(--font-size-18);
   cursor: pointer;
   flex-shrink: 0;
   display: flex;
@@ -3520,10 +3515,10 @@ h3.kam-sr-chart-card-title {
   gap: 10px;
   padding: 8px 12px;
   border: 1px solid var(--rzp-blue);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: rgba(82, 143, 240, 0.04);
   font-family: var(--font-secondary);
-  font-size: 13px;
+  font-size: var(--font-size-14);
 }
 
 .kam-rule-ranked-pos {
@@ -3531,12 +3526,12 @@ h3.kam-sr-chart-card-title {
   height: 22px;
   border-radius: 50%;
   background: var(--rzp-blue);
-  color: #fff;
+  color: var(--rzp-text-on-dark);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
-  font-weight: 700;
+  font-size: var(--font-size-11);
+  font-weight: var(--font-weight-bold);
   flex-shrink: 0;
   font-family: var(--font-primary);
 }
@@ -3551,7 +3546,7 @@ h3.kam-sr-chart-card-title {
 .kam-rule-ranked-controls .kam-rule-move-btn {
   width: 24px;
   height: 24px;
-  font-size: 12px;
+  font-size: var(--font-size-12);
 }
 
 .kam-rule-ranked-controls .kam-rule-builder-remove-btn {
@@ -3569,13 +3564,13 @@ h3.kam-sr-chart-card-title {
 .kam-rule-add-terminal-btn {
   padding: 6px 12px;
   border: 1px dashed var(--rzp-border);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   background: none;
   cursor: pointer;
   font-family: var(--font-secondary);
-  font-size: 12px;
+  font-size: var(--font-size-12);
   color: var(--rzp-text-secondary);
-  transition: all 0.15s ease;
+  transition: all var(--duration-quick) var(--easing-standard);
 }
 
 .kam-rule-add-terminal-btn:hover {
@@ -3586,11 +3581,11 @@ h3.kam-sr-chart-card-title {
 
 .kam-rule-add-terminal-btn .muted {
   color: var(--rzp-text-muted);
-  font-size: 11px;
+  font-size: var(--font-size-11);
 }
 
 .kam-rule-builder-hint {
-  font-size: 12px;
+  font-size: var(--font-size-12);
   color: var(--rzp-text-muted);
   font-family: var(--font-secondary);
   margin: 0 0 4px 0;
@@ -3605,10 +3600,10 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-rule-builder-threshold-desc {
-  font-size: 11px;
+  font-size: var(--font-size-11);
   font-family: var(--font-secondary);
   color: var(--rzp-text-muted);
-  line-height: 1.4;
+  line-height: var(--line-height-m);
   margin: 0 0 10px 0;
 }
 
@@ -3624,9 +3619,9 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-rule-builder-threshold-field label {
-  font-size: 11px;
+  font-size: var(--font-size-11);
   font-family: var(--font-secondary);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   color: var(--rzp-text-secondary);
 }
 
@@ -3640,9 +3635,9 @@ h3.kam-sr-chart-card-title {
   width: 72px;
   padding: 5px 8px;
   border: 1px solid var(--rzp-border);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   font-family: var(--font-secondary);
-  font-size: 13px;
+  font-size: var(--font-size-14);
   text-align: right;
 }
 
@@ -3652,7 +3647,7 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-rule-builder-threshold-unit {
-  font-size: 11px;
+  font-size: var(--font-size-11);
   color: var(--rzp-text-muted);
   font-family: var(--font-secondary);
 }
@@ -3662,7 +3657,7 @@ h3.kam-sr-chart-card-title {
   display: flex;
   align-items: center;
   gap: 5px;
-  font-size: 11px;
+  font-size: var(--font-size-11);
   font-family: var(--font-secondary);
   color: #f59e0b;
   padding: 4px 0 0;
@@ -3688,19 +3683,19 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-rule-terminal-id {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   font-family: var(--font-primary);
   color: var(--rzp-text-primary);
 }
 
 .kam-rule-terminal-gw {
   color: var(--rzp-text-muted);
-  font-size: 12px;
+  font-size: var(--font-size-12);
 }
 
 .kam-rule-terminal-sr {
   color: var(--rzp-success);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   margin-left: auto;
 }
 
@@ -3721,20 +3716,20 @@ h3.kam-sr-chart-card-title {
   gap: 10px;
   padding: 8px 12px;
   border: 1px solid var(--rzp-border);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   font-family: var(--font-secondary);
-  font-size: 13px;
+  font-size: var(--font-size-14);
 }
 
 .kam-rule-split-input {
   width: 64px;
   height: 30px;
   border: 1px solid var(--rzp-border);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   text-align: center;
-  font-size: 14px;
+  font-size: var(--font-size-14);
   font-family: var(--font-primary);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--rzp-text-primary);
   background: var(--rzp-card-bg);
   margin-left: auto;
@@ -3746,8 +3741,8 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-rule-split-total {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-semibold);
   font-family: var(--font-primary);
   color: var(--rzp-text-primary);
   padding: 6px 0;
@@ -3770,7 +3765,7 @@ h3.kam-sr-chart-card-title {
   width: 100vw;
   height: 100vh;
   z-index: 1100;
-  background: #fff;
+  background: var(--rzp-card-bg);
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -3789,7 +3784,7 @@ h3.kam-sr-chart-card-title {
   gap: 16px;
   padding: 16px 32px;
   border-bottom: 1px solid var(--rzp-border);
-  background: #fff;
+  background: var(--rzp-card-bg);
   position: sticky;
   top: 0;
   z-index: 10;
@@ -3801,10 +3796,10 @@ h3.kam-sr-chart-card-title {
   gap: 6px;
   background: none;
   border: 1px solid var(--rzp-border);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   padding: 6px 12px;
-  font-size: 13px;
-  font-weight: 500;
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-medium);
   color: var(--rzp-text-secondary);
   cursor: pointer;
   transition: all 0.15s;
@@ -3816,17 +3811,17 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-rule-builder-overlay-title {
-  font-size: 18px;
-  font-weight: 600;
+  font-size: var(--font-size-18);
+  font-weight: var(--font-weight-semibold);
   color: var(--rzp-text-primary);
   margin: 0;
   flex: 1;
 }
 
 .kam-rule-builder-overlay-merchant {
-  font-size: 13px;
+  font-size: var(--font-size-14);
   color: var(--rzp-text-muted);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 /* — Mode Toggle — */
@@ -3841,16 +3836,16 @@ h3.kam-sr-chart-card-title {
   align-items: center;
   gap: 6px;
   padding: 8px 20px;
-  font-size: 13px;
-  font-weight: 500;
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-medium);
   border: 1px solid var(--rzp-border);
-  background: #fff;
+  background: var(--rzp-card-bg);
   color: var(--rzp-text-secondary);
   cursor: pointer;
   transition: all 0.15s;
 }
 .kam-rule-builder-mode-btn:first-child {
-  border-radius: 8px 0 0 8px;
+  border-radius: var(--radius-md) 0 0 8px;
   border-right: none;
 }
 .kam-rule-builder-mode-btn:last-child {
@@ -3859,7 +3854,7 @@ h3.kam-sr-chart-card-title {
 .kam-rule-builder-mode-btn.active {
   background: var(--rzp-blue);
   border-color: var(--rzp-blue);
-  color: #fff;
+  color: var(--rzp-text-on-dark);
 }
 .kam-rule-builder-mode-btn:not(.active):hover {
   background: var(--rzp-bg);
@@ -3892,7 +3887,7 @@ h3.kam-sr-chart-card-title {
   display: flex;
   flex-direction: column;
   border: 1px solid var(--rzp-border);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   background: #fafbfc;
   overflow: hidden;
 }
@@ -3922,13 +3917,13 @@ h3.kam-sr-chart-card-title {
   opacity: 0.5;
 }
 .kam-rule-ai-empty h4 {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: var(--font-size-16);
+  font-weight: var(--font-weight-semibold);
   color: var(--rzp-text-primary);
   margin: 0 0 6px;
 }
 .kam-rule-ai-empty p {
-  font-size: 13px;
+  font-size: var(--font-size-14);
   color: var(--rzp-text-muted);
   margin: 0 0 16px;
 }
@@ -3938,11 +3933,11 @@ h3.kam-sr-chart-card-title {
   gap: 6px;
 }
 .kam-rule-ai-examples span {
-  font-size: 12px;
+  font-size: var(--font-size-12);
   color: var(--rzp-blue);
   cursor: pointer;
   padding: 6px 12px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   background: rgba(42, 105, 255, 0.06);
   transition: background 0.15s;
 }
@@ -3963,17 +3958,17 @@ h3.kam-sr-chart-card-title {
 .kam-rule-ai-message-bubble {
   max-width: 85%;
   padding: 10px 14px;
-  border-radius: 12px;
-  font-size: 13px;
-  line-height: 1.5;
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-14);
+  line-height: var(--line-height-m);
 }
 .kam-rule-ai-message.user .kam-rule-ai-message-bubble {
   background: var(--rzp-blue);
-  color: #fff;
+  color: var(--rzp-text-on-dark);
   border-bottom-right-radius: 4px;
 }
 .kam-rule-ai-message.assistant .kam-rule-ai-message-bubble {
-  background: #fff;
+  background: var(--rzp-card-bg);
   color: var(--rzp-text-primary);
   border: 1px solid var(--rzp-border);
   border-bottom-left-radius: 4px;
@@ -3985,8 +3980,8 @@ h3.kam-sr-chart-card-title {
   margin-top: 8px;
   padding: 2px 8px;
   border-radius: 10px;
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--font-size-11);
+  font-weight: var(--font-weight-semibold);
 }
 .kam-rule-ai-confidence.high {
   background: rgba(30, 170, 90, 0.12);
@@ -4009,11 +4004,11 @@ h3.kam-sr-chart-card-title {
   gap: 4px;
 }
 .kam-rule-ai-warning-item {
-  font-size: 12px;
+  font-size: var(--font-size-12);
   color: #b8860b;
   padding: 4px 8px;
   background: rgba(245, 166, 35, 0.08);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
 }
 
 /* Typing indicator */
@@ -4044,14 +4039,14 @@ h3.kam-sr-chart-card-title {
   gap: 8px;
   padding: 12px 16px;
   border-top: 1px solid var(--rzp-border);
-  background: #fff;
+  background: var(--rzp-card-bg);
 }
 .kam-rule-ai-input {
   flex: 1;
   padding: 10px 14px;
   border: 1px solid var(--rzp-border);
-  border-radius: 8px;
-  font-size: 13px;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-14);
   font-family: var(--font-primary);
   outline: none;
   transition: border-color 0.15s;
@@ -4068,7 +4063,7 @@ h3.kam-sr-chart-card-title {
   gap: 6px;
   white-space: nowrap;
   padding: 8px 16px !important;
-  font-size: 13px !important;
+  font-size: var(--font-size-14) !important;
 }
 .kam-rule-ai-submit:disabled {
   opacity: 0.5;
@@ -4078,16 +4073,16 @@ h3.kam-sr-chart-card-title {
 /* Right pane: rule preview */
 .kam-rule-builder-ai-preview {
   border: 1px solid var(--rzp-border);
-  border-radius: 12px;
-  background: #fff;
+  border-radius: var(--radius-lg);
+  background: var(--rzp-card-bg);
   padding: 20px;
   display: flex;
   flex-direction: column;
 }
 
 .kam-rule-ai-preview-title {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-semibold);
   color: var(--rzp-text-primary);
   margin: 0 0 16px;
   padding-bottom: 12px;
@@ -4106,7 +4101,7 @@ h3.kam-sr-chart-card-title {
   gap: 12px;
 }
 .kam-rule-ai-preview-empty p {
-  font-size: 13px;
+  font-size: var(--font-size-14);
   color: var(--rzp-text-muted);
   margin: 0;
   max-width: 240px;
@@ -4126,8 +4121,8 @@ h3.kam-sr-chart-card-title {
   align-items: flex-start;
 }
 .kam-rule-ai-preview-label {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--font-size-12);
+  font-weight: var(--font-weight-semibold);
   color: var(--rzp-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.3px;
@@ -4135,8 +4130,8 @@ h3.kam-sr-chart-card-title {
   padding-top: 2px;
 }
 .kam-rule-ai-preview-value {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-medium);
   color: var(--rzp-text-primary);
 }
 
@@ -4157,29 +4152,29 @@ h3.kam-sr-chart-card-title {
   flex-wrap: wrap;
 }
 .kam-rule-ai-cond-field {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--font-size-12);
+  font-weight: var(--font-weight-semibold);
   color: var(--rzp-text-primary);
   padding: 3px 8px;
   background: var(--rzp-bg);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
 }
 .kam-rule-ai-cond-op {
-  font-size: 11px;
+  font-size: var(--font-size-11);
   color: var(--rzp-text-muted);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 .kam-rule-ai-cond-val {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--font-size-12);
+  font-weight: var(--font-weight-semibold);
   color: var(--rzp-blue);
   padding: 3px 8px;
   background: rgba(42, 105, 255, 0.08);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
 }
 .kam-rule-ai-cond-logic {
-  font-size: 10px;
-  font-weight: 700;
+  font-size: var(--font-size-10);
+  font-weight: var(--font-weight-bold);
   color: var(--rzp-text-muted);
   padding: 2px 6px;
   background: var(--rzp-bg);
@@ -4196,16 +4191,16 @@ h3.kam-sr-chart-card-title {
 }
 .kam-rule-ai-terminal-chip,
 .kam-rule-ai-split-chip {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--font-size-12);
+  font-weight: var(--font-weight-semibold);
   padding: 4px 10px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   background: var(--rzp-bg);
   color: var(--rzp-text-primary);
   border: 1px solid var(--rzp-border);
 }
 .kam-rule-ai-arrow {
-  font-size: 11px;
+  font-size: var(--font-size-11);
   color: var(--rzp-text-muted);
   margin-right: 4px;
 }
@@ -4263,7 +4258,7 @@ h3.kam-sr-chart-card-title {
   height: 2px;
   background: var(--rzp-border);
   border-radius: 1px;
-  transition: background 0.3s ease;
+  transition: background var(--duration-gentle) var(--easing-standard);
 }
 
 .kam-wizard-step-connector.active {
@@ -4295,38 +4290,38 @@ h3.kam-sr-chart-card-title {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-semibold);
   border: 2px solid var(--rzp-border);
-  background: #fff;
+  background: var(--rzp-card-bg);
   color: var(--rzp-text-muted);
-  transition: all 0.25s ease;
+  transition: all var(--duration-moderate) var(--easing-standard);
 }
 
 .kam-wizard-step-indicator.active .kam-wizard-step-dot {
   border-color: var(--rzp-blue);
   background: var(--rzp-blue);
-  color: #fff;
+  color: var(--rzp-text-on-dark);
   box-shadow: 0 2px 8px rgba(83, 109, 254, 0.25);
 }
 
 .kam-wizard-step-indicator.completed .kam-wizard-step-dot {
   border-color: var(--rzp-success, #1fad6e);
   background: var(--rzp-success, #1fad6e);
-  color: #fff;
+  color: var(--rzp-text-on-dark);
 }
 
 .kam-wizard-step-label {
-  font-size: 11px;
-  font-weight: 500;
+  font-size: var(--font-size-11);
+  font-weight: var(--font-weight-medium);
   color: var(--rzp-text-muted);
   letter-spacing: 0.02em;
-  transition: color 0.2s ease;
+  transition: color var(--duration-moderate) var(--easing-standard);
 }
 
 .kam-wizard-step-indicator.active .kam-wizard-step-label {
   color: var(--rzp-blue);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .kam-wizard-step-indicator.completed .kam-wizard-step-label {
@@ -4357,17 +4352,17 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-wizard-step-title {
-  font-size: 18px;
-  font-weight: 600;
+  font-size: var(--font-size-18);
+  font-weight: var(--font-weight-semibold);
   color: var(--rzp-text-primary);
   margin: 0 0 6px;
 }
 
 .kam-wizard-step-desc {
-  font-size: 13px;
+  font-size: var(--font-size-14);
   color: var(--rzp-text-muted);
   margin: 0 0 20px;
-  line-height: 1.5;
+  line-height: var(--line-height-m);
 }
 
 /* Type cards - enhanced for wizard step */
@@ -4391,7 +4386,7 @@ h3.kam-sr-chart-card-title {
   align-items: center;
   justify-content: center;
   margin-bottom: 4px;
-  transition: background 0.2s ease;
+  transition: background var(--duration-moderate) var(--easing-standard);
 }
 
 .kam-rule-type-card.selected .kam-rule-type-card-icon {
@@ -4400,7 +4395,7 @@ h3.kam-sr-chart-card-title {
 
 .kam-rule-type-card-icon svg {
   stroke: var(--rzp-text-muted);
-  transition: stroke 0.2s ease;
+  transition: stroke var(--duration-moderate) var(--easing-standard);
 }
 
 .kam-rule-type-card.selected .kam-rule-type-card-icon svg {
@@ -4409,7 +4404,7 @@ h3.kam-sr-chart-card-title {
 
 .kam-wizard-step-panel .kam-rule-type-card span {
   font-size: 12.5px;
-  line-height: 1.5;
+  line-height: var(--line-height-m);
   color: var(--rzp-text-muted);
 }
 
@@ -4419,7 +4414,7 @@ h3.kam-sr-chart-card-title {
   padding: 10px 14px;
   background: rgba(220, 53, 69, 0.05);
   border: 1px solid rgba(220, 53, 69, 0.15);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
 }
 
 .kam-wizard-step-error {
@@ -4430,7 +4425,7 @@ h3.kam-sr-chart-card-title {
 
 .kam-wizard-step-error::before {
   content: '! ';
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
 }
 
 
@@ -4445,7 +4440,7 @@ h3.kam-sr-chart-card-title {
   border-top: 1px solid var(--rzp-border);
   position: sticky;
   bottom: 0;
-  background: #fff;
+  background: var(--rzp-card-bg);
   z-index: 2;
 }
 
@@ -4458,9 +4453,9 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-wizard-footer-step {
-  font-size: 12px;
+  font-size: var(--font-size-12);
   color: var(--rzp-text-muted);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 
@@ -4479,7 +4474,7 @@ h3.kam-sr-chart-card-title {
   gap: 16px;
   padding: 14px 18px;
   border-bottom: 1px solid var(--rzp-border);
-  transition: background 0.15s ease;
+  transition: background var(--duration-quick) var(--easing-standard);
 }
 
 .kam-wizard-review-row:last-child {
@@ -4491,8 +4486,8 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-wizard-review-label {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--font-size-12);
+  font-weight: var(--font-weight-semibold);
   color: var(--rzp-text-muted);
   min-width: 100px;
   flex-shrink: 0;
@@ -4503,18 +4498,18 @@ h3.kam-sr-chart-card-title {
 
 .kam-wizard-review-value {
   flex: 1;
-  font-size: 13px;
+  font-size: var(--font-size-14);
   color: var(--rzp-text-primary);
-  line-height: 1.5;
+  line-height: var(--line-height-m);
 }
 
 .kam-wizard-review-edit {
-  font-size: 12px;
+  font-size: var(--font-size-12);
   color: var(--rzp-blue);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   flex-shrink: 0;
   opacity: 0;
-  transition: opacity 0.15s ease;
+  transition: opacity var(--duration-quick) var(--easing-standard);
 }
 
 .kam-wizard-review-row:hover .kam-wizard-review-edit {
@@ -4533,15 +4528,15 @@ h3.kam-sr-chart-card-title {
   padding: 3px 10px;
   background: var(--rzp-bg-secondary);
   border: 1px solid var(--rzp-border);
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 500;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-12);
+  font-weight: var(--font-weight-medium);
   color: var(--rzp-text-primary);
 }
 
 .kam-wizard-review-logic {
-  font-size: 10px;
-  font-weight: 700;
+  font-size: var(--font-size-10);
+  font-weight: var(--font-weight-bold);
   color: var(--rzp-blue);
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -4556,8 +4551,8 @@ h3.kam-sr-chart-card-title {
 
 .kam-wizard-review-arrow {
   color: var(--rzp-text-muted);
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-semibold);
 }
 
 /* ── Guided Wizard: Payment Method Cards ── */
@@ -4571,12 +4566,12 @@ h3.kam-sr-chart-card-title {
 
 .kam-guided-method-card {
   border: 2px solid var(--rzp-border);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   padding: 32px 24px;
   text-align: center;
   cursor: pointer;
-  transition: all 0.2s ease;
-  background: #fff;
+  transition: all var(--duration-moderate) var(--easing-standard);
+  background: var(--rzp-card-bg);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -4587,7 +4582,7 @@ h3.kam-sr-chart-card-title {
   border-color: var(--rzp-blue);
   background: #f0f4ff;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-mid);
 }
 
 .kam-guided-method-card.selected {
@@ -4605,24 +4600,24 @@ h3.kam-sr-chart-card-title {
   align-items: center;
   justify-content: center;
   color: var(--rzp-blue);
-  transition: all 0.2s ease;
+  transition: all var(--duration-moderate) var(--easing-standard);
 }
 
 .kam-guided-method-card.selected .kam-guided-method-icon {
   background: var(--rzp-blue);
-  color: #fff;
+  color: var(--rzp-text-on-dark);
 }
 
 .kam-guided-method-card strong {
-  font-size: 18px;
-  font-weight: 700;
+  font-size: var(--font-size-18);
+  font-weight: var(--font-weight-bold);
   color: var(--rzp-text-primary);
 }
 
 .kam-guided-method-card span {
-  font-size: 13px;
+  font-size: var(--font-size-14);
   color: var(--rzp-text-muted);
-  line-height: 1.4;
+  line-height: var(--line-height-m);
   max-width: 240px;
 }
 
@@ -4642,8 +4637,8 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-guided-filter-label {
-  font-weight: 600;
-  font-size: 14px;
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-14);
   color: var(--rzp-text-primary);
   display: flex;
   align-items: center;
@@ -4651,7 +4646,7 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-guided-filter-hint {
-  font-size: 12px;
+  font-size: var(--font-size-12);
   color: var(--rzp-text-muted);
   margin-bottom: 4px;
 }
@@ -4668,12 +4663,12 @@ h3.kam-sr-chart-card-title {
   padding: 8px 16px;
   border: 1.5px solid var(--rzp-border);
   border-radius: 20px;
-  background: #fff;
-  font-size: 13px;
-  font-weight: 500;
+  background: var(--rzp-card-bg);
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-medium);
   color: var(--rzp-text-primary);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all var(--duration-quick) var(--easing-standard);
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -4689,18 +4684,18 @@ h3.kam-sr-chart-card-title {
   border-color: var(--rzp-blue);
   background: #eef2ff;
   color: var(--rzp-blue);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.12);
 }
 
 .kam-guided-chip-lg {
   padding: 10px 20px;
-  font-size: 14px;
+  font-size: var(--font-size-14);
   border-radius: 10px;
 }
 
 .kam-guided-filter-selection-summary {
-  font-size: 12px;
+  font-size: var(--font-size-12);
   color: var(--rzp-text-muted);
   display: flex;
   align-items: center;
@@ -4712,7 +4707,7 @@ h3.kam-sr-chart-card-title {
   background: none;
   border: none;
   color: var(--rzp-blue);
-  font-size: 12px;
+  font-size: var(--font-size-12);
   cursor: pointer;
   padding: 0;
   text-decoration: underline;
@@ -4720,6 +4715,45 @@ h3.kam-sr-chart-card-title {
 
 .kam-guided-clear-btn:hover {
   color: #1e40af;
+}
+
+/* ── Guided Wizard: Amount Input ── */
+
+.kam-guided-amount-custom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.kam-guided-amount-custom select {
+  padding: 7px 10px;
+  border: 1px solid var(--rzp-border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-secondary);
+  font-size: var(--font-size-14);
+  background: var(--rzp-card-bg);
+  color: var(--rzp-text-primary);
+}
+
+.kam-guided-amount-custom input[type="number"],
+.kam-guided-amount-custom input[type="date"] {
+  width: 140px;
+  padding: 7px 10px;
+  border: 1px solid var(--rzp-border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-secondary);
+  font-size: var(--font-size-14);
+  color: var(--rzp-text-primary);
+}
+
+.kam-guided-amount-custom input[type="number"]:focus,
+.kam-guided-amount-custom input[type="date"]:focus,
+.kam-guided-amount-custom select:focus {
+  outline: none;
+  border-color: var(--rzp-blue);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
 }
 
 /* ── Guided Wizard: Objective Cards ── */
@@ -4737,10 +4771,10 @@ h3.kam-sr-chart-card-title {
   gap: 16px;
   padding: 16px 20px;
   border: 2px solid var(--rzp-border);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   cursor: pointer;
-  transition: all 0.2s ease;
-  background: #fff;
+  transition: all var(--duration-moderate) var(--easing-standard);
+  background: var(--rzp-card-bg);
   position: relative;
 }
 
@@ -4765,12 +4799,12 @@ h3.kam-sr-chart-card-title {
   justify-content: center;
   color: var(--rzp-blue);
   flex-shrink: 0;
-  transition: all 0.2s ease;
+  transition: all var(--duration-moderate) var(--easing-standard);
 }
 
 .kam-guided-objective-card.selected .kam-guided-objective-icon {
   background: var(--rzp-blue);
-  color: #fff;
+  color: var(--rzp-text-on-dark);
 }
 
 .kam-guided-objective-content {
@@ -4781,15 +4815,15 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-guided-objective-content strong {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: var(--font-size-16);
+  font-weight: var(--font-weight-semibold);
   color: var(--rzp-text-primary);
 }
 
 .kam-guided-objective-content span {
-  font-size: 13px;
+  font-size: var(--font-size-14);
   color: var(--rzp-text-muted);
-  line-height: 1.4;
+  line-height: var(--line-height-m);
 }
 
 .kam-guided-objective-check {
@@ -4807,15 +4841,177 @@ h3.kam-sr-chart-card-title {
   padding: 12px 16px;
   background: #f0f9ff;
   border: 1px solid #bae6fd;
-  border-radius: 8px;
-  font-size: 13px;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-14);
   color: #0369a1;
-  line-height: 1.5;
+  line-height: var(--line-height-m);
 }
 
 .kam-guided-objective-suggestion svg {
   flex-shrink: 0;
   margin-top: 2px;
+}
+
+/* ── Two-Level Cost Sub-Options ── */
+
+.kam-guided-cost-suboptions {
+  margin-top: var(--spacing-5);
+  padding: var(--spacing-5);
+  background: var(--rzp-bg-subtle);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--rzp-border);
+  animation: kamFadeIn var(--duration-moderate) var(--easing-entrance);
+}
+
+.kam-guided-cost-suboptions-label {
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-semibold);
+  color: var(--rzp-text-primary);
+  margin-bottom: var(--spacing-4);
+}
+
+.kam-guided-cost-suboptions-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.kam-guided-cost-subcard {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-4);
+  padding: var(--spacing-4) var(--spacing-5);
+  border: 1.5px solid var(--rzp-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  background: var(--rzp-card-bg);
+  transition: all var(--duration-quick) var(--easing-standard);
+}
+
+.kam-guided-cost-subcard:hover {
+  border-color: var(--rzp-blue);
+}
+
+.kam-guided-cost-subcard.selected {
+  border-color: var(--rzp-blue);
+  background: var(--rzp-blue-light);
+}
+
+.kam-guided-cost-subcard-radio {
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+
+.kam-guided-cost-subcard-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--rzp-border);
+  position: relative;
+  transition: border-color var(--duration-quick) var(--easing-standard);
+}
+
+.kam-guided-cost-subcard:hover .kam-guided-cost-subcard-dot {
+  border-color: var(--rzp-text-muted);
+}
+
+.kam-guided-cost-subcard-dot.active {
+  border-color: var(--rzp-blue);
+}
+
+.kam-guided-cost-subcard-dot.active::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  background: var(--rzp-blue);
+  border-radius: var(--radius-full);
+}
+
+.kam-guided-cost-subcard-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.kam-guided-cost-subcard-content strong {
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-semibold);
+  color: var(--rzp-text-primary);
+}
+
+.kam-guided-cost-subcard-content span {
+  font-size: var(--font-size-12);
+  color: var(--rzp-text-secondary);
+  line-height: var(--line-height-m);
+}
+
+/* ── SR Safety Net (prominent callout) ── */
+
+.kam-sr-safety-net {
+  background: var(--rzp-bg-subtle);
+  border: 1px solid var(--rzp-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-5) var(--spacing-6);
+  margin-bottom: var(--spacing-6);
+}
+
+.kam-sr-safety-net-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-3);
+}
+
+.kam-sr-safety-net-header svg {
+  color: var(--rzp-blue);
+  flex-shrink: 0;
+}
+
+.kam-sr-safety-net-header strong {
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-semibold);
+  color: var(--rzp-text-primary);
+}
+
+.kam-sr-safety-net-desc {
+  font-size: var(--font-size-14);
+  color: var(--rzp-text-secondary);
+  line-height: var(--line-height-m);
+  margin-bottom: var(--spacing-4);
+}
+
+.kam-sr-safety-net-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-4);
+  margin-bottom: var(--spacing-3);
+}
+
+.kam-sr-safety-net-field label {
+  font-size: var(--font-size-12);
+  font-weight: var(--font-weight-semibold);
+  color: var(--rzp-text-secondary);
+  display: block;
+  margin-bottom: var(--spacing-2);
+}
+
+.kam-sr-safety-net-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3) var(--spacing-4);
+  background: var(--rzp-warning-light);
+  border: 1px solid rgba(245, 166, 35, 0.3);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-12);
+  color: #92400E;
+  line-height: var(--line-height-m);
+}
+
+.kam-sr-safety-net-warning svg {
+  color: var(--rzp-warning);
+  flex-shrink: 0;
+  margin-top: 1px;
 }
 
 /* ── Routing Decision Gate ── */
@@ -4830,8 +5026,8 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-routing-decision-header h3 {
-  font-size: 20px;
-  font-weight: 700;
+  font-size: var(--font-size-20);
+  font-weight: var(--font-weight-bold);
   color: var(--rzp-text-primary);
   margin: 0;
 }
@@ -4846,10 +5042,10 @@ h3.kam-sr-chart-card-title {
 
 .kam-routing-strategy-card {
   border: 1.5px solid var(--rzp-border);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   padding: 18px 20px;
-  background: #fff;
-  transition: all 0.2s ease;
+  background: var(--rzp-card-bg);
+  transition: all var(--duration-moderate) var(--easing-standard);
   position: relative;
   display: flex;
   flex-direction: column;
@@ -4863,7 +5059,7 @@ h3.kam-sr-chart-card-title {
 
 .kam-routing-strategy-card.active:has(.kam-routing-active-badge.cost) {
   border-color: #ea580c;
-  background: #fff7ed;
+  background: var(--rzp-card-bg)7ed;
   box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.1);
 }
 
@@ -4899,7 +5095,7 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-routing-strategy-card-icon.cost {
-  background: #fff7ed;
+  background: var(--rzp-card-bg)7ed;
   color: #ea580c;
 }
 
@@ -4911,14 +5107,14 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-routing-strategy-labels strong {
-  font-size: 14px;
-  font-weight: 700;
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-bold);
   color: var(--rzp-text-primary);
 }
 
 .kam-routing-active-badge {
-  font-size: 10px;
-  font-weight: 700;
+  font-size: var(--font-size-10);
+  font-weight: var(--font-weight-bold);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   padding: 3px 10px;
@@ -4933,9 +5129,9 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-routing-strategy-desc {
-  font-size: 12px;
+  font-size: var(--font-size-12);
   color: var(--rzp-text-muted);
-  line-height: 1.5;
+  line-height: var(--line-height-m);
   margin: 0 0 4px;
   flex: 1;
 }
@@ -4949,12 +5145,12 @@ h3.kam-sr-chart-card-title {
   margin-top: 10px;
   padding: 10px 12px;
   background: rgba(255, 255, 255, 0.7);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   border: 1px solid #bbf7d0;
 }
 
 .kam-routing-benefit.cost-mode {
-  background: #fffbeb;
+  background: var(--rzp-card-bg)beb;
   border-color: #fde68a;
 }
 
@@ -4962,9 +5158,9 @@ h3.kam-sr-chart-card-title {
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  font-size: 12px;
+  font-size: var(--font-size-12);
   color: #166534;
-  line-height: 1.4;
+  line-height: var(--line-height-m);
 }
 
 .kam-routing-benefit-item svg {
@@ -4977,7 +5173,7 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-routing-benefit-item strong {
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
 }
 
 /* Switch warning */
@@ -4987,7 +5183,7 @@ h3.kam-sr-chart-card-title {
   gap: 14px;
   margin-top: 14px;
   padding: 16px 20px;
-  background: #fffbeb;
+  background: var(--rzp-card-bg)beb;
   border: 1px solid #fde68a;
   border-radius: 10px;
 }
@@ -5002,16 +5198,16 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-routing-switch-warning-content h4 {
-  font-size: 14px;
-  font-weight: 700;
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-bold);
   color: #92400e;
   margin: 0 0 6px;
 }
 
 .kam-routing-switch-warning-content p {
-  font-size: 13px;
+  font-size: var(--font-size-14);
   color: #78350f;
-  line-height: 1.5;
+  line-height: var(--line-height-m);
   margin: 0;
 }
 
@@ -5026,7 +5222,7 @@ h3.kam-sr-chart-card-title {
   background: #f59e0b;
   color: white;
   border: none;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .kam-btn-warning:hover {
@@ -5049,7 +5245,7 @@ h3.kam-sr-chart-card-title {
   align-items: center;
   justify-content: space-between;
   padding: 10px 16px;
-  background: #fff7ed;
+  background: var(--rzp-card-bg)7ed;
   border: 1px solid #fed7aa;
   border-radius: 10px;
   margin-bottom: 16px;
@@ -5059,8 +5255,8 @@ h3.kam-sr-chart-card-title {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-semibold);
   color: #ea580c;
 }
 
@@ -5068,17 +5264,17 @@ h3.kam-sr-chart-card-title {
   background: none;
   border: 1px solid #ea580c;
   color: #ea580c;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--font-size-12);
+  font-weight: var(--font-weight-semibold);
   padding: 5px 12px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all var(--duration-quick) var(--easing-standard);
 }
 
 .kam-routing-mode-switch:hover {
   background: #ea580c;
-  color: #fff;
+  color: var(--rzp-text-on-dark);
 }
 
 /* ── AI Recommendations Per-Card Accordion ─────────────────────── */
@@ -5097,8 +5293,8 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-rec-accordion-trigger .kam-rec-title {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-semibold);
   color: var(--rzp-text-primary);
   white-space: nowrap;
   overflow: hidden;
@@ -5106,7 +5302,7 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-recs-chevron {
-  transition: transform 0.25s ease;
+  transition: transform var(--duration-moderate) var(--easing-standard);
   color: var(--rzp-text-muted);
   flex-shrink: 0;
 }
@@ -5140,13 +5336,13 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-terminal-method-label {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-semibold);
   color: var(--rzp-text-primary);
 }
 
 .kam-terminal-method-count {
-  font-size: 11px;
+  font-size: var(--font-size-11);
   color: var(--rzp-text-muted);
   margin-left: auto;
 }
@@ -5156,7 +5352,7 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-terminal-method-group .kam-terminal-table thead th {
-  font-size: 10px;
+  font-size: var(--font-size-10);
   padding: 6px 12px;
   background: transparent;
 }
@@ -5168,7 +5364,7 @@ h3.kam-sr-chart-card-title {
 .kam-ntfa-summary {
   border-top: 3px solid var(--rzp-danger);
   background: #fef2f2;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   padding: 16px 20px;
   margin-bottom: 16px;
 }
@@ -5186,8 +5382,8 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-ntfa-metric-label {
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--font-size-11);
+  font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: var(--rzp-text-muted);
@@ -5195,8 +5391,8 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-ntfa-metric-value {
-  font-size: 20px;
-  font-weight: 700;
+  font-size: var(--font-size-20);
+  font-weight: var(--font-weight-bold);
   color: var(--rzp-text-primary);
   font-family: var(--font-primary);
 }
@@ -5206,13 +5402,13 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-ntfa-metric-value.small {
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 1.3;
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-m);
 }
 
 .kam-ntfa-metric-sub {
-  font-size: 11px;
+  font-size: var(--font-size-11);
   color: var(--rzp-text-muted);
 }
 
@@ -5236,7 +5432,7 @@ h3.kam-sr-chart-card-title {
   align-items: center;
   padding: 14px 16px;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: background var(--duration-quick) var(--easing-standard);
 }
 
 .kam-ntfa-profile-header:hover {
@@ -5251,8 +5447,8 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-ntfa-profile-label {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-semibold);
   color: var(--rzp-text-primary);
   font-family: var(--font-secondary);
 }
@@ -5264,13 +5460,13 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-ntfa-revenue-lost {
-  font-size: 13px;
+  font-size: var(--font-size-14);
   color: var(--rzp-danger);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 .kam-ntfa-chevron {
-  transition: transform 0.2s ease;
+  transition: transform var(--duration-moderate) var(--easing-standard);
   color: var(--rzp-text-muted);
 }
 
@@ -5289,22 +5485,22 @@ h3.kam-sr-chart-card-title {
   gap: 4px;
   margin-bottom: 16px;
   background: #f1f3f5;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   padding: 3px;
 }
 
 .kam-ntfa-layer-tab {
   flex: 1;
   padding: 7px 14px;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--font-size-12);
+  font-weight: var(--font-weight-semibold);
   font-family: var(--font-secondary);
   border: none;
   background: transparent;
   color: var(--rzp-text-muted);
   cursor: pointer;
-  border-radius: 6px;
-  transition: all 0.15s ease;
+  border-radius: var(--radius-sm);
+  transition: all var(--duration-quick) var(--easing-standard);
 }
 
 .kam-ntfa-layer-tab:hover {
@@ -5317,107 +5513,279 @@ h3.kam-sr-chart-card-title {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
-/* Waterfall */
-.kam-ntfa-waterfall {
-  position: relative;
-  padding-left: 24px;
-}
-
-.kam-ntfa-waterfall::before {
-  content: '';
-  position: absolute;
-  left: 7px;
-  top: 8px;
-  bottom: 8px;
-  width: 2px;
-  background: var(--rzp-border);
-}
-
-.kam-ntfa-step {
-  position: relative;
+/* Visual Funnel */
+.kam-ntfa-funnel {
   display: flex;
-  gap: 12px;
-  padding: 10px 0;
+  flex-direction: column;
 }
 
-.kam-ntfa-step.ntf-cause {
-  background: #fef2f2;
-  margin: 0 -12px;
-  padding: 10px 12px;
-  border-radius: 8px;
+.kam-ntfa-funnel-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  margin-bottom: var(--spacing-5);
+  padding-bottom: var(--spacing-4);
+  border-bottom: 1px solid var(--rzp-border);
 }
 
-.kam-ntfa-step.filtered {
-  background: #fffbeb;
-  margin: 0 -12px;
-  padding: 10px 12px;
-  border-radius: 8px;
+.kam-ntfa-funnel-title {
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-bold);
+  color: var(--rzp-text-primary);
+  font-family: var(--font-secondary);
 }
 
-.kam-ntfa-step-marker {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  margin-top: 2px;
+.kam-ntfa-funnel-subtitle {
+  font-size: var(--font-size-12);
+  color: var(--rzp-text-muted);
+  font-family: var(--font-secondary);
+}
+
+/* Step layout */
+.kam-ntfa-funnel-step {
+  display: flex;
+  gap: var(--spacing-4);
   position: relative;
-  z-index: 1;
-  margin-left: -24px;
 }
 
-.kam-ntfa-step-marker.success {
+.kam-ntfa-funnel-step.ntf-cause .kam-ntfa-funnel-body {
+  background: #fef2f2;
+  border: 1px solid rgba(231, 76, 60, 0.2);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-4);
+}
+
+.kam-ntfa-funnel-step.filtered .kam-ntfa-funnel-body {
+  background: #fffbeb;
+  border: 1px solid rgba(245, 166, 35, 0.15);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-4);
+}
+
+.kam-ntfa-funnel-step.skipped {
+  opacity: 0.55;
+}
+
+/* Left column: number + connector */
+.kam-ntfa-funnel-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 28px;
+  flex-shrink: 0;
+}
+
+.kam-ntfa-funnel-num {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-12);
+  font-weight: var(--font-weight-bold);
+  font-family: var(--font-secondary);
+  color: white;
+  flex-shrink: 0;
+}
+
+.kam-ntfa-funnel-num.success {
   background: var(--rzp-success);
 }
 
-.kam-ntfa-step-marker.warning {
+.kam-ntfa-funnel-num.warning {
   background: var(--rzp-warning);
 }
 
-.kam-ntfa-step-marker.danger {
+.kam-ntfa-funnel-num.danger {
   background: var(--rzp-danger);
 }
 
-.kam-ntfa-step-marker.neutral {
-  background: #ccc;
+.kam-ntfa-funnel-num.neutral {
+  background: var(--rzp-text-muted);
 }
 
-.kam-ntfa-step-content {
+.kam-ntfa-funnel-connector {
+  width: 2px;
+  flex: 1;
+  min-height: var(--spacing-4);
+  background: var(--rzp-border);
+}
+
+/* Right column: body */
+.kam-ntfa-funnel-body {
   flex: 1;
   min-width: 0;
+  padding-bottom: var(--spacing-5);
 }
 
-.kam-ntfa-step-header {
+.kam-ntfa-funnel-step-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-2);
+}
+
+.kam-ntfa-funnel-step-info {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 4px;
+  gap: var(--spacing-2);
+  flex-wrap: wrap;
 }
 
-.kam-ntfa-step-label {
-  font-size: 13px;
-  font-weight: 600;
+.kam-ntfa-funnel-step-label {
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-semibold);
   color: var(--rzp-text-primary);
+  font-family: var(--font-secondary);
 }
 
-.kam-ntfa-step-desc {
-  font-size: 12px;
+.kam-ntfa-funnel-counts {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  flex-shrink: 0;
+}
+
+.kam-ntfa-count-elim {
+  font-size: var(--font-size-12);
+  font-weight: var(--font-weight-bold);
+  color: var(--rzp-danger);
+  background: #fef2f2;
+  padding: 1px var(--spacing-2);
+  border-radius: var(--radius-xs);
+  font-family: var(--font-secondary);
+}
+
+.kam-ntfa-count-remain {
+  font-size: var(--font-size-12);
+  font-weight: var(--font-weight-bold);
+  color: var(--rzp-success);
+  font-family: var(--font-secondary);
+}
+
+.kam-ntfa-count-remain.zero {
+  color: var(--rzp-danger);
+}
+
+.kam-ntfa-funnel-desc {
+  font-size: var(--font-size-12);
   color: var(--rzp-text-secondary);
-  margin: 0 0 6px;
-  line-height: 1.4;
+  margin: 0 0 var(--spacing-3);
+  line-height: var(--line-height-m);
 }
 
-.kam-ntfa-step-terminals {
+/* Funnel bar — the visual core */
+.kam-ntfa-funnel-bar-wrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-3);
+}
+
+.kam-ntfa-funnel-bar {
+  flex: 1;
+  height: 10px;
+  background: var(--rzp-bg-muted);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  display: flex;
+  position: relative;
+}
+
+.kam-ntfa-funnel-bar-fill {
+  height: 100%;
+  border-radius: var(--radius-sm);
+  transition: width 0.4s var(--easing-standard);
+}
+
+.kam-ntfa-funnel-bar-fill.success {
+  background: var(--rzp-success);
+}
+
+.kam-ntfa-funnel-bar-fill.warning {
+  background: var(--rzp-warning);
+}
+
+.kam-ntfa-funnel-bar-fill.empty {
+  width: 0 !important;
+}
+
+.kam-ntfa-funnel-bar-elim {
+  height: 100%;
+  background: var(--rzp-danger);
+  opacity: 0.35;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.kam-ntfa-funnel-bar-label {
+  font-size: var(--font-size-11);
+  font-weight: var(--font-weight-bold);
+  color: var(--rzp-text-muted);
+  font-family: var(--font-secondary);
+  white-space: nowrap;
+  min-width: 28px;
+  text-align: right;
+}
+
+/* Terminal chips in funnel */
+.kam-ntfa-funnel-terminals {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: var(--spacing-2);
+  margin-top: var(--spacing-1);
+}
+
+/* NTF final banner */
+.kam-ntfa-funnel-ntf {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-4);
+  background: #fef2f2;
+  border: 2px solid var(--rzp-danger);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-4) var(--spacing-5);
+  margin-left: calc(28px + var(--spacing-4));
+}
+
+.kam-ntfa-funnel-ntf-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  background: var(--rzp-danger);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.kam-ntfa-funnel-ntf-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.kam-ntfa-funnel-ntf-label {
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-bold);
+  color: var(--rzp-danger);
+  font-family: var(--font-secondary);
+}
+
+.kam-ntfa-funnel-ntf-desc {
+  font-size: var(--font-size-12);
+  color: var(--rzp-text-secondary);
+  line-height: var(--line-height-m);
 }
 
 .kam-ntfa-terminal-chip {
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--font-size-11);
+  font-weight: var(--font-weight-semibold);
   font-family: var(--font-mono, monospace);
   padding: 2px 8px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
 }
 
 .kam-ntfa-terminal-chip.remaining {
@@ -5446,7 +5814,7 @@ h3.kam-sr-chart-card-title {
 
 .kam-ntfa-impact-card {
   background: #f8f9fa;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   padding: 14px;
   display: flex;
   flex-direction: column;
@@ -5465,17 +5833,17 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-ntfa-explain-card h4 {
-  font-size: 13px;
-  font-weight: 700;
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-bold);
   margin: 0 0 6px;
   color: var(--rzp-text-primary);
 }
 
 .kam-ntfa-explain-card p {
-  font-size: 13px;
+  font-size: var(--font-size-14);
   color: var(--rzp-text-secondary);
   margin: 0;
-  line-height: 1.5;
+  line-height: var(--line-height-m);
 }
 
 .kam-ntfa-alt-terminals {
@@ -5489,7 +5857,7 @@ h3.kam-sr-chart-card-title {
   display: flex;
   align-items: center;
   gap: 12px;
-  font-size: 12px;
+  font-size: var(--font-size-12);
   color: var(--rzp-text-secondary);
 }
 
@@ -5502,7 +5870,7 @@ h3.kam-sr-chart-card-title {
 
 .kam-ntfa-action {
   border: 1px solid var(--rzp-border);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   padding: 14px 16px;
   border-left-width: 3px;
 }
@@ -5526,17 +5894,17 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-ntfa-action-title {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-semibold);
   color: var(--rzp-text-primary);
   margin: 0 0 4px;
 }
 
 .kam-ntfa-action-desc {
-  font-size: 13px;
+  font-size: var(--font-size-14);
   color: var(--rzp-text-secondary);
   margin: 0 0 10px;
-  line-height: 1.5;
+  line-height: var(--line-height-m);
 }
 
 .kam-ntfa-action-footer {
@@ -5546,7 +5914,7 @@ h3.kam-sr-chart-card-title {
 }
 
 .kam-ntfa-action-hint {
-  font-size: 12px;
+  font-size: var(--font-size-12);
   color: var(--rzp-text-muted);
   font-style: italic;
 }
