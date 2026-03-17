@@ -2742,7 +2742,7 @@ function GaltonBoard({ merchant, rules, simOverrides, setSimOverrides, gateways:
   const dropTimerRef = useRef(null)
 
   // Generate transactions and filter by date range
-  const allTxns = useMemo(() => generateMerchantTransactions(merchant), [merchant])
+  const allTxns = useMemo(() => merchant ? generateMerchantTransactions(merchant) : [], [merchant])
 
   const filteredTxns = useMemo(() => {
     const now = new Date(2026, 2, 11, 10, 0, 0)
@@ -2759,11 +2759,13 @@ function GaltonBoard({ merchant, rules, simOverrides, setSimOverrides, gateways:
 
   // Batch simulation result
   const batchResult = useMemo(() => {
+    if (!merchant || !merchant.gatewayMetrics) return { totalPayments: 0, terminalDistribution: [], ntfCount: 0, ntfPercentage: 0, traces: [], ruleImpact: [] }
     return batchSimulatePayments(merchant, filteredTxns, rules, simOverrides)
   }, [merchant, filteredTxns, rules, simOverrides])
 
   // Build terminal columns (always show all terminals + NTF bin)
   const terminalCols = useMemo(() => {
+    if (!merchant || !merchant.gatewayMetrics || !batchResult?.terminalDistribution) return []
     const cols = merchant.gatewayMetrics.map(gm => {
       const gw = gwData.find(g => g.id === gm.gatewayId)
       const term = gw?.terminals.find(t => t.id === gm.terminalId)
@@ -2794,6 +2796,7 @@ function GaltonBoard({ merchant, rules, simOverrides, setSimOverrides, gateways:
 
   // Extract rule rows from simulation for the peg board
   const ruleRows = useMemo(() => {
+    if (!merchant || !merchant.gatewayMetrics) return []
     // Run a single representative txn to get the rule stages
     const sampleTxn = {
       payment_method: 'Cards',
@@ -2858,7 +2861,7 @@ function GaltonBoard({ merchant, rules, simOverrides, setSimOverrides, gateways:
 
   const handleDrop = useCallback(() => {
     if (isDroppingRef.current) return
-    if (!batchResult || !batchResult.traces || batchResult.traces.length === 0) return
+    if (!batchResult || !batchResult.traces || batchResult.traces.length === 0 || terminalCols.length === 0) return
     isDroppingRef.current = true
     setIsDropping(true)
     setGaltonBalls([])
@@ -2950,7 +2953,7 @@ function GaltonBoard({ merchant, rules, simOverrides, setSimOverrides, gateways:
     ruleRows.forEach((_, ri) => {
       const pct = 15 + (ri / Math.max(ruleRows.length, 1)) * 40
       const progress = (ri + 1) / Math.max(ruleRows.length, 1)
-      const x = startX + (targetX - startX) * progress * 0.6 + (ball.jitters[ri] || 0)
+      const x = startX + (targetX - startX) * progress * 0.6 + (ball.jitters?.[ri] || 0)
       const y = pegStartY + ri * pegRowH + pegRowH / 2
       steps.push({ pct, x, y })
     })
@@ -2986,6 +2989,8 @@ function GaltonBoard({ merchant, rules, simOverrides, setSimOverrides, gateways:
       return `@keyframes ${s.animName} { ${s.keyframes} }`
     }).filter(Boolean).join('\n')
   }, [galtonBalls, generateBallStyle])
+
+  if (terminalCols.length === 0) return null
 
   return (
     <div className="kam-galton-board">
