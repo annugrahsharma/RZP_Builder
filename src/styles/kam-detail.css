@@ -6648,354 +6648,302 @@ h3.kam-sr-chart-card-title {
   background: var(--rzp-bg-secondary);
 }
 
-/* Container */
-.kam-simv-container {
+/* ── Galton Board ── */
+
+.kam-galton-board {
   margin-top: 12px;
+  background: linear-gradient(to bottom, #f8fafc, #f1f5f9);
   border: 1px solid var(--rzp-border);
   border-radius: 10px;
-  background: var(--rzp-bg-primary);
   overflow: hidden;
 }
 
-/* Controls bar */
-.kam-simv-controls {
+.kam-galton-controls {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
+  gap: 10px;
+  padding: 10px 14px;
   border-bottom: 1px solid var(--rzp-border);
   background: var(--rzp-bg-secondary);
+  flex-wrap: wrap;
 }
 
-.kam-simv-ctrl-btn {
+.kam-galton-range-btns {
   display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 4px 12px;
-  font-size: 12px;
-  font-weight: 500;
   border: 1px solid var(--rzp-border);
   border-radius: 6px;
-  background: #fff;
-  color: var(--rzp-text-primary);
+  overflow: hidden;
+}
+
+.kam-galton-range-btn {
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: 500;
+  border: none;
+  border-right: 1px solid var(--rzp-border);
+  background: transparent;
+  color: var(--rzp-text-secondary);
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
-.kam-simv-ctrl-btn:hover {
-  background: var(--rzp-bg-secondary);
-  border-color: var(--rzp-blue);
-  color: var(--rzp-blue);
+.kam-galton-range-btn:last-child {
+  border-right: none;
 }
 
-.kam-simv-step-label {
+.kam-galton-range-btn.active {
+  background: var(--rzp-blue);
+  color: #fff;
+}
+
+.kam-galton-range-btn:hover:not(.active) {
+  background: var(--rzp-bg-primary);
+}
+
+.kam-galton-count {
   font-size: 12px;
   color: var(--rzp-text-secondary);
-  margin-left: auto;
   font-weight: 500;
 }
 
-/* SVG canvas */
-.kam-simv-svg {
+.kam-galton-drop-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid var(--rzp-blue);
+  border-radius: 6px;
+  background: var(--rzp-blue);
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-left: auto;
+}
+
+.kam-galton-drop-btn:hover:not(:disabled) {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+}
+
+.kam-galton-drop-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.kam-galton-drop-btn.dropping {
+  background: var(--rzp-text-muted);
+  border-color: var(--rzp-text-muted);
+}
+
+/* SVG Canvas */
+.kam-galton-svg {
   width: 100%;
   height: auto;
-  max-height: 420px;
+  max-height: 600px;
   display: block;
 }
 
-/* Zone backgrounds */
-.kam-simv-zone {
-  fill: #f7f9fc;
-  stroke: #e2e8f0;
-  stroke-width: 1;
+/* Entry funnel */
+.kam-galton-funnel {
+  fill: #e0e7ff;
+  stroke: var(--rzp-blue);
+  stroke-width: 1.5;
+  opacity: 0.7;
 }
 
-.kam-simv-zone-label {
-  font-size: 11px;
+.kam-galton-funnel-label {
+  font-size: 12px;
+  fill: var(--rzp-blue);
   font-weight: 600;
-  fill: var(--rzp-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
-/* Flow lines between zones */
-.kam-simv-flow {
+/* Lane dividers */
+.kam-galton-lane-divider {
   stroke: var(--rzp-border);
-  stroke-width: 2;
-  stroke-dasharray: 6 4;
-  transition: stroke 0.4s ease;
-}
-
-.kam-simv-flow.active {
-  stroke: var(--rzp-blue);
-  stroke-dasharray: none;
-  stroke-width: 2.5;
-}
-
-/* Entry zone */
-.kam-simv-entry-box {
-  fill: #f0f4ff;
-  stroke: var(--rzp-blue);
-  stroke-width: 1.5;
-}
-
-.kam-simv-entry-icon {
-  font-size: 22px;
-}
-
-.kam-simv-entry-text {
-  font-size: 11px;
-  fill: var(--rzp-text-secondary);
-  font-weight: 500;
-}
-
-/* Terminal nodes */
-.kam-simv-node {
-  transition: opacity 0.5s ease, transform 0.4s ease;
-}
-
-.kam-simv-node-circle {
-  fill: #e0e0e0;
-  stroke: #bbb;
-  stroke-width: 1.5;
-  transition: all 0.4s ease;
-}
-
-.kam-simv-node.eligible .kam-simv-node-circle {
-  fill: #d4edda;
-  stroke: var(--rzp-success);
-  stroke-width: 2;
-}
-
-.kam-simv-node.ineligible .kam-simv-node-circle {
-  fill: #f5f5f5;
-  stroke: #ccc;
-  stroke-width: 1;
+  stroke-width: 0.5;
+  stroke-dasharray: 4 4;
   opacity: 0.5;
 }
 
-.kam-simv-node.disabled .kam-simv-node-circle {
-  fill: #ffe0e0;
-  stroke: var(--rzp-danger);
-  stroke-width: 2;
-  stroke-dasharray: 4 3;
-}
-
-.kam-simv-node-strike {
-  stroke: var(--rzp-danger);
-  stroke-width: 2.5;
-  stroke-linecap: round;
-}
-
-.kam-simv-node-id {
-  font-size: 9px;
+/* Lane headers */
+.kam-galton-lane-header {
+  font-size: 10px;
   fill: var(--rzp-text-primary);
   font-weight: 600;
   font-family: 'Menlo', 'Monaco', monospace;
 }
 
-.kam-simv-node-label {
+.kam-galton-lane-header.ntf {
+  fill: var(--rzp-danger);
+}
+
+/* Rule labels */
+.kam-galton-rule-label {
   font-size: 9px;
   fill: var(--rzp-text-muted);
   font-weight: 500;
 }
 
-/* Mini nodes in rule zone */
-.kam-simv-mini-node {
-  transition: all 0.4s ease;
+.kam-galton-rule-label.disabled {
+  fill: var(--rzp-text-muted);
+  opacity: 0.4;
+  text-decoration: line-through;
 }
 
-.kam-simv-mini-node.alive {
-  fill: var(--rzp-success);
+/* Pegs */
+.kam-galton-peg {
+  stroke-width: 1.5;
+  transition: all 0.3s ease;
+}
+
+.kam-galton-peg.blocking {
+  fill: var(--rzp-danger);
+  stroke: #991b1b;
   opacity: 0.9;
 }
 
-.kam-simv-mini-node.eliminated {
-  fill: var(--rzp-danger);
-  opacity: 0.15;
-  r: 5;
+.kam-galton-peg.open {
+  fill: #d4edda;
+  stroke: var(--rzp-success);
 }
 
-/* Rule gate lines */
-.kam-simv-gate-line {
+.kam-galton-peg.skip {
+  fill: none;
   stroke: var(--rzp-border);
-  stroke-width: 2;
-  stroke-dasharray: 6 3;
-  transition: all 0.4s ease;
+  stroke-dasharray: 3 2;
+  opacity: 0.5;
 }
 
-.kam-simv-gate-knob {
-  fill: var(--rzp-bg-secondary);
+.kam-galton-peg.neutral {
+  fill: none;
   stroke: var(--rzp-border);
-  stroke-width: 1.5;
-  transition: all 0.4s ease;
+  stroke-width: 1;
+  opacity: 0.4;
 }
 
-.kam-simv-gate.active .kam-simv-gate-line {
-  stroke: var(--rzp-warning);
-  stroke-width: 3;
-  stroke-dasharray: none;
-  animation: kam-simv-gate-pulse 1s ease-out;
-}
-
-.kam-simv-gate.active .kam-simv-gate-knob {
-  fill: var(--rzp-warning);
-  stroke: #b45309;
-}
-
-.kam-simv-gate.ntf .kam-simv-gate-line {
-  stroke: var(--rzp-danger);
-  stroke-width: 3.5;
-  stroke-dasharray: none;
-  animation: kam-simv-gate-block 0.8s ease-out;
-}
-
-.kam-simv-gate.ntf .kam-simv-gate-knob {
-  fill: var(--rzp-danger);
-  stroke: #991b1b;
-}
-
-.kam-simv-gate.skip .kam-simv-gate-line {
+.kam-galton-peg.disabled {
+  fill: none;
   stroke: var(--rzp-text-muted);
   stroke-width: 1;
-  opacity: 0.5;
+  stroke-dasharray: 2 2;
+  opacity: 0.3;
 }
 
-.kam-simv-gate.skip .kam-simv-gate-knob {
-  fill: var(--rzp-bg-secondary);
-  stroke: var(--rzp-text-muted);
-  opacity: 0.5;
+.kam-galton-peg-strike {
+  stroke: #fff;
+  stroke-width: 2;
+  stroke-linecap: round;
 }
 
-.kam-simv-gate-label {
-  font-size: 8px;
+/* Deflectors (sorter) */
+.kam-galton-deflector {
+  fill: #e0e7ff;
+  stroke: var(--rzp-blue);
+  stroke-width: 1;
+  opacity: 0.6;
+  transition: all 0.3s ease;
+}
+
+.kam-galton-deflector-score {
+  font-size: 9px;
+  fill: var(--rzp-blue);
+  font-weight: 600;
+}
+
+/* Bins */
+.kam-galton-bin-group {
+  cursor: pointer;
+}
+
+.kam-galton-bin {
+  fill: #f8fafc;
+  stroke: var(--rzp-border);
+  stroke-width: 1;
+  transition: all 0.2s ease;
+}
+
+.kam-galton-bin.ntf {
+  stroke: var(--rzp-danger);
+  fill: #fef2f2;
+}
+
+.kam-galton-bin-group:hover .kam-galton-bin {
+  stroke: var(--rzp-blue);
+  stroke-width: 1.5;
+}
+
+.kam-galton-bin-fill {
+  fill: url(#galton-bin-fill-grad);
+  transition: height 0.8s ease-out, y 0.8s ease-out;
+}
+
+.kam-galton-bin-fill.ntf {
+  fill: url(#galton-ntf-fill-grad);
+}
+
+.kam-galton-bin-count {
+  font-size: 13px;
+  fill: var(--rzp-text-primary);
+  font-weight: 700;
+}
+
+.kam-galton-bin-count.ntf {
+  fill: var(--rzp-danger);
+}
+
+.kam-galton-bin-pct {
+  font-size: 10px;
   fill: var(--rzp-text-muted);
   font-weight: 500;
 }
 
-.kam-simv-gate.active .kam-simv-gate-label {
-  fill: var(--rzp-warning);
-  font-weight: 600;
-}
-
-.kam-simv-gate.ntf .kam-simv-gate-label {
-  fill: var(--rzp-danger);
-  font-weight: 600;
-}
-
-/* Sorter nodes */
-.kam-simv-sorter-circle {
-  fill: #e8f0fe;
-  stroke: var(--rzp-blue);
-  stroke-width: 1.5;
-  transition: all 0.4s ease;
-}
-
-.kam-simv-sorter-node.selected .kam-simv-sorter-circle {
-  fill: #d4edda;
-  stroke: var(--rzp-success);
-  stroke-width: 2;
-}
-
-.kam-simv-sorter-ring {
-  fill: none;
-  stroke: var(--rzp-success);
-  stroke-width: 2.5;
-  animation: kam-simv-select-ring 1s ease-out;
-}
-
-.kam-simv-sorter-rank {
-  font-size: 9px;
-  fill: var(--rzp-blue);
-  font-weight: 700;
-  font-family: 'Menlo', 'Monaco', monospace;
-}
-
-.kam-simv-sorter-node.selected .kam-simv-sorter-rank {
-  fill: var(--rzp-success);
-}
-
-.kam-simv-sorter-id {
-  font-size: 10px;
-  fill: var(--rzp-text-primary);
-  font-weight: 600;
-}
-
-.kam-simv-sorter-score {
-  font-size: 9px;
-  fill: var(--rzp-text-muted);
-}
-
-.kam-simv-selected-label {
-  font-size: 10px;
-  fill: var(--rzp-success);
-  font-weight: 700;
-}
-
-/* Result zone */
-.kam-simv-result-circle.success {
-  fill: #d4edda;
-  stroke: var(--rzp-success);
-  stroke-width: 2.5;
-  animation: kam-simv-result-pop 0.6s ease-out;
-}
-
-.kam-simv-result-circle.ntf {
-  fill: #fde8e8;
-  stroke: var(--rzp-danger);
-  stroke-width: 2.5;
-  animation: kam-simv-result-pop 0.6s ease-out;
-}
-
-.kam-simv-result-icon {
-  font-size: 22px;
-  font-weight: 700;
-}
-
-.kam-simv-result-icon.success {
-  fill: var(--rzp-success);
-}
-
-.kam-simv-result-icon.ntf {
+.kam-galton-bin-pct.ntf {
   fill: var(--rzp-danger);
 }
 
-.kam-simv-result-text {
-  font-size: 13px;
+.kam-galton-bin-label {
+  font-size: 10px;
+  fill: var(--rzp-text-secondary);
   font-weight: 600;
 }
 
-.kam-simv-result-text.success {
-  fill: var(--rzp-text-primary);
-}
-
-.kam-simv-result-text.ntf {
+.kam-galton-bin-label.ntf {
   fill: var(--rzp-danger);
 }
 
-.kam-simv-result-sub {
+/* Tooltip */
+.kam-galton-tooltip-bg {
+  fill: #1e293b;
+  opacity: 0.92;
+}
+
+.kam-galton-tooltip-text {
+  font-size: 11px;
+  fill: #fff;
+  font-weight: 600;
+}
+
+.kam-galton-tooltip-sub {
   font-size: 10px;
-  fill: var(--rzp-text-muted);
+  fill: #94a3b8;
+  font-weight: 400;
 }
 
-/* Animated packet */
-.kam-simv-packet {
-  fill: var(--rzp-blue);
-  transition: cx 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+/* Animated balls */
+.kam-galton-ball {
+  opacity: 0;
+  filter: url(#galton-glow);
 }
 
-.kam-simv-packet-trail {
-  fill: var(--rzp-blue);
-  opacity: 0.15;
-  transition: cx 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.kam-simv-packet-group {
-  animation: kam-simv-packet-pulse 1.5s ease-in-out infinite;
+.kam-galton-ball.ntf {
+  filter: none;
+  opacity: 0;
 }
 
 /* Legend */
-.kam-simv-legend {
+.kam-galton-legend {
   display: flex;
   align-items: center;
   gap: 14px;
@@ -7005,7 +6953,7 @@ h3.kam-sr-chart-card-title {
   flex-wrap: wrap;
 }
 
-.kam-simv-legend-item {
+.kam-galton-legend-item {
   display: inline-flex;
   align-items: center;
   gap: 5px;
@@ -7013,68 +6961,37 @@ h3.kam-sr-chart-card-title {
   color: var(--rzp-text-secondary);
 }
 
-.kam-simv-dot {
+.kam-galton-dot {
   width: 10px;
   height: 10px;
   border-radius: 50%;
   display: inline-block;
 }
 
-.kam-simv-dot.eligible {
+.kam-galton-dot.blocking {
+  background: var(--rzp-danger);
+  border: 1.5px solid #991b1b;
+}
+
+.kam-galton-dot.open {
   background: #d4edda;
   border: 1.5px solid var(--rzp-success);
 }
 
-.kam-simv-dot.ineligible {
-  background: #f5f5f5;
-  border: 1.5px solid #ccc;
+.kam-galton-dot.skip {
+  background: transparent;
+  border: 1.5px dashed var(--rzp-border);
 }
 
-.kam-simv-dot.disabled {
-  background: #ffe0e0;
-  border: 1.5px dashed var(--rzp-danger);
+.kam-galton-legend-sep {
+  width: 1px;
+  height: 16px;
+  background: var(--rzp-border);
 }
 
-.kam-simv-dot.eliminated {
-  background: var(--rzp-danger);
-  opacity: 0.3;
-}
-
-.kam-simv-legend-hint {
+.kam-galton-legend-hint {
   font-size: 10px;
   color: var(--rzp-text-muted);
   font-style: italic;
   margin-left: auto;
-}
-
-/* ── Animations ── */
-
-@keyframes kam-simv-packet-pulse {
-  0%, 100% { opacity: 0.9; }
-  50% { opacity: 1; }
-}
-
-@keyframes kam-simv-gate-pulse {
-  0% { stroke-width: 2; opacity: 0.5; }
-  40% { stroke-width: 5; opacity: 1; }
-  100% { stroke-width: 3; opacity: 1; }
-}
-
-@keyframes kam-simv-gate-block {
-  0% { stroke-width: 2; }
-  30% { stroke-width: 6; }
-  60% { stroke-width: 4; }
-  100% { stroke-width: 3.5; }
-}
-
-@keyframes kam-simv-select-ring {
-  0% { r: 12; opacity: 0; stroke-width: 0; }
-  50% { r: 20; opacity: 1; stroke-width: 3; }
-  100% { r: 17; opacity: 1; stroke-width: 2.5; }
-}
-
-@keyframes kam-simv-result-pop {
-  0% { r: 0; opacity: 0; }
-  60% { r: 32; opacity: 1; }
-  100% { r: 28; opacity: 1; }
 }

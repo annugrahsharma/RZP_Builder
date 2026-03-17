@@ -22,6 +22,7 @@ import {
   detectNTFGaps,
   simulateTransaction,
   simulateRoutingPipeline,
+  batchSimulatePayments,
   traceNTFRuleChain,
   getTerminalDisplayId,
   getTerminalGatewayInfo,
@@ -2733,65 +2734,201 @@ function MetricCard({ icon, iconBg, iconColor, label, value, delta, deltaType })
 // ---------------------------------------------------------------------------
 // Visual Pipeline (NetLogo-style routing simulator)
 // ---------------------------------------------------------------------------
-function VisualPipeline({ pipelineResult, animStep, isPlaying, setIsPlaying, setAnimStep, setSimOverrides, gateways, merchant }) {
-  const stages = pipelineResult.stages
-  const poolStage = stages.find(s => s.type === 'initial')
-  const ruleStages = stages.filter(s => s.type === 'rule_filter' || s.type === 'rule_ntf' || s.type === 'rule_skip')
-  const sorterStage = stages.find(s => s.type === 'sorter')
-  const ntfStage = stages.find(s => s.type === 'ntf')
-  const isNTF = pipelineResult.isNTF
+function GaltonBoard({ merchant, rules, simOverrides, setSimOverrides, gateways: gwData }) {
+  const [galtonRange, setGaltonRange] = useState('7d')
+  const [galtonBalls, setGaltonBalls] = useState([])
+  const [isDropping, setIsDropping] = useState(false)
+  const [hoveredBin, setHoveredBin] = useState(null)
+  const dropTimerRef = useRef(null)
 
-  // All terminals from pool stage
-  const allTerminals = poolStage ? [...poolStage.terminalsRemaining, ...poolStage.terminalsEliminated] : []
-  const eligibleIds = new Set((poolStage?.terminalsRemaining || []).map(t => t.terminalId))
+  // Generate transactions and filter by date range
+  const allTxns = useMemo(() => generateMerchantTransactions(merchant), [merchant])
 
-  // Track which terminals survive each rule stage
-  const terminalFateByStage = useMemo(() => {
-    const fates = {}
-    // After pool stage
-    const poolAlive = new Set(eligibleIds)
-    fates[-1] = new Set(poolAlive)
-    fates[0] = new Set(poolAlive)
-
-    let alive = new Set(poolAlive)
-    stages.forEach((stage, idx) => {
-      if (stage.type === 'rule_filter' || stage.type === 'rule_ntf') {
-        const eliminated = new Set((stage.terminalsEliminated || []).map(t => t.terminalId))
-        alive = new Set([...alive].filter(id => !eliminated.has(id)))
-      }
-      fates[idx] = new Set(alive)
-    })
-    return fates
-  }, [stages, eligibleIds]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  const handleReplay = () => {
-    setAnimStep(-1)
-    setIsPlaying(true)
-    setTimeout(() => setAnimStep(0), 100)
-  }
-
-  const handlePlayPause = () => {
-    if (isPlaying) {
-      setIsPlaying(false)
-    } else {
-      if (animStep >= stages.length) {
-        handleReplay()
-      } else {
-        setIsPlaying(true)
-        if (animStep < 0) setTimeout(() => setAnimStep(0), 100)
-      }
+  const filteredTxns = useMemo(() => {
+    const now = new Date(2026, 2, 11, 10, 0, 0)
+    const rangeMs = {
+      '24h': 24 * 3600000,
+      '7d': 7 * 24 * 3600000,
+      '30d': 30 * 24 * 3600000,
+      'all': Infinity,
     }
+    const cutoff = rangeMs[galtonRange] || rangeMs['7d']
+    if (cutoff === Infinity) return allTxns
+    return allTxns.filter(t => (now.getTime() - t.timestamp.getTime()) <= cutoff)
+  }, [allTxns, galtonRange])
+
+  // Batch simulation result
+  const batchResult = useMemo(() => {
+    return batchSimulatePayments(merchant, filteredTxns, rules, simOverrides)
+  }, [merchant, filteredTxns, rules, simOverrides])
+
+  // Build terminal columns (always show all terminals + NTF bin)
+  const terminalCols = useMemo(() => {
+    const cols = merchant.gatewayMetrics.map(gm => {
+      const gw = gwData.find(g => g.id === gm.gatewayId)
+      const term = gw?.terminals.find(t => t.id === gm.terminalId)
+      const dist = batchResult.terminalDistribution.find(d => d.terminalId === gm.terminalId)
+      return {
+        terminalId: gm.terminalId,
+        displayId: term?.terminalId || gm.terminalId,
+        gatewayShort: gw?.shortName || '??',
+        count: dist?.count || 0,
+        percentage: dist?.percentage || 0,
+        avgSR: dist?.avgSR || gm.successRate,
+        avgCost: dist?.avgCost || gm.costPerTxn,
+      }
+    })
+    // Add NTF bin
+    cols.push({
+      terminalId: '__ntf__',
+      displayId: 'NTF',
+      gatewayShort: 'Failed',
+      count: batchResult.ntfCount,
+      percentage: batchResult.ntfPercentage,
+      avgSR: 0,
+      avgCost: 0,
+      isNTF: true,
+    })
+    return cols
+  }, [merchant, gwData, batchResult])
+
+  // Extract rule rows from simulation for the peg board
+  const ruleRows = useMemo(() => {
+    // Run a single representative txn to get the rule stages
+    const sampleTxn = {
+      payment_method: 'Cards',
+      amount: 5000,
+      card_network: 'Visa',
+      card_type: 'credit',
+      international: false,
+    }
+    const sampleResult = simulateRoutingPipeline(merchant, sampleTxn, rules, simOverrides)
+    const ruleStages = sampleResult.stages.filter(s =>
+      s.type === 'rule_filter' || s.type === 'rule_ntf' || s.type === 'rule_skip' || s.type === 'rule_pass' || s.type === 'rule_disabled'
+    )
+    return ruleStages.map(stage => {
+      const eliminatedIds = new Set((stage.terminalsEliminated || []).map(t => t.terminalId))
+      const remainingIds = new Set((stage.terminalsRemaining || []).map(t => t.terminalId))
+      return {
+        ruleId: stage.ruleId,
+        ruleName: stage.ruleName || stage.label,
+        type: stage.type,
+        eliminatedIds,
+        remainingIds,
+        isDisabled: stage.isWhatIfDisabled,
+      }
+    })
+  }, [merchant, rules, simOverrides])
+
+  // Sorter scores for deflector widths
+  const sorterScores = useMemo(() => {
+    const sampleTxn = { payment_method: 'Cards', amount: 5000, card_network: 'Visa', card_type: 'credit', international: false }
+    const sampleResult = simulateRoutingPipeline(merchant, sampleTxn, rules, simOverrides)
+    const sorterStage = sampleResult.stages.find(s => s.type === 'sorter')
+    if (!sorterStage?.scored) return {}
+    const scoreMap = {}
+    sorterStage.scored.forEach(t => { scoreMap[t.terminalId] = t.finalScore })
+    return scoreMap
+  }, [merchant, rules, simOverrides])
+
+  // Layout constants
+  const W = 800, H = 600
+  const colCount = terminalCols.length
+  const laneW = W / colCount
+  const entryY = 60
+  const pegStartY = 100
+  const pegRowH = ruleRows.length > 0 ? Math.min(45, 160 / ruleRows.length) : 45
+  const sorterY = pegStartY + ruleRows.length * pegRowH + 20
+  const binStartY = sorterY + 60
+  const binH = H - binStartY - 30
+
+  // Max fill for bin scaling
+  const maxCount = Math.max(...terminalCols.map(c => c.count), 1)
+
+  // Ball color by payment method
+  const ballColor = (pm) => {
+    if (pm === 'UPI') return '#16a34a'
+    if (pm === 'NB') return '#9333ea'
+    return '#2563eb' // Cards default
   }
 
-  const handleToggleTerminal = (terminalId) => {
-    setSimOverrides(prev => {
-      const next = new Set(prev.disabledTerminals)
-      next.has(terminalId) ? next.delete(terminalId) : next.add(terminalId)
-      return { ...prev, disabledTerminals: next }
+  // Handle dropping balls
+  // Ref to track dropping state without stale closures
+  const isDroppingRef = useRef(false)
+
+  const handleDrop = useCallback(() => {
+    if (isDroppingRef.current) return
+    if (!batchResult || !batchResult.traces || batchResult.traces.length === 0) return
+    isDroppingRef.current = true
+    setIsDropping(true)
+    setGaltonBalls([])
+
+    const traces = batchResult.traces
+    const cols = terminalCols
+    const rows = ruleRows
+
+    const balls = traces.map((trace, i) => {
+      // Determine which column this ball lands in
+      let targetColIdx = cols.findIndex(c => c.terminalId === trace.finalTerminalId)
+      if (trace.isNTF || targetColIdx < 0) targetColIdx = cols.length - 1
+
+      // Jitter: +/- 8px horizontal randomness per peg row
+      const jitters = rows.map((_, ri) => ((hashStr(trace.id + '-j-' + ri) % 17) - 8))
+
+      return {
+        id: trace.id,
+        targetColIdx,
+        color: ballColor(trace.paymentMethod),
+        delay: i * 30,
+        isNTF: trace.isNTF,
+        jitters,
+        paymentMethod: trace.paymentMethod,
+        amount: trace.amount,
+      }
     })
-  }
+
+    // Stagger ball entry
+    let ballIdx = 0
+    if (dropTimerRef.current) clearInterval(dropTimerRef.current)
+    const interval = setInterval(() => {
+      if (ballIdx >= balls.length) {
+        clearInterval(interval)
+        setTimeout(() => {
+          isDroppingRef.current = false
+          setIsDropping(false)
+        }, 1800)
+        return
+      }
+      setGaltonBalls(prev => [...prev, { ...balls[ballIdx], startTime: Date.now() }])
+      ballIdx++
+    }, 30)
+    dropTimerRef.current = interval
+  }, [batchResult, terminalCols, ruleRows])
+
+  // Clean up timer on unmount
+  useEffect(() => {
+    return () => {
+      if (dropTimerRef.current) clearInterval(dropTimerRef.current)
+      isDroppingRef.current = false
+    }
+  }, [])
+
+  // Auto-drop on first render or when batch result changes
+  useEffect(() => {
+    // Clear previous animation
+    if (dropTimerRef.current) {
+      clearInterval(dropTimerRef.current)
+      dropTimerRef.current = null
+    }
+    isDroppingRef.current = false
+    setIsDropping(false)
+    setGaltonBalls([])
+    const t = setTimeout(() => handleDrop(), 300)
+    return () => clearTimeout(t)
+  }, [batchResult]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleToggleRule = (ruleId) => {
+    if (!ruleId) return
     setSimOverrides(prev => {
       const next = new Set(prev.disabledRules)
       next.has(ruleId) ? next.delete(ruleId) : next.add(ruleId)
@@ -2799,244 +2936,330 @@ function VisualPipeline({ pipelineResult, animStep, isPlaying, setIsPlaying, set
     })
   }
 
-  // Layout constants
-  const W = 960, H = 400
-  const zones = [
-    { key: 'entry', x: 0, w: 100, label: 'Payment' },
-    { key: 'pool', x: 115, w: 190, label: 'Terminal Pool' },
-    { key: 'rules', x: 320, w: 220, label: 'Rule Filters' },
-    { key: 'sorter', x: 555, w: 180, label: 'Sorter' },
-    { key: 'result', x: 750, w: 200, label: 'Result' },
-  ]
-  const topY = 42, botY = H - 10
-  const zoneH = botY - topY
+  // Generate CSS keyframes for each ball dynamically
+  const generateBallStyle = useCallback((ball) => {
+    const targetX = laneW * ball.targetColIdx + laneW / 2
+    const startX = W / 2
+    const totalDuration = 1500 // ms
 
-  const termY = (index, total) => topY + 30 + (total > 1 ? index * ((zoneH - 60) / (total - 1)) : (zoneH - 60) / 2)
+    // Build keyframe path through peg rows
+    const steps = []
+    steps.push({ pct: 0, x: startX, y: entryY - 15 })
+    steps.push({ pct: 8, x: startX, y: entryY + 10 })
 
-  // Determine which stage index each step maps to
-  const poolIdx = stages.indexOf(poolStage)
-  const ruleIdxStart = ruleStages.length > 0 ? stages.indexOf(ruleStages[0]) : -1
-  const ruleIdxEnd = ruleStages.length > 0 ? stages.indexOf(ruleStages[ruleStages.length - 1]) : -1
-  const sorterIdx = sorterStage ? stages.indexOf(sorterStage) : -1
+    ruleRows.forEach((_, ri) => {
+      const pct = 15 + (ri / Math.max(ruleRows.length, 1)) * 40
+      const progress = (ri + 1) / Math.max(ruleRows.length, 1)
+      const x = startX + (targetX - startX) * progress * 0.6 + (ball.jitters[ri] || 0)
+      const y = pegStartY + ri * pegRowH + pegRowH / 2
+      steps.push({ pct, x, y })
+    })
 
-  // Packet position based on animStep
-  const packetX = animStep < 0 ? 50 : animStep <= poolIdx ? 210 : (animStep <= ruleIdxEnd && ruleIdxEnd >= 0) ? 430 : animStep === sorterIdx ? 645 : 850
-  const packetVisible = animStep >= 0
+    // Sorter deflection
+    steps.push({ pct: 65, x: startX + (targetX - startX) * 0.85, y: sorterY + 15 })
+    // Final position: into the bin
+    steps.push({ pct: 88, x: targetX, y: binStartY + 5 })
+    steps.push({ pct: 100, x: targetX, y: binStartY + binH * 0.5 })
 
-  // Sorted terminals for sorter zone
-  const scoredTerminals = sorterStage?.scored || []
+    const keyframes = steps.map(s =>
+      `${s.pct}% { transform: translate(${s.x}px, ${s.y}px); opacity: ${s.pct > 92 ? 0.3 : s.pct < 5 ? 0 : 1}; }`
+    ).join('\n')
 
-  const animDone = animStep >= stages.length
+    const animName = `galton-ball-${ball.id.replace(/[^a-zA-Z0-9]/g, '')}`
+
+    return {
+      animName,
+      keyframes,
+      duration: totalDuration,
+      delay: ball.delay,
+    }
+  }, [laneW, W, entryY, pegStartY, pegRowH, ruleRows, sorterY, binStartY, binH])
+
+  // Build stylesheet for all active balls (deduplicate by animation name)
+  const ballStyleSheet = useMemo(() => {
+    if (galtonBalls.length === 0) return ''
+    const seen = new Set()
+    return galtonBalls.map(ball => {
+      const s = generateBallStyle(ball)
+      if (seen.has(s.animName)) return ''
+      seen.add(s.animName)
+      return `@keyframes ${s.animName} { ${s.keyframes} }`
+    }).filter(Boolean).join('\n')
+  }, [galtonBalls, generateBallStyle])
 
   return (
-    <div className="kam-simv-container">
-      <div className="kam-simv-controls">
-        <button className="kam-simv-ctrl-btn" onClick={handlePlayPause} title={isPlaying ? 'Pause' : 'Play'}>
-          {isPlaying ? (
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+    <div className="kam-galton-board">
+      {/* Inline keyframes for ball animation */}
+      {ballStyleSheet && <style>{ballStyleSheet}</style>}
+
+      {/* Controls row */}
+      <div className="kam-galton-controls">
+        <div className="kam-galton-range-btns">
+          {['24h', '7d', '30d', 'all'].map(r => (
+            <button
+              key={r}
+              className={`kam-galton-range-btn${galtonRange === r ? ' active' : ''}`}
+              onClick={() => setGaltonRange(r)}
+            >{r === 'all' ? 'All' : r}</button>
+          ))}
+        </div>
+        <span className="kam-galton-count">{filteredTxns.length} payments in range</span>
+        <button
+          className={`kam-galton-drop-btn${isDropping ? ' dropping' : ''}`}
+          onClick={handleDrop}
+          disabled={isDropping}
+        >
+          {isDropping ? (
+            <>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="3"/></svg>
+              Dropping...
+            </>
           ) : (
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            <>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/><polyline points="8 12 12 16 16 12"/><line x1="12" y1="8" x2="12" y2="16"/>
+              </svg>
+              Drop Payments
+            </>
           )}
-          {isPlaying ? 'Pause' : animDone ? 'Done' : 'Play'}
         </button>
-        <button className="kam-simv-ctrl-btn" onClick={handleReplay} title="Replay">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
-          </svg>
-          Replay
-        </button>
-        <span className="kam-simv-step-label">
-          {animStep < 0 ? 'Ready' : animStep < stages.length ? `Stage ${animStep + 1}/${stages.length}: ${stages[animStep]?.label}` : isNTF ? 'NTF — Payment Failed' : 'Complete'}
-        </span>
       </div>
 
-      <svg className="kam-simv-svg" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet">
+      {/* SVG Board */}
+      <svg className="kam-galton-svg" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet">
         <defs>
-          <filter id="simv-glow">
-            <feGaussianBlur stdDeviation="3" result="blur"/>
+          <filter id="galton-glow">
+            <feGaussianBlur stdDeviation="2" result="blur"/>
             <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
           </filter>
-          <filter id="simv-glow-green">
-            <feGaussianBlur stdDeviation="4" result="blur"/>
-            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
-          <linearGradient id="simv-flow-grad" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="var(--rzp-blue)" stopOpacity="0.2"/>
-            <stop offset="50%" stopColor="var(--rzp-blue)" stopOpacity="0.5"/>
-            <stop offset="100%" stopColor="var(--rzp-blue)" stopOpacity="0.2"/>
+          <linearGradient id="galton-bin-fill-grad" x1="0" y1="1" x2="0" y2="0">
+            <stop offset="0%" stopColor="var(--rzp-blue)" stopOpacity="0.8"/>
+            <stop offset="100%" stopColor="var(--rzp-blue)" stopOpacity="0.3"/>
+          </linearGradient>
+          <linearGradient id="galton-ntf-fill-grad" x1="0" y1="1" x2="0" y2="0">
+            <stop offset="0%" stopColor="var(--rzp-danger)" stopOpacity="0.8"/>
+            <stop offset="100%" stopColor="var(--rzp-danger)" stopOpacity="0.3"/>
           </linearGradient>
         </defs>
 
-        {/* Background zones */}
-        {zones.map(z => (
-          <g key={z.key}>
-            <rect className="kam-simv-zone" x={z.x} y={topY} width={z.w} height={zoneH} rx="8"/>
-            <text x={z.x + z.w / 2} y={topY + 18} className="kam-simv-zone-label" textAnchor="middle">{z.label}</text>
-          </g>
+        {/* ── Entry zone: funnel ── */}
+        <path
+          d={`M ${W / 2 - 80} ${entryY - 10} L ${W / 2 + 80} ${entryY - 10} L ${W / 2 + 30} ${entryY + 20} L ${W / 2 - 30} ${entryY + 20} Z`}
+          className="kam-galton-funnel"
+        />
+        <text x={W / 2} y={entryY + 5} textAnchor="middle" className="kam-galton-funnel-label">
+          {filteredTxns.length} payments
+        </text>
+
+        {/* ── Lane dividers (vertical dotted lines) ── */}
+        {terminalCols.map((_, ci) => (
+          <line
+            key={`lane-${ci}`}
+            x1={laneW * (ci + 1)} y1={pegStartY - 10}
+            x2={laneW * (ci + 1)} y2={H - 10}
+            className="kam-galton-lane-divider"
+          />
         ))}
 
-        {/* Flow connector lines between zones */}
-        {[
-          [zones[0].x + zones[0].w, zones[1].x],
-          [zones[1].x + zones[1].w, zones[2].x],
-          [zones[2].x + zones[2].w, zones[3].x],
-          [zones[3].x + zones[3].w, zones[4].x],
-        ].map(([x1, x2], i) => (
-          <line key={i} x1={x1} y1={topY + zoneH / 2} x2={x2} y2={topY + zoneH / 2}
-            className={`kam-simv-flow${animStep > i ? ' active' : ''}`}/>
+        {/* ── Lane headers ── */}
+        {terminalCols.map((col, ci) => (
+          <text
+            key={`hdr-${ci}`}
+            x={laneW * ci + laneW / 2}
+            y={pegStartY - 15}
+            textAnchor="middle"
+            className={`kam-galton-lane-header${col.isNTF ? ' ntf' : ''}`}
+          >
+            {col.displayId.length > 12 ? col.displayId.slice(-8) : col.displayId}
+          </text>
         ))}
 
-        {/* ── Entry Zone: Payment info ── */}
-        <g className="kam-simv-entry">
-          <rect x={zones[0].x + 15} y={topY + zoneH / 2 - 35} width={70} height={70} rx="10"
-            className="kam-simv-entry-box"/>
-          <text x={zones[0].x + 50} y={topY + zoneH / 2 - 8} textAnchor="middle" className="kam-simv-entry-icon">
-            {'💳'}
-          </text>
-          <text x={zones[0].x + 50} y={topY + zoneH / 2 + 14} textAnchor="middle" className="kam-simv-entry-text">
-            Payment
-          </text>
-        </g>
+        {/* ── Peg rows (one per rule) ── */}
+        {ruleRows.map((row, ri) => {
+          const rowY = pegStartY + ri * pegRowH + pegRowH / 2
+          return (
+            <g key={`rule-row-${ri}`}>
+              {/* Rule label on left */}
+              <text
+                x={8} y={rowY + 4}
+                className={`kam-galton-rule-label${row.isDisabled ? ' disabled' : ''}`}
+              >
+                {(row.ruleName || '').length > 14 ? (row.ruleName || '').slice(0, 14) + '..' : row.ruleName}
+              </text>
 
-        {/* ── Terminal Pool Zone ── */}
-        {allTerminals.map((t, i) => {
-          const cx = zones[1].x + zones[1].w / 2 + (i % 2 === 0 ? -30 : 30)
-          const cy = termY(i, allTerminals.length)
-          const isEligible = eligibleIds.has(t.terminalId)
-          const poolRevealed = animStep >= poolIdx
-          const eliminatedInPool = !isEligible
-          const isDown = t.reason && t.reason.includes('down')
+              {/* Pegs per terminal column */}
+              {terminalCols.map((col, ci) => {
+                if (col.isNTF) return null
+                const cx = laneW * ci + laneW / 2
+                const isEliminated = row.eliminatedIds.has(col.terminalId)
+                const isKept = row.remainingIds.has(col.terminalId)
+                const isSkip = row.type === 'rule_skip'
+                const isDisabled = row.isDisabled
 
-          let nodeClass = 'kam-simv-node'
-          if (poolRevealed && eliminatedInPool) nodeClass += isDown ? ' disabled' : ' ineligible'
-          else if (poolRevealed) nodeClass += ' eligible'
+                let pegClass = 'kam-galton-peg'
+                if (isDisabled) pegClass += ' disabled'
+                else if (isEliminated) pegClass += ' blocking'
+                else if (isKept) pegClass += ' open'
+                else if (isSkip) pegClass += ' skip'
+                else pegClass += ' neutral'
+
+                return (
+                  <g key={`peg-${ri}-${ci}`}
+                    style={{ cursor: row.ruleId ? 'pointer' : 'default' }}
+                    onClick={() => handleToggleRule(row.ruleId)}
+                  >
+                    <circle cx={cx} cy={rowY} r={8} className={pegClass} />
+                    {isEliminated && !isDisabled && (
+                      <line x1={cx - 5} y1={rowY - 5} x2={cx + 5} y2={rowY + 5}
+                        className="kam-galton-peg-strike" />
+                    )}
+                  </g>
+                )
+              })}
+            </g>
+          )
+        })}
+
+        {/* ── Sorter row: angled deflectors ── */}
+        <text x={8} y={sorterY + 15} className="kam-galton-rule-label">Sorter</text>
+        {terminalCols.map((col, ci) => {
+          if (col.isNTF) return null
+          const cx = laneW * ci + laneW / 2
+          const score = sorterScores[col.terminalId] || 50
+          // Normalize score to deflector width (min 10, max laneW-10)
+          const maxScore = Math.max(...Object.values(sorterScores), 1)
+          const deflW = 10 + (score / maxScore) * (laneW * 0.6 - 10)
+          return (
+            <g key={`defl-${ci}`}>
+              {/* Funnel shape representing sorter weight */}
+              <path
+                d={`M ${cx - deflW / 2} ${sorterY} L ${cx + deflW / 2} ${sorterY} L ${cx + deflW / 3} ${sorterY + 30} L ${cx - deflW / 3} ${sorterY + 30} Z`}
+                className="kam-galton-deflector"
+              />
+              <text x={cx} y={sorterY + 48} textAnchor="middle" className="kam-galton-deflector-score">
+                {Math.round(score)}
+              </text>
+            </g>
+          )
+        })}
+
+        {/* ── Terminal bins ── */}
+        {terminalCols.map((col, ci) => {
+          const bx = laneW * ci + 6
+          const bw = laneW - 12
+          const fillPct = maxCount > 0 ? col.count / maxCount : 0
+          const fillH = Math.max(4, fillPct * (binH - 20))
+          const isNTFBin = col.isNTF
 
           return (
-            <g key={t.terminalId} className={nodeClass}
-              style={{ cursor: 'pointer' }} onClick={() => handleToggleTerminal(t.terminalId)}>
-              <circle cx={cx} cy={cy} r={14} className="kam-simv-node-circle"/>
-              {poolRevealed && eliminatedInPool && (
-                <line x1={cx - 8} y1={cy - 8} x2={cx + 8} y2={cy + 8} className="kam-simv-node-strike"/>
+            <g key={`bin-${ci}`}
+              onMouseEnter={() => setHoveredBin(ci)}
+              onMouseLeave={() => setHoveredBin(null)}
+              className="kam-galton-bin-group"
+            >
+              {/* Bin outline */}
+              <rect
+                x={bx} y={binStartY}
+                width={bw} height={binH - 10}
+                rx={4}
+                className={`kam-galton-bin${isNTFBin ? ' ntf' : ''}`}
+              />
+              {/* Fill bar from bottom */}
+              <rect
+                x={bx + 2} y={binStartY + (binH - 12) - fillH}
+                width={bw - 4} height={fillH}
+                rx={3}
+                className={`kam-galton-bin-fill${isNTFBin ? ' ntf' : ''}`}
+              />
+              {/* Count label */}
+              <text
+                x={laneW * ci + laneW / 2}
+                y={binStartY + binH - 18}
+                textAnchor="middle"
+                className={`kam-galton-bin-count${isNTFBin ? ' ntf' : ''}`}
+              >
+                {col.count}
+              </text>
+              {/* Percentage */}
+              <text
+                x={laneW * ci + laneW / 2}
+                y={binStartY + binH - 4}
+                textAnchor="middle"
+                className={`kam-galton-bin-pct${isNTFBin ? ' ntf' : ''}`}
+              >
+                {col.percentage}%
+              </text>
+              {/* Terminal info below bin */}
+              <text
+                x={laneW * ci + laneW / 2}
+                y={binStartY + binH + 10}
+                textAnchor="middle"
+                className={`kam-galton-bin-label${isNTFBin ? ' ntf' : ''}`}
+              >
+                {col.gatewayShort}
+              </text>
+
+              {/* Hover tooltip */}
+              {hoveredBin === ci && (
+                <g>
+                  <rect
+                    x={laneW * ci + laneW / 2 - 65}
+                    y={binStartY - 55}
+                    width={130} height={48} rx={6}
+                    className="kam-galton-tooltip-bg"
+                  />
+                  <text x={laneW * ci + laneW / 2} y={binStartY - 38} textAnchor="middle" className="kam-galton-tooltip-text">
+                    {isNTFBin ? `${col.count} failed payments` : `SR: ${col.avgSR}% | Cost: ₹${col.avgCost}`}
+                  </text>
+                  <text x={laneW * ci + laneW / 2} y={binStartY - 22} textAnchor="middle" className="kam-galton-tooltip-sub">
+                    {isNTFBin ? 'No terminal found' : `${col.count} payments (${col.percentage}%)`}
+                  </text>
+                </g>
               )}
-              <text x={cx} y={cy + 4} textAnchor="middle" className="kam-simv-node-id">
-                {(t.displayId || t.terminalId).slice(-4)}
-              </text>
-              <text x={cx} y={cy + 26} textAnchor="middle" className="kam-simv-node-label">
-                {t.gatewayShort}
-              </text>
             </g>
           )
         })}
 
-        {/* ── Rule Gates Zone ── */}
-        {ruleStages.map((rule, i) => {
-          const ruleIdx = stages.indexOf(rule)
-          const gateX = zones[2].x + 30 + i * (zones[2].w - 60) / Math.max(ruleStages.length - 1, 1)
-          const revealed = animStep >= ruleIdx
-          const isFilter = rule.type === 'rule_filter'
-          const isNTFCause = rule.type === 'rule_ntf'
-          const isSkip = rule.type === 'rule_skip'
-
-          let gateClass = 'kam-simv-gate'
-          if (revealed && isNTFCause) gateClass += ' ntf'
-          else if (revealed && isFilter) gateClass += ' active'
-          else if (revealed && isSkip) gateClass += ' skip'
-
+        {/* ── Animated balls ── */}
+        {galtonBalls.map((ball, bi) => {
+          const s = generateBallStyle(ball)
           return (
-            <g key={rule.id} className={gateClass}
-              style={{ cursor: 'pointer' }} onClick={() => rule.ruleId && handleToggleRule(rule.ruleId)}>
-              <line x1={gateX} y1={topY + 28} x2={gateX} y2={botY - 8} className="kam-simv-gate-line"/>
-              <rect x={gateX - 8} y={topY + zoneH / 2 - 10} width={16} height={20} rx="3"
-                className="kam-simv-gate-knob"/>
-              <text x={gateX} y={botY + 2} textAnchor="middle" className="kam-simv-gate-label">
-                {(rule.ruleName || rule.label).length > 8 ? (rule.ruleName || rule.label).slice(0, 8) + '..' : (rule.ruleName || rule.label)}
-              </text>
-            </g>
+            <circle
+              key={`${ball.id}-${bi}`}
+              r={4}
+              className={`kam-galton-ball${ball.isNTF ? ' ntf' : ''}`}
+              style={{
+                fill: ball.color,
+                animation: `${s.animName} ${s.duration}ms ease-in-out forwards`,
+                animationDelay: `${s.delay}ms`,
+              }}
+            />
           )
         })}
-
-        {/* ── Terminals flowing through rules (show survivors in rules zone) ── */}
-        {ruleStages.length > 0 && animStep >= ruleIdxStart && poolStage?.terminalsRemaining?.map((t, i) => {
-          // Find the last rule stage we've animated past
-          let lastRevealedRuleIdx = -1
-          for (let ri = ruleStages.length - 1; ri >= 0; ri--) {
-            if (animStep >= stages.indexOf(ruleStages[ri])) { lastRevealedRuleIdx = stages.indexOf(ruleStages[ri]); break }
-          }
-          if (lastRevealedRuleIdx < 0) return null
-          const isAlive = terminalFateByStage[lastRevealedRuleIdx]?.has(t.terminalId)
-          const cx = zones[2].x + zones[2].w - 20
-          const cy = termY(i, poolStage.terminalsRemaining.length)
-
-          return (
-            <circle key={`rule-${t.terminalId}`} cx={cx} cy={cy} r={8}
-              className={`kam-simv-mini-node${isAlive ? ' alive' : ' eliminated'}`}/>
-          )
-        })}
-
-        {/* ── Sorter Zone ── */}
-        {sorterStage && animStep >= sorterIdx && scoredTerminals.map((t, i) => {
-          const cx = zones[3].x + zones[3].w / 2
-          const cy = topY + 45 + i * Math.min(50, (zoneH - 80) / Math.max(scoredTerminals.length - 1, 1))
-          const isSelected = t.isSelected
-          return (
-            <g key={t.terminalId} className={`kam-simv-sorter-node${isSelected ? ' selected' : ''}`}>
-              <circle cx={cx - 40} cy={cy} r={12} className="kam-simv-sorter-circle"/>
-              {isSelected && <circle cx={cx - 40} cy={cy} r={17} className="kam-simv-sorter-ring" filter="url(#simv-glow-green)"/>}
-              <text x={cx - 40} y={cy + 4} textAnchor="middle" className="kam-simv-sorter-rank">#{t.rank}</text>
-              <text x={cx + 5} y={cy - 4} textAnchor="middle" className="kam-simv-sorter-id">{t.displayId?.slice(-6) || t.terminalId.slice(-6)}</text>
-              <text x={cx + 5} y={cy + 10} textAnchor="middle" className="kam-simv-sorter-score">Score: {t.finalScore}</text>
-              {isSelected && <text x={cx + 55} y={cy + 4} className="kam-simv-selected-label">Selected</text>}
-            </g>
-          )
-        })}
-
-        {/* ── Result Zone ── */}
-        {animDone && (
-          <g className="kam-simv-result-zone">
-            {isNTF ? (
-              <>
-                <circle cx={zones[4].x + zones[4].w / 2} cy={topY + zoneH / 2 - 20} r={28}
-                  className="kam-simv-result-circle ntf"/>
-                <text x={zones[4].x + zones[4].w / 2} y={topY + zoneH / 2 - 14} textAnchor="middle"
-                  className="kam-simv-result-icon ntf">{'✕'}</text>
-                <text x={zones[4].x + zones[4].w / 2} y={topY + zoneH / 2 + 20} textAnchor="middle"
-                  className="kam-simv-result-text ntf">Payment Failed</text>
-                <text x={zones[4].x + zones[4].w / 2} y={topY + zoneH / 2 + 38} textAnchor="middle"
-                  className="kam-simv-result-sub">NTF</text>
-              </>
-            ) : pipelineResult.selectedTerminal && (
-              <>
-                <circle cx={zones[4].x + zones[4].w / 2} cy={topY + zoneH / 2 - 20} r={28}
-                  className="kam-simv-result-circle success" filter="url(#simv-glow-green)"/>
-                <text x={zones[4].x + zones[4].w / 2} y={topY + zoneH / 2 - 13} textAnchor="middle"
-                  className="kam-simv-result-icon success">{'✓'}</text>
-                <text x={zones[4].x + zones[4].w / 2} y={topY + zoneH / 2 + 18} textAnchor="middle"
-                  className="kam-simv-result-text success">{pipelineResult.selectedTerminal.displayId}</text>
-                <text x={zones[4].x + zones[4].w / 2} y={topY + zoneH / 2 + 36} textAnchor="middle"
-                  className="kam-simv-result-sub">{pipelineResult.selectedTerminal.gatewayShort}</text>
-                <text x={zones[4].x + zones[4].w / 2} y={topY + zoneH / 2 + 54} textAnchor="middle"
-                  className="kam-simv-result-sub">SR {pipelineResult.selectedTerminal.successRate}% | ₹{pipelineResult.selectedTerminal.costPerTxn}</text>
-              </>
-            )}
-          </g>
-        )}
-
-        {/* ── Animated Payment Packet ── */}
-        {packetVisible && (
-          <g className="kam-simv-packet-group" filter="url(#simv-glow)">
-            <circle className="kam-simv-packet-trail" cx={packetX} cy={topY + zoneH / 2} r={16} />
-            <circle className="kam-simv-packet" cx={packetX} cy={topY + zoneH / 2} r={8} />
-          </g>
-        )}
       </svg>
 
       {/* Legend */}
-      <div className="kam-simv-legend">
-        <span className="kam-simv-legend-item"><span className="kam-simv-dot eligible"></span> Eligible</span>
-        <span className="kam-simv-legend-item"><span className="kam-simv-dot ineligible"></span> Ineligible</span>
-        <span className="kam-simv-legend-item"><span className="kam-simv-dot disabled"></span> Disabled (What-If)</span>
-        <span className="kam-simv-legend-item"><span className="kam-simv-dot eliminated"></span> Eliminated by Rule</span>
-        <span className="kam-simv-legend-hint">Click terminals or rule gates to toggle</span>
+      <div className="kam-galton-legend">
+        <span className="kam-galton-legend-item">
+          <span className="kam-galton-dot" style={{ background: '#2563eb' }}></span> Cards
+        </span>
+        <span className="kam-galton-legend-item">
+          <span className="kam-galton-dot" style={{ background: '#16a34a' }}></span> UPI
+        </span>
+        <span className="kam-galton-legend-item">
+          <span className="kam-galton-dot" style={{ background: '#9333ea' }}></span> NB
+        </span>
+        <span className="kam-galton-legend-sep"></span>
+        <span className="kam-galton-legend-item">
+          <span className="kam-galton-dot blocking"></span> Blocks terminal
+        </span>
+        <span className="kam-galton-legend-item">
+          <span className="kam-galton-dot open"></span> Passes through
+        </span>
+        <span className="kam-galton-legend-item">
+          <span className="kam-galton-dot skip"></span> Rule skipped
+        </span>
+        <span className="kam-galton-legend-hint">Click pegs to toggle rules</span>
       </div>
     </div>
   )
@@ -3978,17 +4201,14 @@ function RulesTabContent({
               </div>
             </div>
 
-            {/* ─ Visual Pipeline ─ */}
-            {simViewMode === 'visual' && pipelineResult && (
-              <VisualPipeline
-                pipelineResult={pipelineResult}
-                animStep={animStep}
-                isPlaying={isPlaying}
-                setIsPlaying={setIsPlaying}
-                setAnimStep={setAnimStep}
+            {/* ─ Galton Board (Visual mode) ─ */}
+            {simViewMode === 'visual' && (
+              <GaltonBoard
+                merchant={merchant}
+                rules={rules}
+                simOverrides={simOverrides}
                 setSimOverrides={setSimOverrides}
                 gateways={gateways}
-                merchant={merchant}
               />
             )}
 

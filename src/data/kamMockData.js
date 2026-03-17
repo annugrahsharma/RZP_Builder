@@ -3138,6 +3138,131 @@ function _buildResult(stages, selectedTerminal, isNTF, warnings, merchant, routi
   }
 }
 
+// ── Batch Payment Simulation (Galton Board) ─────────────────
+
+export function batchSimulatePayments(merchant, transactions, rules, overrides = {}) {
+  const terminalCounts = {}
+  const terminalSRSums = {}
+  const terminalCostSums = {}
+  const ruleMatchCounts = {}
+  const ruleElimCounts = {}
+  const ruleAffected = {}
+  let ntfCount = 0
+  const traces = []
+
+  // Build terminal info map
+  const termInfoMap = {}
+  merchant.gatewayMetrics.forEach(gm => {
+    const gw = gateways.find(g => g.id === gm.gatewayId)
+    const term = gw?.terminals.find(t => t.id === gm.terminalId)
+    termInfoMap[gm.terminalId] = {
+      terminalId: gm.terminalId,
+      displayId: term?.terminalId || gm.terminalId,
+      gatewayShort: gw?.shortName || '??',
+      successRate: gm.successRate,
+      costPerTxn: gm.costPerTxn,
+    }
+  })
+
+  // Run each transaction through the pipeline
+  transactions.forEach((txn, idx) => {
+    const simTxn = {
+      payment_method: txn.paymentMethod?.short === 'CC' || txn.paymentMethod?.short === 'DC' ? 'Cards'
+        : txn.paymentMethod?.short === 'UPI' ? 'UPI'
+        : txn.paymentMethod?.short === 'NB' ? 'NB'
+        : txn.paymentMethod?.label || 'Cards',
+      amount: txn.amount || 1000,
+      card_network: txn.paymentMethod?.short === 'CC' ? 'Visa' : txn.paymentMethod?.short === 'DC' ? 'RuPay' : '',
+      card_type: txn.paymentMethod?.short === 'CC' ? 'credit' : txn.paymentMethod?.short === 'DC' ? 'debit' : '',
+      international: false,
+    }
+
+    const result = simulateRoutingPipeline(merchant, simTxn, rules, overrides)
+
+    // Track terminal distribution
+    if (result.isNTF) {
+      ntfCount++
+    } else if (result.selectedTerminal) {
+      const tid = result.selectedTerminal.terminalId
+      terminalCounts[tid] = (terminalCounts[tid] || 0) + 1
+      terminalSRSums[tid] = (terminalSRSums[tid] || 0) + result.selectedTerminal.successRate
+      terminalCostSums[tid] = (terminalCostSums[tid] || 0) + result.selectedTerminal.costPerTxn
+    }
+
+    // Track rule impacts
+    result.stages.forEach((stage, stageIdx) => {
+      if (stage.type === 'rule_filter' || stage.type === 'rule_ntf' || stage.type === 'rule_pass') {
+        const rid = stage.ruleId
+        if (rid) {
+          ruleMatchCounts[rid] = (ruleMatchCounts[rid] || 0) + 1
+          ruleElimCounts[rid] = (ruleElimCounts[rid] || 0) + (stage.terminalsEliminated?.length || 0)
+          if (!ruleAffected[rid]) ruleAffected[rid] = { name: stage.ruleName, count: 0 }
+          ruleAffected[rid].count++
+        }
+      }
+    })
+
+    // Build trace for animation (sample ~80 balls)
+    if (idx < 80) {
+      const pathStages = []
+      let eliminatedAtStage = null
+      result.stages.forEach((stage, si) => {
+        if (stage.type === 'rule_filter' || stage.type === 'rule_pass' || stage.type === 'rule_skip' || stage.type === 'rule_ntf') {
+          pathStages.push(si)
+        }
+        if (stage.type === 'ntf' || stage.type === 'rule_ntf') {
+          eliminatedAtStage = si
+        }
+      })
+
+      traces.push({
+        id: txn.txnId || `txn-${idx}`,
+        paymentMethod: simTxn.payment_method,
+        cardNetwork: simTxn.card_network,
+        amount: simTxn.amount,
+        finalTerminalId: result.isNTF ? null : result.selectedTerminal?.terminalId,
+        isNTF: result.isNTF,
+        pathStages,
+        eliminatedAtStage,
+      })
+    }
+  })
+
+  // Build terminal distribution
+  const totalPayments = transactions.length
+  const terminalDistribution = Object.keys(termInfoMap).map(tid => {
+    const count = terminalCounts[tid] || 0
+    const info = termInfoMap[tid]
+    return {
+      terminalId: tid,
+      displayId: info.displayId,
+      gatewayShort: info.gatewayShort,
+      count,
+      percentage: totalPayments > 0 ? Math.round((count / totalPayments) * 1000) / 10 : 0,
+      avgSR: count > 0 ? Math.round((terminalSRSums[tid] / count) * 10) / 10 : info.successRate,
+      avgCost: count > 0 ? Math.round((terminalCostSums[tid] / count) * 100) / 100 : info.costPerTxn,
+    }
+  }).sort((a, b) => b.count - a.count)
+
+  // Build rule impact
+  const ruleImpact = Object.entries(ruleAffected).map(([rid, info]) => ({
+    ruleId: rid,
+    ruleName: info.name,
+    matchCount: ruleMatchCounts[rid] || 0,
+    eliminatedTerminals: ruleElimCounts[rid] || 0,
+    affectedPayments: info.count,
+  }))
+
+  return {
+    totalPayments,
+    terminalDistribution,
+    ntfCount,
+    ntfPercentage: totalPayments > 0 ? Math.round((ntfCount / totalPayments) * 1000) / 10 : 0,
+    ruleImpact,
+    traces,
+  }
+}
+
 // ── AI Rule Intent Parser ─────────────────
 
 const INTENT_KEYWORDS = {
