@@ -2941,6 +2941,7 @@ function GaltonBoard({ merchant, rules, simOverrides, setSimOverrides, gateways:
 
   // Generate CSS keyframes for each ball dynamically
   const generateBallStyle = useCallback((ball) => {
+    if (!ball || !ball.id) return null
     const targetX = laneW * ball.targetColIdx + laneW / 2
     const startX = W / 2
     const totalDuration = 1500 // ms
@@ -2968,7 +2969,7 @@ function GaltonBoard({ merchant, rules, simOverrides, setSimOverrides, gateways:
       `${s.pct}% { transform: translate(${s.x}px, ${s.y}px); opacity: ${s.pct > 92 ? 0.3 : s.pct < 5 ? 0 : 1}; }`
     ).join('\n')
 
-    const animName = `galton-ball-${ball.id.replace(/[^a-zA-Z0-9]/g, '')}`
+    const animName = `galton-ball-${(ball.id || 'unknown').replace(/[^a-zA-Z0-9]/g, '')}`
 
     return {
       animName,
@@ -2984,7 +2985,7 @@ function GaltonBoard({ merchant, rules, simOverrides, setSimOverrides, gateways:
     const seen = new Set()
     return galtonBalls.map(ball => {
       const s = generateBallStyle(ball)
-      if (seen.has(s.animName)) return ''
+      if (!s || seen.has(s.animName)) return ''
       seen.add(s.animName)
       return `@keyframes ${s.animName} { ${s.keyframes} }`
     }).filter(Boolean).join('\n')
@@ -3228,9 +3229,10 @@ function GaltonBoard({ merchant, rules, simOverrides, setSimOverrides, gateways:
         {/* ── Animated balls ── */}
         {galtonBalls.map((ball, bi) => {
           const s = generateBallStyle(ball)
+          if (!s) return null
           return (
             <circle
-              key={`${ball.id}-${bi}`}
+              key={`${ball.id || bi}-${bi}`}
               r={4}
               className={`kam-galton-ball${ball.isNTF ? ' ntf' : ''}`}
               style={{
