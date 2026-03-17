@@ -6610,3 +6610,471 @@ h3.kam-sr-chart-card-title {
     grid-template-columns: 1fr;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Visual Pipeline Simulator (NetLogo-style)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* View mode toggle */
+.kam-simv-mode-toggle {
+  display: inline-flex;
+  margin-left: 10px;
+  border: 1px solid var(--rzp-border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.kam-simv-mode-btn {
+  padding: 2px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  border: none;
+  background: transparent;
+  color: var(--rzp-text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.kam-simv-mode-btn:first-child {
+  border-right: 1px solid var(--rzp-border);
+}
+
+.kam-simv-mode-btn.active {
+  background: var(--rzp-blue);
+  color: #fff;
+}
+
+.kam-simv-mode-btn:hover:not(.active) {
+  background: var(--rzp-bg-secondary);
+}
+
+/* Container */
+.kam-simv-container {
+  margin-top: 12px;
+  border: 1px solid var(--rzp-border);
+  border-radius: 10px;
+  background: var(--rzp-bg-primary);
+  overflow: hidden;
+}
+
+/* Controls bar */
+.kam-simv-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--rzp-border);
+  background: var(--rzp-bg-secondary);
+}
+
+.kam-simv-ctrl-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid var(--rzp-border);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--rzp-text-primary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.kam-simv-ctrl-btn:hover {
+  background: var(--rzp-bg-secondary);
+  border-color: var(--rzp-blue);
+  color: var(--rzp-blue);
+}
+
+.kam-simv-step-label {
+  font-size: 12px;
+  color: var(--rzp-text-secondary);
+  margin-left: auto;
+  font-weight: 500;
+}
+
+/* SVG canvas */
+.kam-simv-svg {
+  width: 100%;
+  height: auto;
+  max-height: 420px;
+  display: block;
+}
+
+/* Zone backgrounds */
+.kam-simv-zone {
+  fill: #f7f9fc;
+  stroke: #e2e8f0;
+  stroke-width: 1;
+}
+
+.kam-simv-zone-label {
+  font-size: 11px;
+  font-weight: 600;
+  fill: var(--rzp-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Flow lines between zones */
+.kam-simv-flow {
+  stroke: var(--rzp-border);
+  stroke-width: 2;
+  stroke-dasharray: 6 4;
+  transition: stroke 0.4s ease;
+}
+
+.kam-simv-flow.active {
+  stroke: var(--rzp-blue);
+  stroke-dasharray: none;
+  stroke-width: 2.5;
+}
+
+/* Entry zone */
+.kam-simv-entry-box {
+  fill: #f0f4ff;
+  stroke: var(--rzp-blue);
+  stroke-width: 1.5;
+}
+
+.kam-simv-entry-icon {
+  font-size: 22px;
+}
+
+.kam-simv-entry-text {
+  font-size: 11px;
+  fill: var(--rzp-text-secondary);
+  font-weight: 500;
+}
+
+/* Terminal nodes */
+.kam-simv-node {
+  transition: opacity 0.5s ease, transform 0.4s ease;
+}
+
+.kam-simv-node-circle {
+  fill: #e0e0e0;
+  stroke: #bbb;
+  stroke-width: 1.5;
+  transition: all 0.4s ease;
+}
+
+.kam-simv-node.eligible .kam-simv-node-circle {
+  fill: #d4edda;
+  stroke: var(--rzp-success);
+  stroke-width: 2;
+}
+
+.kam-simv-node.ineligible .kam-simv-node-circle {
+  fill: #f5f5f5;
+  stroke: #ccc;
+  stroke-width: 1;
+  opacity: 0.5;
+}
+
+.kam-simv-node.disabled .kam-simv-node-circle {
+  fill: #ffe0e0;
+  stroke: var(--rzp-danger);
+  stroke-width: 2;
+  stroke-dasharray: 4 3;
+}
+
+.kam-simv-node-strike {
+  stroke: var(--rzp-danger);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+.kam-simv-node-id {
+  font-size: 9px;
+  fill: var(--rzp-text-primary);
+  font-weight: 600;
+  font-family: 'Menlo', 'Monaco', monospace;
+}
+
+.kam-simv-node-label {
+  font-size: 9px;
+  fill: var(--rzp-text-muted);
+  font-weight: 500;
+}
+
+/* Mini nodes in rule zone */
+.kam-simv-mini-node {
+  transition: all 0.4s ease;
+}
+
+.kam-simv-mini-node.alive {
+  fill: var(--rzp-success);
+  opacity: 0.9;
+}
+
+.kam-simv-mini-node.eliminated {
+  fill: var(--rzp-danger);
+  opacity: 0.15;
+  r: 5;
+}
+
+/* Rule gate lines */
+.kam-simv-gate-line {
+  stroke: var(--rzp-border);
+  stroke-width: 2;
+  stroke-dasharray: 6 3;
+  transition: all 0.4s ease;
+}
+
+.kam-simv-gate-knob {
+  fill: var(--rzp-bg-secondary);
+  stroke: var(--rzp-border);
+  stroke-width: 1.5;
+  transition: all 0.4s ease;
+}
+
+.kam-simv-gate.active .kam-simv-gate-line {
+  stroke: var(--rzp-warning);
+  stroke-width: 3;
+  stroke-dasharray: none;
+  animation: kam-simv-gate-pulse 1s ease-out;
+}
+
+.kam-simv-gate.active .kam-simv-gate-knob {
+  fill: var(--rzp-warning);
+  stroke: #b45309;
+}
+
+.kam-simv-gate.ntf .kam-simv-gate-line {
+  stroke: var(--rzp-danger);
+  stroke-width: 3.5;
+  stroke-dasharray: none;
+  animation: kam-simv-gate-block 0.8s ease-out;
+}
+
+.kam-simv-gate.ntf .kam-simv-gate-knob {
+  fill: var(--rzp-danger);
+  stroke: #991b1b;
+}
+
+.kam-simv-gate.skip .kam-simv-gate-line {
+  stroke: var(--rzp-text-muted);
+  stroke-width: 1;
+  opacity: 0.5;
+}
+
+.kam-simv-gate.skip .kam-simv-gate-knob {
+  fill: var(--rzp-bg-secondary);
+  stroke: var(--rzp-text-muted);
+  opacity: 0.5;
+}
+
+.kam-simv-gate-label {
+  font-size: 8px;
+  fill: var(--rzp-text-muted);
+  font-weight: 500;
+}
+
+.kam-simv-gate.active .kam-simv-gate-label {
+  fill: var(--rzp-warning);
+  font-weight: 600;
+}
+
+.kam-simv-gate.ntf .kam-simv-gate-label {
+  fill: var(--rzp-danger);
+  font-weight: 600;
+}
+
+/* Sorter nodes */
+.kam-simv-sorter-circle {
+  fill: #e8f0fe;
+  stroke: var(--rzp-blue);
+  stroke-width: 1.5;
+  transition: all 0.4s ease;
+}
+
+.kam-simv-sorter-node.selected .kam-simv-sorter-circle {
+  fill: #d4edda;
+  stroke: var(--rzp-success);
+  stroke-width: 2;
+}
+
+.kam-simv-sorter-ring {
+  fill: none;
+  stroke: var(--rzp-success);
+  stroke-width: 2.5;
+  animation: kam-simv-select-ring 1s ease-out;
+}
+
+.kam-simv-sorter-rank {
+  font-size: 9px;
+  fill: var(--rzp-blue);
+  font-weight: 700;
+  font-family: 'Menlo', 'Monaco', monospace;
+}
+
+.kam-simv-sorter-node.selected .kam-simv-sorter-rank {
+  fill: var(--rzp-success);
+}
+
+.kam-simv-sorter-id {
+  font-size: 10px;
+  fill: var(--rzp-text-primary);
+  font-weight: 600;
+}
+
+.kam-simv-sorter-score {
+  font-size: 9px;
+  fill: var(--rzp-text-muted);
+}
+
+.kam-simv-selected-label {
+  font-size: 10px;
+  fill: var(--rzp-success);
+  font-weight: 700;
+}
+
+/* Result zone */
+.kam-simv-result-circle.success {
+  fill: #d4edda;
+  stroke: var(--rzp-success);
+  stroke-width: 2.5;
+  animation: kam-simv-result-pop 0.6s ease-out;
+}
+
+.kam-simv-result-circle.ntf {
+  fill: #fde8e8;
+  stroke: var(--rzp-danger);
+  stroke-width: 2.5;
+  animation: kam-simv-result-pop 0.6s ease-out;
+}
+
+.kam-simv-result-icon {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.kam-simv-result-icon.success {
+  fill: var(--rzp-success);
+}
+
+.kam-simv-result-icon.ntf {
+  fill: var(--rzp-danger);
+}
+
+.kam-simv-result-text {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.kam-simv-result-text.success {
+  fill: var(--rzp-text-primary);
+}
+
+.kam-simv-result-text.ntf {
+  fill: var(--rzp-danger);
+}
+
+.kam-simv-result-sub {
+  font-size: 10px;
+  fill: var(--rzp-text-muted);
+}
+
+/* Animated packet */
+.kam-simv-packet {
+  fill: var(--rzp-blue);
+  transition: cx 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.kam-simv-packet-trail {
+  fill: var(--rzp-blue);
+  opacity: 0.15;
+  transition: cx 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.kam-simv-packet-group {
+  animation: kam-simv-packet-pulse 1.5s ease-in-out infinite;
+}
+
+/* Legend */
+.kam-simv-legend {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 14px;
+  border-top: 1px solid var(--rzp-border);
+  background: var(--rzp-bg-secondary);
+  flex-wrap: wrap;
+}
+
+.kam-simv-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--rzp-text-secondary);
+}
+
+.kam-simv-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.kam-simv-dot.eligible {
+  background: #d4edda;
+  border: 1.5px solid var(--rzp-success);
+}
+
+.kam-simv-dot.ineligible {
+  background: #f5f5f5;
+  border: 1.5px solid #ccc;
+}
+
+.kam-simv-dot.disabled {
+  background: #ffe0e0;
+  border: 1.5px dashed var(--rzp-danger);
+}
+
+.kam-simv-dot.eliminated {
+  background: var(--rzp-danger);
+  opacity: 0.3;
+}
+
+.kam-simv-legend-hint {
+  font-size: 10px;
+  color: var(--rzp-text-muted);
+  font-style: italic;
+  margin-left: auto;
+}
+
+/* ── Animations ── */
+
+@keyframes kam-simv-packet-pulse {
+  0%, 100% { opacity: 0.9; }
+  50% { opacity: 1; }
+}
+
+@keyframes kam-simv-gate-pulse {
+  0% { stroke-width: 2; opacity: 0.5; }
+  40% { stroke-width: 5; opacity: 1; }
+  100% { stroke-width: 3; opacity: 1; }
+}
+
+@keyframes kam-simv-gate-block {
+  0% { stroke-width: 2; }
+  30% { stroke-width: 6; }
+  60% { stroke-width: 4; }
+  100% { stroke-width: 3.5; }
+}
+
+@keyframes kam-simv-select-ring {
+  0% { r: 12; opacity: 0; stroke-width: 0; }
+  50% { r: 20; opacity: 1; stroke-width: 3; }
+  100% { r: 17; opacity: 1; stroke-width: 2.5; }
+}
+
+@keyframes kam-simv-result-pop {
+  0% { r: 0; opacity: 0; }
+  60% { r: 32; opacity: 1; }
+  100% { r: 28; opacity: 1; }
+}

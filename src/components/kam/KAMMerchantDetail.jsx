@@ -2731,6 +2731,318 @@ function MetricCard({ icon, iconBg, iconColor, label, value, delta, deltaType })
 }
 
 // ---------------------------------------------------------------------------
+// Visual Pipeline (NetLogo-style routing simulator)
+// ---------------------------------------------------------------------------
+function VisualPipeline({ pipelineResult, animStep, isPlaying, setIsPlaying, setAnimStep, setSimOverrides, gateways, merchant }) {
+  const stages = pipelineResult.stages
+  const poolStage = stages.find(s => s.type === 'initial')
+  const ruleStages = stages.filter(s => s.type === 'rule_filter' || s.type === 'rule_ntf' || s.type === 'rule_skip')
+  const sorterStage = stages.find(s => s.type === 'sorter')
+  const ntfStage = stages.find(s => s.type === 'ntf')
+  const isNTF = pipelineResult.isNTF
+
+  // All terminals from pool stage
+  const allTerminals = poolStage ? [...poolStage.terminalsRemaining, ...poolStage.terminalsEliminated] : []
+  const eligibleIds = new Set((poolStage?.terminalsRemaining || []).map(t => t.terminalId))
+
+  // Track which terminals survive each rule stage
+  const terminalFateByStage = useMemo(() => {
+    const fates = {}
+    // After pool stage
+    const poolAlive = new Set(eligibleIds)
+    fates[-1] = new Set(poolAlive)
+    fates[0] = new Set(poolAlive)
+
+    let alive = new Set(poolAlive)
+    stages.forEach((stage, idx) => {
+      if (stage.type === 'rule_filter' || stage.type === 'rule_ntf') {
+        const eliminated = new Set((stage.terminalsEliminated || []).map(t => t.terminalId))
+        alive = new Set([...alive].filter(id => !eliminated.has(id)))
+      }
+      fates[idx] = new Set(alive)
+    })
+    return fates
+  }, [stages, eligibleIds]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleReplay = () => {
+    setAnimStep(-1)
+    setIsPlaying(true)
+    setTimeout(() => setAnimStep(0), 100)
+  }
+
+  const handlePlayPause = () => {
+    if (isPlaying) {
+      setIsPlaying(false)
+    } else {
+      if (animStep >= stages.length) {
+        handleReplay()
+      } else {
+        setIsPlaying(true)
+        if (animStep < 0) setTimeout(() => setAnimStep(0), 100)
+      }
+    }
+  }
+
+  const handleToggleTerminal = (terminalId) => {
+    setSimOverrides(prev => {
+      const next = new Set(prev.disabledTerminals)
+      next.has(terminalId) ? next.delete(terminalId) : next.add(terminalId)
+      return { ...prev, disabledTerminals: next }
+    })
+  }
+
+  const handleToggleRule = (ruleId) => {
+    setSimOverrides(prev => {
+      const next = new Set(prev.disabledRules)
+      next.has(ruleId) ? next.delete(ruleId) : next.add(ruleId)
+      return { ...prev, disabledRules: next }
+    })
+  }
+
+  // Layout constants
+  const W = 960, H = 400
+  const zones = [
+    { key: 'entry', x: 0, w: 100, label: 'Payment' },
+    { key: 'pool', x: 115, w: 190, label: 'Terminal Pool' },
+    { key: 'rules', x: 320, w: 220, label: 'Rule Filters' },
+    { key: 'sorter', x: 555, w: 180, label: 'Sorter' },
+    { key: 'result', x: 750, w: 200, label: 'Result' },
+  ]
+  const topY = 42, botY = H - 10
+  const zoneH = botY - topY
+
+  const termY = (index, total) => topY + 30 + (total > 1 ? index * ((zoneH - 60) / (total - 1)) : (zoneH - 60) / 2)
+
+  // Determine which stage index each step maps to
+  const poolIdx = stages.indexOf(poolStage)
+  const ruleIdxStart = ruleStages.length > 0 ? stages.indexOf(ruleStages[0]) : -1
+  const ruleIdxEnd = ruleStages.length > 0 ? stages.indexOf(ruleStages[ruleStages.length - 1]) : -1
+  const sorterIdx = sorterStage ? stages.indexOf(sorterStage) : -1
+
+  // Packet position based on animStep
+  const packetX = animStep < 0 ? 50 : animStep <= poolIdx ? 210 : (animStep <= ruleIdxEnd && ruleIdxEnd >= 0) ? 430 : animStep === sorterIdx ? 645 : 850
+  const packetVisible = animStep >= 0
+
+  // Sorted terminals for sorter zone
+  const scoredTerminals = sorterStage?.scored || []
+
+  const animDone = animStep >= stages.length
+
+  return (
+    <div className="kam-simv-container">
+      <div className="kam-simv-controls">
+        <button className="kam-simv-ctrl-btn" onClick={handlePlayPause} title={isPlaying ? 'Pause' : 'Play'}>
+          {isPlaying ? (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+          ) : (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          )}
+          {isPlaying ? 'Pause' : animDone ? 'Done' : 'Play'}
+        </button>
+        <button className="kam-simv-ctrl-btn" onClick={handleReplay} title="Replay">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+          </svg>
+          Replay
+        </button>
+        <span className="kam-simv-step-label">
+          {animStep < 0 ? 'Ready' : animStep < stages.length ? `Stage ${animStep + 1}/${stages.length}: ${stages[animStep]?.label}` : isNTF ? 'NTF — Payment Failed' : 'Complete'}
+        </span>
+      </div>
+
+      <svg className="kam-simv-svg" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <filter id="simv-glow">
+            <feGaussianBlur stdDeviation="3" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <filter id="simv-glow-green">
+            <feGaussianBlur stdDeviation="4" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <linearGradient id="simv-flow-grad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="var(--rzp-blue)" stopOpacity="0.2"/>
+            <stop offset="50%" stopColor="var(--rzp-blue)" stopOpacity="0.5"/>
+            <stop offset="100%" stopColor="var(--rzp-blue)" stopOpacity="0.2"/>
+          </linearGradient>
+        </defs>
+
+        {/* Background zones */}
+        {zones.map(z => (
+          <g key={z.key}>
+            <rect className="kam-simv-zone" x={z.x} y={topY} width={z.w} height={zoneH} rx="8"/>
+            <text x={z.x + z.w / 2} y={topY + 18} className="kam-simv-zone-label" textAnchor="middle">{z.label}</text>
+          </g>
+        ))}
+
+        {/* Flow connector lines between zones */}
+        {[
+          [zones[0].x + zones[0].w, zones[1].x],
+          [zones[1].x + zones[1].w, zones[2].x],
+          [zones[2].x + zones[2].w, zones[3].x],
+          [zones[3].x + zones[3].w, zones[4].x],
+        ].map(([x1, x2], i) => (
+          <line key={i} x1={x1} y1={topY + zoneH / 2} x2={x2} y2={topY + zoneH / 2}
+            className={`kam-simv-flow${animStep > i ? ' active' : ''}`}/>
+        ))}
+
+        {/* ── Entry Zone: Payment info ── */}
+        <g className="kam-simv-entry">
+          <rect x={zones[0].x + 15} y={topY + zoneH / 2 - 35} width={70} height={70} rx="10"
+            className="kam-simv-entry-box"/>
+          <text x={zones[0].x + 50} y={topY + zoneH / 2 - 8} textAnchor="middle" className="kam-simv-entry-icon">
+            {'💳'}
+          </text>
+          <text x={zones[0].x + 50} y={topY + zoneH / 2 + 14} textAnchor="middle" className="kam-simv-entry-text">
+            Payment
+          </text>
+        </g>
+
+        {/* ── Terminal Pool Zone ── */}
+        {allTerminals.map((t, i) => {
+          const cx = zones[1].x + zones[1].w / 2 + (i % 2 === 0 ? -30 : 30)
+          const cy = termY(i, allTerminals.length)
+          const isEligible = eligibleIds.has(t.terminalId)
+          const poolRevealed = animStep >= poolIdx
+          const eliminatedInPool = !isEligible
+          const isDown = t.reason && t.reason.includes('down')
+
+          let nodeClass = 'kam-simv-node'
+          if (poolRevealed && eliminatedInPool) nodeClass += isDown ? ' disabled' : ' ineligible'
+          else if (poolRevealed) nodeClass += ' eligible'
+
+          return (
+            <g key={t.terminalId} className={nodeClass}
+              style={{ cursor: 'pointer' }} onClick={() => handleToggleTerminal(t.terminalId)}>
+              <circle cx={cx} cy={cy} r={14} className="kam-simv-node-circle"/>
+              {poolRevealed && eliminatedInPool && (
+                <line x1={cx - 8} y1={cy - 8} x2={cx + 8} y2={cy + 8} className="kam-simv-node-strike"/>
+              )}
+              <text x={cx} y={cy + 4} textAnchor="middle" className="kam-simv-node-id">
+                {(t.displayId || t.terminalId).slice(-4)}
+              </text>
+              <text x={cx} y={cy + 26} textAnchor="middle" className="kam-simv-node-label">
+                {t.gatewayShort}
+              </text>
+            </g>
+          )
+        })}
+
+        {/* ── Rule Gates Zone ── */}
+        {ruleStages.map((rule, i) => {
+          const ruleIdx = stages.indexOf(rule)
+          const gateX = zones[2].x + 30 + i * (zones[2].w - 60) / Math.max(ruleStages.length - 1, 1)
+          const revealed = animStep >= ruleIdx
+          const isFilter = rule.type === 'rule_filter'
+          const isNTFCause = rule.type === 'rule_ntf'
+          const isSkip = rule.type === 'rule_skip'
+
+          let gateClass = 'kam-simv-gate'
+          if (revealed && isNTFCause) gateClass += ' ntf'
+          else if (revealed && isFilter) gateClass += ' active'
+          else if (revealed && isSkip) gateClass += ' skip'
+
+          return (
+            <g key={rule.id} className={gateClass}
+              style={{ cursor: 'pointer' }} onClick={() => rule.ruleId && handleToggleRule(rule.ruleId)}>
+              <line x1={gateX} y1={topY + 28} x2={gateX} y2={botY - 8} className="kam-simv-gate-line"/>
+              <rect x={gateX - 8} y={topY + zoneH / 2 - 10} width={16} height={20} rx="3"
+                className="kam-simv-gate-knob"/>
+              <text x={gateX} y={botY + 2} textAnchor="middle" className="kam-simv-gate-label">
+                {(rule.ruleName || rule.label).length > 8 ? (rule.ruleName || rule.label).slice(0, 8) + '..' : (rule.ruleName || rule.label)}
+              </text>
+            </g>
+          )
+        })}
+
+        {/* ── Terminals flowing through rules (show survivors in rules zone) ── */}
+        {ruleStages.length > 0 && animStep >= ruleIdxStart && poolStage?.terminalsRemaining?.map((t, i) => {
+          // Find the last rule stage we've animated past
+          let lastRevealedRuleIdx = -1
+          for (let ri = ruleStages.length - 1; ri >= 0; ri--) {
+            if (animStep >= stages.indexOf(ruleStages[ri])) { lastRevealedRuleIdx = stages.indexOf(ruleStages[ri]); break }
+          }
+          if (lastRevealedRuleIdx < 0) return null
+          const isAlive = terminalFateByStage[lastRevealedRuleIdx]?.has(t.terminalId)
+          const cx = zones[2].x + zones[2].w - 20
+          const cy = termY(i, poolStage.terminalsRemaining.length)
+
+          return (
+            <circle key={`rule-${t.terminalId}`} cx={cx} cy={cy} r={8}
+              className={`kam-simv-mini-node${isAlive ? ' alive' : ' eliminated'}`}/>
+          )
+        })}
+
+        {/* ── Sorter Zone ── */}
+        {sorterStage && animStep >= sorterIdx && scoredTerminals.map((t, i) => {
+          const cx = zones[3].x + zones[3].w / 2
+          const cy = topY + 45 + i * Math.min(50, (zoneH - 80) / Math.max(scoredTerminals.length - 1, 1))
+          const isSelected = t.isSelected
+          return (
+            <g key={t.terminalId} className={`kam-simv-sorter-node${isSelected ? ' selected' : ''}`}>
+              <circle cx={cx - 40} cy={cy} r={12} className="kam-simv-sorter-circle"/>
+              {isSelected && <circle cx={cx - 40} cy={cy} r={17} className="kam-simv-sorter-ring" filter="url(#simv-glow-green)"/>}
+              <text x={cx - 40} y={cy + 4} textAnchor="middle" className="kam-simv-sorter-rank">#{t.rank}</text>
+              <text x={cx + 5} y={cy - 4} textAnchor="middle" className="kam-simv-sorter-id">{t.displayId?.slice(-6) || t.terminalId.slice(-6)}</text>
+              <text x={cx + 5} y={cy + 10} textAnchor="middle" className="kam-simv-sorter-score">Score: {t.finalScore}</text>
+              {isSelected && <text x={cx + 55} y={cy + 4} className="kam-simv-selected-label">Selected</text>}
+            </g>
+          )
+        })}
+
+        {/* ── Result Zone ── */}
+        {animDone && (
+          <g className="kam-simv-result-zone">
+            {isNTF ? (
+              <>
+                <circle cx={zones[4].x + zones[4].w / 2} cy={topY + zoneH / 2 - 20} r={28}
+                  className="kam-simv-result-circle ntf"/>
+                <text x={zones[4].x + zones[4].w / 2} y={topY + zoneH / 2 - 14} textAnchor="middle"
+                  className="kam-simv-result-icon ntf">{'✕'}</text>
+                <text x={zones[4].x + zones[4].w / 2} y={topY + zoneH / 2 + 20} textAnchor="middle"
+                  className="kam-simv-result-text ntf">Payment Failed</text>
+                <text x={zones[4].x + zones[4].w / 2} y={topY + zoneH / 2 + 38} textAnchor="middle"
+                  className="kam-simv-result-sub">NTF</text>
+              </>
+            ) : pipelineResult.selectedTerminal && (
+              <>
+                <circle cx={zones[4].x + zones[4].w / 2} cy={topY + zoneH / 2 - 20} r={28}
+                  className="kam-simv-result-circle success" filter="url(#simv-glow-green)"/>
+                <text x={zones[4].x + zones[4].w / 2} y={topY + zoneH / 2 - 13} textAnchor="middle"
+                  className="kam-simv-result-icon success">{'✓'}</text>
+                <text x={zones[4].x + zones[4].w / 2} y={topY + zoneH / 2 + 18} textAnchor="middle"
+                  className="kam-simv-result-text success">{pipelineResult.selectedTerminal.displayId}</text>
+                <text x={zones[4].x + zones[4].w / 2} y={topY + zoneH / 2 + 36} textAnchor="middle"
+                  className="kam-simv-result-sub">{pipelineResult.selectedTerminal.gatewayShort}</text>
+                <text x={zones[4].x + zones[4].w / 2} y={topY + zoneH / 2 + 54} textAnchor="middle"
+                  className="kam-simv-result-sub">SR {pipelineResult.selectedTerminal.successRate}% | ₹{pipelineResult.selectedTerminal.costPerTxn}</text>
+              </>
+            )}
+          </g>
+        )}
+
+        {/* ── Animated Payment Packet ── */}
+        {packetVisible && (
+          <g className="kam-simv-packet-group" filter="url(#simv-glow)">
+            <circle className="kam-simv-packet-trail" cx={packetX} cy={topY + zoneH / 2} r={16} />
+            <circle className="kam-simv-packet" cx={packetX} cy={topY + zoneH / 2} r={8} />
+          </g>
+        )}
+      </svg>
+
+      {/* Legend */}
+      <div className="kam-simv-legend">
+        <span className="kam-simv-legend-item"><span className="kam-simv-dot eligible"></span> Eligible</span>
+        <span className="kam-simv-legend-item"><span className="kam-simv-dot ineligible"></span> Ineligible</span>
+        <span className="kam-simv-legend-item"><span className="kam-simv-dot disabled"></span> Disabled (What-If)</span>
+        <span className="kam-simv-legend-item"><span className="kam-simv-dot eliminated"></span> Eliminated by Rule</span>
+        <span className="kam-simv-legend-hint">Click terminals or rule gates to toggle</span>
+      </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // Rules Tab Content
 // ---------------------------------------------------------------------------
 function RulesTabContent({
@@ -3265,6 +3577,32 @@ function RulesTabContent({
     [merchant, simForm, rules, simOverrides]
   )
 
+  // Visual simulator state
+  const [simViewMode, setSimViewMode] = useState('visual')
+  const [animStep, setAnimStep] = useState(-1)
+  const [isPlaying, setIsPlaying] = useState(false)
+
+  // Animation sequencer: advance animStep through pipeline stages
+  useEffect(() => {
+    if (!isPlaying || !pipelineResult) return
+    if (animStep >= pipelineResult.stages.length) {
+      setIsPlaying(false)
+      return
+    }
+    const timer = setTimeout(() => setAnimStep(prev => prev + 1), 800)
+    return () => clearTimeout(timer)
+  }, [isPlaying, animStep, pipelineResult])
+
+  // Auto-play when visual mode is shown or inputs change
+  useEffect(() => {
+    if (simViewMode === 'visual' && pipelineResult) {
+      setAnimStep(-1)
+      setIsPlaying(true)
+      const t = setTimeout(() => setAnimStep(0), 100)
+      return () => clearTimeout(t)
+    }
+  }, [simViewMode, simForm, simOverrides]) // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleApplySuggestedSplit = useCallback(() => {
     if (!tspCompliance) return
     const lockedGwId = merchant.dealDetails?.lockedGatewayId
@@ -3503,119 +3841,7 @@ function RulesTabContent({
         )}
       </div>
 
-      {/* ── Rules Content (only when cost mode) ──── */}
-      {routingMode === 'cost' && (
-      <>
-
-      {/* Cost-Saving Mode bar moved inside Routing Rules card below */}
-
-      {/* ── NTF Guard Banner ─────────────────────────── */}
-      {ntfGaps.hasGaps && (
-        <div className="kam-rules-ntf-banner">
-          <div className="kam-rules-ntf-header">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-              <line x1="12" y1="9" x2="12" y2="13" />
-              <line x1="12" y1="17" x2="12.01" y2="17" />
-            </svg>
-            <strong>NTF Risk Detected</strong>
-            <span className="kam-badge danger">{ntfGaps.gaps.length} gap{ntfGaps.gaps.length !== 1 ? 's' : ''}</span>
-          </div>
-          <p>The current rule set has coverage gaps that could cause payment failures:</p>
-          <ul className="kam-rules-ntf-list">
-            {ntfGaps.gaps.map((gap, i) => (
-              <li key={i}>
-                {gap.method && <span className="kam-badge neutral" style={{ marginRight: 6 }}>{gap.method}</span>}
-                {gap.reason}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* ── GMV Commitment Card (TSP only) ────────────── */}
-      {merchant.dealType === 'tsp' && tspCompliance && (
-        <div className="kam-rules-commitment-card">
-          <div className="kam-card-header">
-            <h3 className="kam-card-title">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-              </svg>
-              GMV Commitment — {tspCompliance.lockedGatewayName}
-            </h3>
-            <span className={`kam-badge ${tspCompliance.status === 'on_track' ? 'success' : tspCompliance.status === 'at_risk' ? 'warning' : 'danger'}`}>
-              {tspCompliance.status === 'on_track' ? 'On Track' : tspCompliance.status === 'at_risk' ? 'At Risk' : 'Off Track'}
-            </span>
-          </div>
-          <div className="kam-rules-commitment-body">
-            <div className="kam-rules-commitment-metrics">
-              <div className="kam-rules-commitment-metric">
-                <span className="label">Annual Target</span>
-                <span className="value">{formatINR(tspCompliance.gmvCommitment)}</span>
-              </div>
-              <div className="kam-rules-commitment-metric">
-                <span className="label">Projected Annual</span>
-                <span className="value">{formatINR(tspCompliance.projectedAnnualGMV)}</span>
-              </div>
-              <div className="kam-rules-commitment-metric">
-                <span className="label">Current Traffic</span>
-                <span className="value">{tspCompliance.actualTrafficPct}%</span>
-              </div>
-              <div className="kam-rules-commitment-metric">
-                <span className="label">Suggested Traffic</span>
-                <span className="value" style={{ color: 'var(--rzp-blue)' }}>{tspCompliance.suggestedTrafficPct}%</span>
-              </div>
-            </div>
-            <div className="kam-rules-commitment-progress">
-              <div className="kam-rules-progress-bar">
-                <div
-                  className={`kam-rules-progress-fill ${tspCompliance.status}`}
-                  style={{ width: `${Math.min(100, (tspCompliance.projectedAnnualGMV / tspCompliance.gmvCommitment) * 100)}%` }}
-                />
-              </div>
-              <span className="kam-rules-progress-label">
-                {((tspCompliance.projectedAnnualGMV / tspCompliance.gmvCommitment) * 100).toFixed(0)}% of target
-              </span>
-            </div>
-            {tspCompliance.status !== 'on_track' && (
-              <button className="kam-btn kam-btn-primary" style={{ marginTop: 12, fontSize: 13 }} onClick={handleApplySuggestedSplit}>
-                Apply Suggested Split ({tspCompliance.suggestedTrafficPct}% → {tspCompliance.lockedGatewayName})
-              </button>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* ── Offer Routing Card (offer-linked only) ─────── */}
-      {merchant.dealType === 'offer_linked' && merchant.dealDetails && (
-        <div className="kam-rules-offer-card">
-          <div className="kam-card-header">
-            <h3 className="kam-card-title">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="20 12 20 22 4 22 4 12" /><rect x="2" y="7" width="20" height="5" /><line x1="12" y1="22" x2="12" y2="7" /><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z" /><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" />
-              </svg>
-              Offer Routing
-            </h3>
-            <span className={`kam-badge ${hasOfferRule ? 'success' : 'warning'}`}>
-              {hasOfferRule ? 'Rule Active' : 'Rule Missing'}
-            </span>
-          </div>
-          <p style={{ fontSize: 13, fontFamily: 'var(--font-secondary)', color: 'var(--rzp-text-secondary)', lineHeight: 1.5, marginBottom: 12 }}>
-            {merchant.dealDetails.description}
-          </p>
-          <div style={{ display: 'flex', gap: 16, fontSize: 13, fontFamily: 'var(--font-secondary)', color: 'var(--rzp-text-primary)', marginBottom: 12 }}>
-            <span><strong>Constraint:</strong> {merchant.dealDetails.constraint}</span>
-            <span><strong>Expires:</strong> {merchant.dealDetails.expiresAt}</span>
-          </div>
-          {!hasOfferRule && (
-            <button className="kam-btn kam-btn-primary" style={{ fontSize: 13 }} onClick={handleCreateOfferRule}>
-              Create Offer Rule
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* ── Routing Simulator ─────────────────────────── */}
+      {/* ── Routing Simulator (available in all modes) ─────────────────────────── */}
       <div className="kam-detail-card kam-sim-container">
         <div className="kam-card-header" style={{ cursor: 'pointer' }} onClick={() => setShowSimulator(!showSimulator)}>
           <h3 className="kam-card-title">
@@ -3624,6 +3850,10 @@ function RulesTabContent({
             </svg>
             Simulate Payment
             <span className="kam-badge info" style={{ fontSize: 10, padding: '1px 6px', marginLeft: 6 }}>Sandbox</span>
+            <div className="kam-simv-mode-toggle" onClick={e => e.stopPropagation()}>
+              <button className={`kam-simv-mode-btn${simViewMode === 'visual' ? ' active' : ''}`} onClick={() => setSimViewMode('visual')}>Visual</button>
+              <button className={`kam-simv-mode-btn${simViewMode === 'debug' ? ' active' : ''}`} onClick={() => setSimViewMode('debug')}>Debug</button>
+            </div>
           </h3>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`kam-recs-chevron${showSimulator ? ' expanded' : ''}`}>
             <polyline points="6 9 12 15 18 9" />
@@ -3748,8 +3978,22 @@ function RulesTabContent({
               </div>
             </div>
 
-            {/* ─ Pipeline Waterfall ─ */}
-            {pipelineResult && (
+            {/* ─ Visual Pipeline ─ */}
+            {simViewMode === 'visual' && pipelineResult && (
+              <VisualPipeline
+                pipelineResult={pipelineResult}
+                animStep={animStep}
+                isPlaying={isPlaying}
+                setIsPlaying={setIsPlaying}
+                setAnimStep={setAnimStep}
+                setSimOverrides={setSimOverrides}
+                gateways={gateways}
+                merchant={merchant}
+              />
+            )}
+
+            {/* ─ Pipeline Waterfall (Debug) ─ */}
+            {simViewMode === 'debug' && pipelineResult && (
               <div className="kam-sim-pipeline">
                 {pipelineResult.stages.map((stage, idx) => {
                   const isLast = idx === pipelineResult.stages.length - 1
@@ -3902,8 +4146,8 @@ function RulesTabContent({
               </div>
             )}
 
-            {/* ─ Result Summary ─ */}
-            {pipelineResult && !pipelineResult.isNTF && pipelineResult.selectedTerminal && (
+            {/* ─ Result Summary (Debug) ─ */}
+            {simViewMode === 'debug' && pipelineResult && !pipelineResult.isNTF && pipelineResult.selectedTerminal && (
               <div className="kam-sim-result">
                 <div className="kam-sim-result-header">
                   <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--rzp-success)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -3950,6 +4194,118 @@ function RulesTabContent({
           </div>
         )}
       </div>
+
+      {/* ── Rules Content (only when cost mode) ──── */}
+      {routingMode === 'cost' && (
+      <>
+
+      {/* Cost-Saving Mode bar moved inside Routing Rules card below */}
+
+      {/* ── NTF Guard Banner ─────────────────────────── */}
+      {ntfGaps.hasGaps && (
+        <div className="kam-rules-ntf-banner">
+          <div className="kam-rules-ntf-header">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+              <line x1="12" y1="9" x2="12" y2="13" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+            <strong>NTF Risk Detected</strong>
+            <span className="kam-badge danger">{ntfGaps.gaps.length} gap{ntfGaps.gaps.length !== 1 ? 's' : ''}</span>
+          </div>
+          <p>The current rule set has coverage gaps that could cause payment failures:</p>
+          <ul className="kam-rules-ntf-list">
+            {ntfGaps.gaps.map((gap, i) => (
+              <li key={i}>
+                {gap.method && <span className="kam-badge neutral" style={{ marginRight: 6 }}>{gap.method}</span>}
+                {gap.reason}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* ── GMV Commitment Card (TSP only) ────────────── */}
+      {merchant.dealType === 'tsp' && tspCompliance && (
+        <div className="kam-rules-commitment-card">
+          <div className="kam-card-header">
+            <h3 className="kam-card-title">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+              </svg>
+              GMV Commitment — {tspCompliance.lockedGatewayName}
+            </h3>
+            <span className={`kam-badge ${tspCompliance.status === 'on_track' ? 'success' : tspCompliance.status === 'at_risk' ? 'warning' : 'danger'}`}>
+              {tspCompliance.status === 'on_track' ? 'On Track' : tspCompliance.status === 'at_risk' ? 'At Risk' : 'Off Track'}
+            </span>
+          </div>
+          <div className="kam-rules-commitment-body">
+            <div className="kam-rules-commitment-metrics">
+              <div className="kam-rules-commitment-metric">
+                <span className="label">Annual Target</span>
+                <span className="value">{formatINR(tspCompliance.gmvCommitment)}</span>
+              </div>
+              <div className="kam-rules-commitment-metric">
+                <span className="label">Projected Annual</span>
+                <span className="value">{formatINR(tspCompliance.projectedAnnualGMV)}</span>
+              </div>
+              <div className="kam-rules-commitment-metric">
+                <span className="label">Current Traffic</span>
+                <span className="value">{tspCompliance.actualTrafficPct}%</span>
+              </div>
+              <div className="kam-rules-commitment-metric">
+                <span className="label">Suggested Traffic</span>
+                <span className="value" style={{ color: 'var(--rzp-blue)' }}>{tspCompliance.suggestedTrafficPct}%</span>
+              </div>
+            </div>
+            <div className="kam-rules-commitment-progress">
+              <div className="kam-rules-progress-bar">
+                <div
+                  className={`kam-rules-progress-fill ${tspCompliance.status}`}
+                  style={{ width: `${Math.min(100, (tspCompliance.projectedAnnualGMV / tspCompliance.gmvCommitment) * 100)}%` }}
+                />
+              </div>
+              <span className="kam-rules-progress-label">
+                {((tspCompliance.projectedAnnualGMV / tspCompliance.gmvCommitment) * 100).toFixed(0)}% of target
+              </span>
+            </div>
+            {tspCompliance.status !== 'on_track' && (
+              <button className="kam-btn kam-btn-primary" style={{ marginTop: 12, fontSize: 13 }} onClick={handleApplySuggestedSplit}>
+                Apply Suggested Split ({tspCompliance.suggestedTrafficPct}% → {tspCompliance.lockedGatewayName})
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── Offer Routing Card (offer-linked only) ─────── */}
+      {merchant.dealType === 'offer_linked' && merchant.dealDetails && (
+        <div className="kam-rules-offer-card">
+          <div className="kam-card-header">
+            <h3 className="kam-card-title">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 12 20 22 4 22 4 12" /><rect x="2" y="7" width="20" height="5" /><line x1="12" y1="22" x2="12" y2="7" /><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z" /><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" />
+              </svg>
+              Offer Routing
+            </h3>
+            <span className={`kam-badge ${hasOfferRule ? 'success' : 'warning'}`}>
+              {hasOfferRule ? 'Rule Active' : 'Rule Missing'}
+            </span>
+          </div>
+          <p style={{ fontSize: 13, fontFamily: 'var(--font-secondary)', color: 'var(--rzp-text-secondary)', lineHeight: 1.5, marginBottom: 12 }}>
+            {merchant.dealDetails.description}
+          </p>
+          <div style={{ display: 'flex', gap: 16, fontSize: 13, fontFamily: 'var(--font-secondary)', color: 'var(--rzp-text-primary)', marginBottom: 12 }}>
+            <span><strong>Constraint:</strong> {merchant.dealDetails.constraint}</span>
+            <span><strong>Expires:</strong> {merchant.dealDetails.expiresAt}</span>
+          </div>
+          {!hasOfferRule && (
+            <button className="kam-btn kam-btn-primary" style={{ fontSize: 13 }} onClick={handleCreateOfferRule}>
+              Create Offer Rule
+            </button>
+          )}
+        </div>
+      )}
 
       {/* ── Grouped Rule List ──────────────────────────── */}
       <div className="kam-detail-card">
