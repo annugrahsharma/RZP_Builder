@@ -999,7 +999,7 @@ export default function KAMMerchantDetail() {
 
   // Transaction data
   const transactions = useMemo(() => merchant ? generateMerchantTransactions(merchant) : [], [merchant])
-  const srData = useMemo(() => merchant ? generateSRTimeSeries(merchant) : [], [merchant])
+  const srData = useMemo(() => merchant ? generateSRTimeSeries(merchant) : { dates: [], overall: [], byMethod: {} }, [merchant])
   const recommendations = useMemo(() => merchant ? generateRecommendations(merchant) : [], [merchant])
   const sankeyData = useMemo(() => merchant ? generateSankeyData(merchant) : { nodes: [], links: [] }, [merchant])
 
