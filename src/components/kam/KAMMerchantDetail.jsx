@@ -1415,6 +1415,43 @@ export default function KAMMerchantDetail() {
                     )}
                   </div>
 
+                  {/* MCC Peer Comparison — when terminal procurement is recommended */}
+                  {rec.meta?.peerComparison && (
+                    <>
+                      <div className="kam-rec-section-label">MCC Peer Comparison</div>
+                      <div className="kam-rec-peer-comparison">
+                        <div className="kam-rec-peer-row this-merchant">
+                          <span className="kam-rec-peer-name">{merchant.name}</span>
+                          <div className="kam-rec-peer-bar-wrap">
+                            <div className="kam-rec-peer-bar this" style={{ width: `${(merchant.avgPaymentSuccessRate / 100) * 100}%` }} />
+                          </div>
+                          <span className="kam-rec-peer-sr">{merchant.avgPaymentSuccessRate}%</span>
+                          <span className="kam-rec-peer-terminals">{rec.meta.merchantTerminalCount} terminals</span>
+                        </div>
+                        {rec.meta.peerComparison.map((peer) => (
+                          <div key={peer.name} className="kam-rec-peer-row peer">
+                            <span className="kam-rec-peer-name">{peer.name}</span>
+                            <div className="kam-rec-peer-bar-wrap">
+                              <div className="kam-rec-peer-bar peer" style={{ width: `${(peer.sr / 100) * 100}%` }} />
+                            </div>
+                            <span className="kam-rec-peer-sr">{peer.sr}%</span>
+                            <span className="kam-rec-peer-terminals">{peer.terminalCount} terminals</span>
+                          </div>
+                        ))}
+                        {rec.meta.missingGateways && rec.meta.missingGateways.length > 0 && (
+                          <div className="kam-rec-missing-gateways">
+                            <span className="kam-rec-missing-label">Missing terminals:</span>
+                            {rec.meta.missingGateways.map((gw) => (
+                              <span key={gw.gatewayId} className="kam-rec-missing-chip">
+                                {gw.gwName} <span className="kam-rec-missing-sr">{gw.successRate}% SR</span>
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  )}
+
                   {/* Recommended Action */}
                   <div className="kam-rec-section-label">Recommended Action</div>
                   <div className="kam-rec-impact">

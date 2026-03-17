@@ -193,13 +193,10 @@ export const merchants = [
     currentTerminalId: 'term-icici-001',
     routingStrategy: 'success_rate',
     gatewayMetrics: [
-      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 73.5, costPerTxn: 1.80, txnShare: 25, supportedMethods: ['Cards'] },
-      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 72.1, costPerTxn: 0, txnShare: 15, supportedMethods: ['UPI'] },
-      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 72.8, costPerTxn: 1.70, txnShare: 20, supportedMethods: ['Cards', 'NB'] },
-      { gatewayId: 'gw-axis', terminalId: 'term-axis-001', successRate: 71.4, costPerTxn: 1.50, txnShare: 15, supportedMethods: ['Cards', 'UPI'] },
-      { gatewayId: 'gw-rbl', terminalId: 'term-rbl-001', successRate: 68.8, costPerTxn: 1.10, txnShare: 10, supportedMethods: ['NB', 'Cards'] },
-      { gatewayId: 'gw-yes', terminalId: 'term-yes-001', successRate: 69.1, costPerTxn: 0, txnShare: 10, supportedMethods: ['UPI'] },
-      { gatewayId: 'gw-yes', terminalId: 'term-yes-002', successRate: 67.8, costPerTxn: 0.85, txnShare: 5, supportedMethods: ['Cards'] },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 73.5, costPerTxn: 1.80, txnShare: 35, supportedMethods: ['Cards'] },
+      { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 72.1, costPerTxn: 0, txnShare: 20, supportedMethods: ['UPI'] },
+      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 72.8, costPerTxn: 1.70, txnShare: 30, supportedMethods: ['Cards', 'NB'] },
+      { gatewayId: 'gw-yes', terminalId: 'term-yes-001', successRate: 69.1, costPerTxn: 0, txnShare: 15, supportedMethods: ['UPI'] },
     ],
     status: 'active',
     routingRules: { selectRules: 2, rejectRules: 1, hasFallback: true, hasCardRestrictions: false, hasNetworkRestrictions: false },
@@ -379,7 +376,7 @@ export const merchants = [
     dealDetails: null,
     monthlyTxnVolume: 780000,
     monthlyGMV: 195000000,
-    avgPaymentSuccessRate: 71.3,
+    avgPaymentSuccessRate: 73.8,
     forwardPricing: 2.0,
     currentGatewayId: 'gw-hdfc',
     currentTerminalId: 'term-hdfc-001',
@@ -387,7 +384,8 @@ export const merchants = [
     gatewayMetrics: [
       { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-001', successRate: 73.5, costPerTxn: 1.80, txnShare: 40, supportedMethods: ['Cards', 'UPI', 'NB'] },
       { gatewayId: 'gw-hdfc', terminalId: 'term-hdfc-002', successRate: 72.1, costPerTxn: 0, txnShare: 15, supportedMethods: ['Cards'] },
-      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 72.8, costPerTxn: 1.70, txnShare: 30, supportedMethods: ['Cards', 'NB'] },
+      { gatewayId: 'gw-icici', terminalId: 'term-icici-001', successRate: 72.8, costPerTxn: 1.70, txnShare: 20, supportedMethods: ['Cards', 'NB'] },
+      { gatewayId: 'gw-axis', terminalId: 'term-axis-001', successRate: 74.2, costPerTxn: 1.50, txnShare: 10, supportedMethods: ['Cards', 'UPI'] },
       { gatewayId: 'gw-yes', terminalId: 'term-yes-001', successRate: 69.1, costPerTxn: 0, txnShare: 15, supportedMethods: ['UPI'] },
     ],
     status: 'active',
@@ -1302,18 +1300,81 @@ export function generateRecommendations(merchant) {
     }
   }
 
-  // 2. Low SR: success rate below 93% with no SR sensitivity
+  // 2. Low SR: success rate below 93% — enrich with MCC peer terminal comparison
   if (merchant.avgPaymentSuccessRate < 93 && !merchant.srSensitive) {
+    const mccPeers = merchants.filter(
+      (m) => m.mcc === merchant.mcc && m.id !== merchant.id
+    )
+    const merchantGwIds = new Set(merchant.gatewayMetrics.map((gm) => gm.gatewayId))
+    const merchantTerminalCount = merchant.gatewayMetrics.length
+
+    // Find peers with higher SR
+    const betterPeers = mccPeers
+      .filter((p) => p.avgPaymentSuccessRate > merchant.avgPaymentSuccessRate)
+      .sort((a, b) => b.avgPaymentSuccessRate - a.avgPaymentSuccessRate)
+
+    // Find terminals that better peers have but this merchant doesn't
+    const missingGateways = []
+    const seenGw = new Set()
+    betterPeers.forEach((peer) => {
+      peer.gatewayMetrics.forEach((gm) => {
+        if (!merchantGwIds.has(gm.gatewayId) && !seenGw.has(gm.gatewayId)) {
+          seenGw.add(gm.gatewayId)
+          const gwInfo = gateways.find((g) => g.id === gm.gatewayId)
+          missingGateways.push({
+            gatewayId: gm.gatewayId,
+            gwName: gwInfo?.shortName || gm.gatewayId,
+            successRate: gm.successRate,
+            peerName: peer.name,
+            peerSR: peer.avgPaymentSuccessRate,
+            peerTerminalCount: peer.gatewayMetrics.length,
+          })
+        }
+      })
+    })
+    missingGateways.sort((a, b) => b.successRate - a.successRate)
+
+    let description, signal, title, impact
+    if (betterPeers.length > 0 && missingGateways.length > 0) {
+      const bestPeer = betterPeers[0]
+      const srGap = (bestPeer.avgPaymentSuccessRate - merchant.avgPaymentSuccessRate).toFixed(1)
+      const topMissing = missingGateways.slice(0, 2)
+      const terminalNames = topMissing.map((g) => g.gwName).join(', ')
+      title = `Procure ${terminalNames} terminal${topMissing.length > 1 ? 's' : ''} to close SR gap`
+      description = `${merchant.name} has ${merchantTerminalCount} terminal${merchantTerminalCount !== 1 ? 's' : ''} with ${merchant.avgPaymentSuccessRate}% SR, while MCC peer ${bestPeer.name} achieves ${bestPeer.avgPaymentSuccessRate}% SR with ${bestPeer.gatewayMetrics.length} terminals — ${srGap}pp higher. ${bestPeer.name} routes via ${topMissing.map((g) => `${g.gwName} (${g.successRate}% SR)`).join(' and ')}, which ${merchant.name} currently lacks. Adding ${topMissing.length > 1 ? 'these terminals' : 'this terminal'} would expand routing options and help close the SR gap.`
+      signal = `${merchantTerminalCount} terminals vs ${bestPeer.gatewayMetrics.length} at ${bestPeer.name} · SR gap ${srGap}pp`
+      impact = `Close ${srGap}pp SR gap with MCC peers`
+    } else if (betterPeers.length > 0) {
+      const bestPeer = betterPeers[0]
+      const srGap = (bestPeer.avgPaymentSuccessRate - merchant.avgPaymentSuccessRate).toFixed(1)
+      title = 'Investigate low success rate'
+      description = `Current SR is ${merchant.avgPaymentSuccessRate}%, trailing MCC peer ${bestPeer.name} (${bestPeer.avgPaymentSuccessRate}%) by ${srGap}pp. Both have similar terminal coverage — review terminal health and routing configuration to identify the gap.`
+      signal = `SR ${merchant.avgPaymentSuccessRate}% vs ${bestPeer.name} at ${bestPeer.avgPaymentSuccessRate}%`
+      impact = `Close ${srGap}pp SR gap with MCC peers`
+    } else {
+      title = 'Investigate low success rate'
+      description = `Current success rate is ${merchant.avgPaymentSuccessRate}%, which is below the 93% threshold. Consider enabling SR sensitivity or reviewing terminal health to improve payment experience.`
+      signal = `SR at ${merchant.avgPaymentSuccessRate}% (below 93% benchmark)`
+      impact = 'Improve conversion rate by 2–4%'
+    }
+
     recs.push({
       id: 'low-sr-action',
       type: 'critical',
-      title: 'Investigate low success rate',
-      description: `Current success rate is ${merchant.avgPaymentSuccessRate}%, which is below the 93% threshold. This may lead to poor checkout experience and merchant dissatisfaction. Consider enabling SR sensitivity or reviewing terminal health.`,
-      signal: `SR at ${merchant.avgPaymentSuccessRate}% (below 93% benchmark)`,
-      action: 'review_terminals',
-      impact: 'Improve conversion rate by 2–4%',
+      title,
+      description,
+      signal,
+      action: missingGateways.length > 0 ? 'procure_terminal' : 'review_terminals',
+      impact,
       confidence: 92,
-      affectedArea: 'Terminal Health',
+      affectedArea: missingGateways.length > 0 ? 'Terminal Procurement' : 'Terminal Health',
+      meta: missingGateways.length > 0 ? {
+        missingGateways: missingGateways.slice(0, 2),
+        peerComparison: betterPeers.slice(0, 2).map((p) => ({
+          name: p.name, sr: p.avgPaymentSuccessRate, terminalCount: p.gatewayMetrics.length,
+        })),
+        merchantTerminalCount,
+      } : undefined,
     })
   }
 
@@ -1466,47 +1527,6 @@ export function generateRecommendations(merchant) {
           nrBps: nrImprovementBps,
         },
       })
-    }
-  }
-
-  // 8. MCC peer comparison — procure terminal from higher-SR peer's gateway
-  if (merchant.routingStrategy === 'success_rate') {
-    const mccPeers = merchants.filter(
-      (m) => m.mcc === merchant.mcc && m.id !== merchant.id && m.routingStrategy === 'success_rate'
-    )
-    if (mccPeers.length > 0) {
-      const mccGroup = [merchant, ...mccPeers]
-      const mccAvgSR = mccGroup.reduce((s, m) => s + m.avgPaymentSuccessRate, 0) / mccGroup.length
-
-      if (merchant.avgPaymentSuccessRate < mccAvgSR) {
-        const bestPeer = mccPeers.reduce((best, m) =>
-          m.avgPaymentSuccessRate > best.avgPaymentSuccessRate ? m : best
-        )
-        const merchantGwIds = new Set(merchant.gatewayMetrics.map((gm) => gm.gatewayId))
-        const peerOnlyGws = bestPeer.gatewayMetrics.filter((gm) => !merchantGwIds.has(gm.gatewayId))
-
-        if (peerOnlyGws.length > 0) {
-          const bestMissing = peerOnlyGws.reduce((best, gm) =>
-            gm.successRate > best.successRate ? gm : best
-          )
-          const gwInfo = gateways.find((g) => g.id === bestMissing.gatewayId)
-          const gwName = gwInfo?.shortName || bestMissing.gatewayId
-          const srGap = (bestPeer.avgPaymentSuccessRate - merchant.avgPaymentSuccessRate).toFixed(1)
-
-          recs.push({
-            id: `mcc-peer-terminal-${bestMissing.gatewayId}`,
-            type: 'warning',
-            signal: `SR ${merchant.avgPaymentSuccessRate}% vs MCC avg ${mccAvgSR.toFixed(1)}% (${bestPeer.name} at ${bestPeer.avgPaymentSuccessRate}%)`,
-            title: `Procure ${gwName} terminal to improve success rate`,
-            description: `${merchant.name}'s SR trails MCC peer ${bestPeer.name} (${bestPeer.avgPaymentSuccessRate}%) by ${srGap}pp. ${bestPeer.name} routes ${bestMissing.txnShare}% traffic via ${gwName} (${bestMissing.successRate}% SR) — a gateway ${merchant.name} currently lacks. Adding ${gwName} terminal could improve overall SR by ~0.5–1%.`,
-            impact: 'Close SR gap with MCC peers',
-            action: 'procure_terminal',
-            confidence: 85,
-            affectedArea: 'Terminal Procurement',
-            meta: { peerName: bestPeer.name, peerSR: bestPeer.avgPaymentSuccessRate, gwName, gwSR: bestMissing.successRate, srGap: parseFloat(srGap) },
-          })
-        }
-      }
     }
   }
 

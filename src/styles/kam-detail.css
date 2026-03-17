@@ -2175,6 +2175,110 @@ h3.kam-sr-chart-card-title {
   margin-bottom: 10px;
 }
 
+/* MCC Peer Comparison */
+.kam-rec-peer-comparison {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  padding: var(--spacing-4);
+  background: var(--rzp-bg-subtle);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--rzp-border);
+  margin-bottom: var(--spacing-3);
+}
+
+.kam-rec-peer-row {
+  display: grid;
+  grid-template-columns: 80px minmax(60px, 1fr) 48px 76px;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+.kam-rec-peer-name {
+  font-size: var(--font-size-12);
+  font-weight: var(--font-weight-medium);
+  color: var(--rzp-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kam-rec-peer-bar-wrap {
+  height: 8px;
+  background: var(--rzp-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.kam-rec-peer-bar {
+  height: 100%;
+  border-radius: var(--radius-sm);
+  transition: width var(--duration-moderate) var(--easing-standard);
+}
+
+.kam-rec-peer-bar.this {
+  background: var(--rzp-danger);
+}
+
+.kam-rec-peer-bar.peer {
+  background: var(--rzp-success);
+}
+
+.kam-rec-peer-sr {
+  font-size: var(--font-size-12);
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-secondary);
+  text-align: right;
+}
+
+.kam-rec-peer-row.this-merchant .kam-rec-peer-sr {
+  color: var(--rzp-danger);
+}
+
+.kam-rec-peer-row.peer .kam-rec-peer-sr {
+  color: var(--rzp-success);
+}
+
+.kam-rec-peer-terminals {
+  font-size: var(--font-size-11);
+  color: var(--rzp-text-muted);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.kam-rec-missing-gateways {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-2);
+  padding-top: var(--spacing-3);
+  border-top: 1px solid var(--rzp-border);
+}
+
+.kam-rec-missing-label {
+  font-size: var(--font-size-11);
+  color: var(--rzp-text-muted);
+  font-weight: var(--font-weight-medium);
+}
+
+.kam-rec-missing-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: 2px var(--spacing-3);
+  background: var(--rzp-blue-light, #eff6ff);
+  border: 1px solid rgba(82, 143, 240, 0.2);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-11);
+  font-weight: var(--font-weight-semibold);
+  color: var(--rzp-blue);
+}
+
+.kam-rec-missing-sr {
+  font-weight: var(--font-weight-regular);
+  color: var(--rzp-text-muted);
+}
+
 /* Impact */
 .kam-rec-impact {
   display: flex;
