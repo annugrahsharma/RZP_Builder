@@ -3734,6 +3734,9 @@ function RulesTabContent({
     } else if (gs.paymentMethod === 'EMI') {
       conditions.push({ field: 'payment_method', operator: 'equals', value: 'EMI' })
       if (gs.emiType) conditions.push({ field: 'emi_type', operator: 'equals', value: gs.emiType })
+      if (gs.issuerBank) conditions.push({ field: 'issuer_bank', operator: 'equals', value: gs.issuerBank })
+      if (gs.cardNetworks.length === 1) conditions.push({ field: 'card_network', operator: 'equals', value: gs.cardNetworks[0] })
+      else if (gs.cardNetworks.length > 1) conditions.push({ field: 'card_network', operator: 'in', value: [...gs.cardNetworks] })
     }
     // Amount (applies to all payment methods)
     if (gs.amountOperator) {
@@ -3797,9 +3800,11 @@ function RulesTabContent({
       if (guidedState.international === true) parts.push('Intl')
       else if (guidedState.international === false) parts.push('Domestic')
     } else if (guidedState.paymentMethod === 'EMI') {
+      if (guidedState.issuerBank) parts.push(guidedState.issuerBank)
       if (guidedState.emiType === 'no_cost') parts.push('No-Cost EMI')
       else if (guidedState.emiType === 'standard') parts.push('Standard EMI')
       else parts.push('EMI')
+      if (guidedState.cardNetworks.length > 0 && guidedState.cardNetworks.length <= 2) parts.push(guidedState.cardNetworks.join('+'))
     }
     if (guidedState.amountOperator === 'greater_than' && guidedState.amountValue) parts.push(`> ₹${(guidedState.amountValue / 100000) >= 1 ? (guidedState.amountValue / 100000) + 'L' : guidedState.amountValue.toLocaleString('en-IN')}`)
     else if (guidedState.amountOperator === 'less_than' && guidedState.amountValue) parts.push(`< ₹${guidedState.amountValue.toLocaleString('en-IN')}`)
@@ -5706,21 +5711,68 @@ function RulesTabContent({
 
                         {/* ── EMI Path ── */}
                         {guidedState.paymentMethod === 'EMI' && (
-                          <div className="kam-guided-filter-group">
-                            <div className="kam-guided-filter-label">EMI Type</div>
-                            <div className="kam-guided-filter-hint">Filter by EMI type, or leave on "Any" for all EMI transactions.</div>
-                            <div className="kam-guided-chip-group">
-                              {[{ value: null, label: 'Any' }, { value: 'no_cost', label: 'No-Cost EMI' }, { value: 'standard', label: 'Standard EMI' }].map(opt => (
-                                <button
-                                  key={opt.label}
-                                  className={`kam-guided-chip${guidedState.emiType === opt.value ? ' selected' : ''}`}
-                                  onClick={() => setGuidedState(prev => ({ ...prev, emiType: opt.value }))}
-                                >
-                                  {opt.label}
-                                </button>
-                              ))}
+                          <>
+                            <div className="kam-guided-filter-group">
+                              <div className="kam-guided-filter-label">EMI Type</div>
+                              <div className="kam-guided-filter-hint">Filter by EMI type, or leave on "Any" for all EMI transactions.</div>
+                              <div className="kam-guided-chip-group">
+                                {[{ value: null, label: 'Any' }, { value: 'no_cost', label: 'No-Cost EMI' }, { value: 'standard', label: 'Standard EMI' }].map(opt => (
+                                  <button
+                                    key={opt.label}
+                                    className={`kam-guided-chip${guidedState.emiType === opt.value ? ' selected' : ''}`}
+                                    onClick={() => setGuidedState(prev => ({ ...prev, emiType: opt.value }))}
+                                  >
+                                    {opt.label}
+                                  </button>
+                                ))}
+                              </div>
                             </div>
-                          </div>
+
+                            {/* Issuer Bank (EMI is bank-specific) */}
+                            <div className="kam-guided-filter-group">
+                              <div className="kam-guided-filter-label">Issuer Bank</div>
+                              <div className="kam-guided-filter-hint">EMI is bank-specific. Select the issuing bank, e.g. "HDFC EMI should go via HDFC terminal."</div>
+                              <div className="kam-guided-chip-group">
+                                {[{ value: null, label: 'Any' }, { value: 'HDFC', label: 'HDFC' }, { value: 'ICICI', label: 'ICICI' }, { value: 'SBI', label: 'SBI' }, { value: 'Axis', label: 'Axis' }, { value: 'Kotak', label: 'Kotak' }].map(opt => (
+                                  <button
+                                    key={opt.label}
+                                    className={`kam-guided-chip${guidedState.issuerBank === opt.value ? ' selected' : ''}`}
+                                    onClick={() => setGuidedState(prev => ({ ...prev, issuerBank: opt.value }))}
+                                  >
+                                    {opt.label}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Card Network (for EMI) */}
+                            <div className="kam-guided-filter-group">
+                              <div className="kam-guided-filter-label">Card Network</div>
+                              <div className="kam-guided-filter-hint">Optionally filter by card network for this EMI rule.</div>
+                              <div className="kam-guided-chip-group">
+                                {['Visa', 'Mastercard', 'RuPay'].map(nw => (
+                                  <button
+                                    key={nw}
+                                    className={`kam-guided-chip${guidedState.cardNetworks.includes(nw) ? ' selected' : ''}`}
+                                    onClick={() => setGuidedState(prev => ({
+                                      ...prev,
+                                      cardNetworks: prev.cardNetworks.includes(nw)
+                                        ? prev.cardNetworks.filter(n => n !== nw)
+                                        : [...prev.cardNetworks, nw],
+                                    }))}
+                                  >
+                                    {nw}
+                                  </button>
+                                ))}
+                              </div>
+                              {guidedState.cardNetworks.length > 0 && (
+                                <div className="kam-guided-filter-selection-summary">
+                                  Selected: {guidedState.cardNetworks.join(', ')}
+                                  <button className="kam-guided-clear-btn" onClick={() => setGuidedState(prev => ({ ...prev, cardNetworks: [] }))}>Clear</button>
+                                </div>
+                              )}
+                            </div>
+                          </>
                         )}
 
                         {/* ── Amount Threshold (all methods) ── */}
