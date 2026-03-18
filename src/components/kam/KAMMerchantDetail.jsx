@@ -4689,83 +4689,16 @@ function RulesTabContent({
 
         {/* List View: Grouped Rule List */}
         {ruleViewMode === 'list' && <div className="kam-rule-groups">
-
-          {/* Platform rules — inline, read-only */}
-          {applicablePlatformRules.length > 0 && (
-            <div className="kam-rule-group" style={{ marginBottom: 12 }}>
-              <div className="kam-rule-group-header" style={{ background: '#f1f5f9' }}>
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#64748b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                </svg>
-                <span>Platform Rules</span>
-                <span className="kam-badge neutral" style={{ marginLeft: 8, fontSize: 10 }}>Read-only</span>
-                <span style={{ marginLeft: 'auto', fontSize: 11, color: '#94a3b8' }}>{applicablePlatformRules.length} rule{applicablePlatformRules.length !== 1 ? 's' : ''}</span>
-              </div>
-              {applicablePlatformRules.map(rule => (
-                <div key={rule.id} className="kam-rule-card platform">
-                  <div className="kam-rule-card-main">
-                    <span className="kam-rule-priority-badge" style={{ background: '#e2e8f0', color: '#64748b' }}>
-                      <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
-                    </span>
-                    <span className="kam-rule-name">{rule.name}</span>
-                    <span className="kam-badge neutral" style={{ fontSize: 10 }}>Platform</span>
-                  </div>
-                  {rule.conditions.length > 0 && (
-                    <div className="kam-rule-conditions">
-                      <span className="kam-rule-if">IF</span>
-                      {rule.conditions.map((c, ci) => (
-                        <React.Fragment key={ci}>
-                          {ci > 0 && <span className="kam-rule-logic">AND</span>}
-                          <span className="kam-rule-condition-chip">
-                            {RULE_CONDITIONS[c.field]?.label || c.field} {RULE_OPERATOR_LABELS[c.operator] || c.operator} {
-                              c.field === 'amount' ? `\u20B9${Number(c.value)?.toLocaleString('en-IN')}`
-                              : c.field === 'international' ? (c.value ? 'Yes' : 'No')
-                              : String(c.value)
-                            }
-                          </span>
-                        </React.Fragment>
-                      ))}
-                    </div>
-                  )}
-                  <div className="kam-rule-action">
-                    {rule.action.type === 'reject' ? (
-                      <>
-                        <span className="kam-rule-then" style={{ color: '#dc2626' }}>BLOCKS:</span>
-                        {rule.action.terminals.map((tid, i) => {
-                          let displayId = tid
-                          for (const gw of gatewayData) { const t = gw.terminals.find(t => t.id === tid); if (t) { displayId = t.terminalId; break } }
-                          return (
-                            <React.Fragment key={tid}>
-                              {i > 0 && <span className="kam-rule-arrow">·</span>}
-                              <span className="kam-rule-terminal-chip" style={{ background: '#fef2f2', color: '#991b1b' }}>{displayId}</span>
-                            </React.Fragment>
-                          )
-                        })}
-                      </>
-                    ) : (
-                      <>
-                        <span className="kam-rule-then">ROUTES TO:</span>
-                        {rule.action.terminals.map((tid, i) => {
-                          let displayId = tid
-                          for (const gw of gatewayData) { const t = gw.terminals.find(t => t.id === tid); if (t) { displayId = t.terminalId; break } }
-                          return (
-                            <React.Fragment key={tid}>
-                              {i > 0 && <span className="kam-rule-arrow">&rarr;</span>}
-                              <span className="kam-rule-terminal-chip">{displayId}</span>
-                            </React.Fragment>
-                          )
-                        })}
-                      </>
-                    )}
-                  </div>
-                  <div className="kam-rule-meta" style={{ color: '#94a3b8', fontStyle: 'italic' }}>{rule.reason}</div>
-                </div>
-              ))}
-            </div>
-          )}
-
           {groupedRules.groups.map(({ groupDef, rules: groupRulesList, subMethodRules }) => {
+            // Find platform rules that apply to this method group
+            const groupPlatformRules = applicablePlatformRules.filter(pr => {
+              const methodCond = pr.conditions.find(c => c.field === 'payment_method')
+              if (!methodCond) return true // no method condition = applies to all groups
+              const prMethod = methodCond.value
+              if (groupDef.key === 'all_txn' || groupDef.key === 'all_methods') return !pr.conditions.find(c => c.field === 'payment_method') // only show in "all" groups if no method filter
+              if (groupDef.methodValues && groupDef.methodValues.includes(prMethod)) return true
+              return false
+            })
             const isOpen = groupDef.alwaysExpanded || expandedGroups[groupDef.key]
             const ruleCount = groupRulesList.length
 
@@ -4905,15 +4838,68 @@ function RulesTabContent({
                     )}
                     <span className="kam-rule-group-icon">{groupIcon}</span>
                     <span className="kam-rule-group-label">{groupDef.label}</span>
-                    <span className={`kam-badge ${ruleCount > 0 ? 'info' : 'neutral'}`} style={{ fontSize: 11 }}>
-                      {ruleCount} {ruleCount === 1 ? 'rule' : 'rules'}
+                    <span className={`kam-badge ${ruleCount + groupPlatformRules.length > 0 ? 'info' : 'neutral'}`} style={{ fontSize: 11 }}>
+                      {ruleCount + groupPlatformRules.length} {(ruleCount + groupPlatformRules.length) === 1 ? 'rule' : 'rules'}
                     </span>
+                    {groupPlatformRules.length > 0 && <span className="kam-badge neutral" style={{ fontSize: 10 }}>{groupPlatformRules.length} platform</span>}
                   </div>
                 </div>
 
                 {/* Group Body */}
                 {isOpen && (
                   <div className="kam-rule-group-body">
+                    {/* Platform rules for this method group */}
+                    {groupPlatformRules.map(pr => (
+                      <div key={pr.id} className="kam-rule-card platform">
+                        <div className="kam-rule-card-header">
+                          <div className="kam-rule-left">
+                            <span className="kam-rule-priority" style={{ background: '#e2e8f0', color: '#64748b', border: 'none' }}>
+                              <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                            </span>
+                            <span className="kam-rule-name">{pr.name}</span>
+                            <span className="kam-badge neutral" style={{ fontSize: 10 }}>Platform</span>
+                          </div>
+                        </div>
+                        {pr.conditions.length > 0 && (
+                          <div className="kam-rule-conditions">
+                            <span className="kam-rule-if">IF</span>
+                            {pr.conditions.map((c, ci) => (
+                              <React.Fragment key={ci}>
+                                {ci > 0 && <span className="kam-rule-logic">AND</span>}
+                                <span className="kam-rule-condition-chip">
+                                  {RULE_CONDITIONS[c.field]?.label || c.field} {RULE_OPERATOR_LABELS[c.operator] || c.operator} {
+                                    c.field === 'amount' ? `\u20B9${Number(c.value)?.toLocaleString('en-IN')}`
+                                    : c.field === 'international' ? (c.value ? 'Yes' : 'No')
+                                    : String(c.value)
+                                  }
+                                </span>
+                              </React.Fragment>
+                            ))}
+                          </div>
+                        )}
+                        <div className="kam-rule-action">
+                          {pr.action.type === 'reject' ? (
+                            <>
+                              <span className="kam-rule-then" style={{ color: '#dc2626' }}>BLOCKS:</span>
+                              {pr.action.terminals.map((tid, i) => {
+                                let displayId = tid; for (const gw of gatewayData) { const t = gw.terminals.find(t => t.id === tid); if (t) { displayId = t.terminalId; break } }
+                                return <React.Fragment key={tid}>{i > 0 && <span className="kam-rule-arrow">·</span>}<span className="kam-rule-terminal-chip" style={{ background: '#fef2f2', color: '#991b1b' }}>{displayId}</span></React.Fragment>
+                              })}
+                            </>
+                          ) : (
+                            <>
+                              <span className="kam-rule-then">ROUTES TO:</span>
+                              {pr.action.terminals.map((tid, i) => {
+                                let displayId = tid; for (const gw of gatewayData) { const t = gw.terminals.find(t => t.id === tid); if (t) { displayId = t.terminalId; break } }
+                                return <React.Fragment key={tid}>{i > 0 && <span className="kam-rule-arrow">&rarr;</span>}<span className="kam-rule-terminal-chip">{displayId}</span></React.Fragment>
+                              })}
+                            </>
+                          )}
+                        </div>
+                        <div className="kam-rule-meta" style={{ color: '#94a3b8', fontStyle: 'italic' }}>{pr.reason}</div>
+                      </div>
+                    ))}
+
                     {/* Groups with sub-methods (UPI, CC, DC) */}
                     {groupDef.subMethods.length > 0 ? (
                       <>
