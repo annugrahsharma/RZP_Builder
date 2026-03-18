@@ -5003,10 +5003,10 @@ function RulesTabContent({
                             </div>
                           )
                         })}
-                        {/* Platform rules after merchant rules */}
-                        {renderPlatformCards()}
-                        {/* Method defaults last */}
+                        {/* Method defaults second */}
                         {methodDefaultsInGroup.map(rule => renderRuleCard(rule))}
+                        {/* Platform rules last */}
+                        {renderPlatformCards()}
                       </>
                     ) : (
                       /* Groups without sub-methods (UPI One-time, UPI Autopay, NB, All Transactions, All Methods) */
@@ -5031,10 +5031,10 @@ function RulesTabContent({
                             </button>
                           </div>
                         )}
-                        {/* Platform rules after merchant rules */}
-                        {renderPlatformCards()}
-                        {/* Method defaults last */}
+                        {/* Method defaults second */}
                         {methodDefaultsInGroup.map(rule => renderRuleCard(rule))}
+                        {/* Platform rules last */}
+                        {renderPlatformCards()}
                       </>
                     )}
                       </div>
