@@ -986,9 +986,6 @@ export default function KAMMerchantDetail() {
     })
   }, [merchant])
 
-  // Platform rules applicable to this merchant
-  const applicablePlatformRules = useMemo(() => merchant ? getPlatformRulesForMerchant(merchant) : [], [merchant])
-
   // Doppler routing percentage — derived from routing strategy, rule count, and deal type
   const dopplerRoutePercent = useMemo(() => {
     if (!merchant) return 0
@@ -3543,6 +3540,9 @@ function RulesTabContent({
   const rules = merchant.routingRulesV2 || []
   const ntfGaps = useMemo(() => detectNTFGaps(rules, merchant), [rules, merchant])
 
+  // Platform rules applicable to this merchant
+  const applicablePlatformRules = useMemo(() => merchant ? getPlatformRulesForMerchant(merchant) : [], [merchant])
+
   // Primary routing decision: SR-optimized (Doppler) vs Cost-saving (manual rules)
   const [routingMode, setRoutingMode] = useState(merchant.routingStrategy === 'cost_based' ? 'cost' : 'sr')
   const [showSwitchWarning, setShowSwitchWarning] = useState(false)
@@ -3598,6 +3598,18 @@ function RulesTabContent({
       }
     })
   }, [merchant])
+
+  // Wizard state (manual mode) — declared here because previewData useMemo below references wizardStep
+  const WIZARD_STEPS = [
+    { key: 'method', label: 'Payment Method', shortLabel: 'Method' },
+    { key: 'filters', label: 'Transaction Filters', shortLabel: 'Filters' },
+    { key: 'objective', label: 'Objective', shortLabel: 'Objective' },
+    { key: 'routing', label: 'Routing', shortLabel: 'Route' },
+    { key: 'review', label: 'Review & Save', shortLabel: 'Review' },
+  ]
+  const [wizardStep, setWizardStep] = useState(0)
+  const [visitedSteps, setVisitedSteps] = useState(new Set([0]))
+  const [wizardStepErrors, setWizardStepErrors] = useState({})
 
   // ── Pre-Apply Simulation (Preview Impact) ──
   const [previewTraceMethod, setPreviewTraceMethod] = useState('UPI')
@@ -3686,18 +3698,6 @@ function RulesTabContent({
   const [aiMessages, setAiMessages] = useState([])
   const [aiSuggestion, setAiSuggestion] = useState(null)
   const [isAiProcessing, setIsAiProcessing] = useState(false)
-
-  // Wizard state (manual mode)
-  const WIZARD_STEPS = [
-    { key: 'method', label: 'Payment Method', shortLabel: 'Method' },
-    { key: 'filters', label: 'Transaction Filters', shortLabel: 'Filters' },
-    { key: 'objective', label: 'Objective', shortLabel: 'Objective' },
-    { key: 'routing', label: 'Routing', shortLabel: 'Route' },
-    { key: 'review', label: 'Review & Save', shortLabel: 'Review' },
-  ]
-  const [wizardStep, setWizardStep] = useState(0)
-  const [visitedSteps, setVisitedSteps] = useState(new Set([0]))
-  const [wizardStepErrors, setWizardStepErrors] = useState({})
 
   // Guided state — drives the visual Step 0 + Step 1 UI, syncs to ruleForm.conditions
   const INITIAL_GUIDED = { paymentMethod: null, upiFlow: null, cardType: null, cardNetworks: [], issuerBank: null, international: null, amountOperator: null, amountValue: null, amountValueTo: null, emiType: null, expiresAt: null, neverExpires: true, objectiveCategory: null, objective: null }
