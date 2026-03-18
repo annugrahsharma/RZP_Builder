@@ -430,7 +430,7 @@ export function KAMProvider({ children }) {
           if (m.id !== merchantId) return m
           const existingRules = m.routingRulesV2 || []
           // Assign priority: one before default (999)
-          const nonDefault = existingRules.filter((r) => !r.isDefault)
+          const nonDefault = existingRules.filter((r) => !r.isDefault && !r.isMethodDefault)
           const newPriority = nonDefault.length + 1
           const newRule = { ...rule, priority: newPriority }
           return { ...m, routingRulesV2: [...existingRules, newRule] }
@@ -480,13 +480,13 @@ export function KAMProvider({ children }) {
           if (m.id !== merchantId) return m
           const rules = m.routingRulesV2 || []
           const target = rules.find((r) => r.id === ruleId)
-          if (target?.isDefault) return m // cannot delete default
+          if (target?.isDefault || target?.isMethodDefault) return m // cannot delete default or method default
           deletedName = target?.name || ruleId
           const remaining = rules.filter((r) => r.id !== ruleId)
-          // Re-index priorities (keep default at 999)
+          // Re-index priorities (keep default at 999, method defaults at 900+)
           let priority = 1
           const reindexed = remaining.map((r) => {
-            if (r.isDefault) return r
+            if (r.isDefault || r.isMethodDefault) return r
             return { ...r, priority: priority++ }
           })
           return { ...m, routingRulesV2: reindexed }
@@ -540,7 +540,7 @@ export function KAMProvider({ children }) {
           const reordered = orderedIds.map((id, idx) => {
             const rule = rules.find((r) => r.id === id)
             if (!rule) return null
-            return { ...rule, priority: rule.isDefault ? 999 : idx + 1 }
+            return { ...rule, priority: rule.isDefault ? 999 : rule.isMethodDefault ? rule.priority : idx + 1 }
           }).filter(Boolean)
           // Add any rules not in orderedIds (shouldn't happen, but safety)
           rules.forEach((r) => {

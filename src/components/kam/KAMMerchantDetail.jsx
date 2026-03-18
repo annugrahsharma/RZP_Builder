@@ -28,8 +28,12 @@ import {
   getTerminalGatewayInfo,
   parseRuleIntent,
   generateNTFAnalysis,
+  computeRuleCoverageMatrix,
+  transactionToSimInput,
+  generateRoutingAnalysis,
   merchants as allMerchantsData,
   gateways as gatewayData,
+  getPlatformRulesForMerchant,
 } from '../../data/kamMockData'
 
 // ---------------------------------------------------------------------------
@@ -815,6 +819,58 @@ function SankeyChart({ data }) {
 }
 
 // ---------------------------------------------------------------------------
+// TracePipeline — renders the routing pipeline stages for a single transaction
+// ---------------------------------------------------------------------------
+function TracePipeline({ txn, merchant, rules }) {
+  const simInput = transactionToSimInput(txn)
+  const result = simulateRoutingPipeline(merchant, simInput, rules, {})
+
+  return (
+    <div className="kam-trace-pipeline">
+      {result.stages.map((stage, idx) => (
+        <div key={stage.id || idx} className={`kam-trace-stage ${stage.type === 'ntf' || stage.type === 'rule_ntf' ? 'ntf' : ''}`}>
+          <div className="kam-trace-stage-num">{idx + 1}</div>
+          <div className="kam-trace-stage-content">
+            <div className="kam-trace-stage-label">{stage.label}</div>
+            <div className="kam-trace-stage-desc">{stage.description}</div>
+            {stage.terminalsRemaining && (
+              <div className="kam-trace-terminals">
+                <span className="kam-trace-remaining">{stage.terminalsRemaining.length} remaining</span>
+                {stage.terminalsEliminated?.length > 0 && (
+                  <span className="kam-trace-eliminated">&minus;{stage.terminalsEliminated.length} eliminated</span>
+                )}
+              </div>
+            )}
+            {(stage.type === 'rule_ntf' || stage.type === 'ntf') && (
+              <div className="kam-trace-ntf-cause">
+                <strong>NTF Cause:</strong> {stage.description}
+                {stage.causeRuleId && (
+                  <span className="kam-trace-fix-hint"> — Consider editing rule &ldquo;{stage.causeRuleName}&rdquo;</span>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      ))}
+
+      {/* Final result */}
+      {result.selectedTerminal && (
+        <div className="kam-trace-result success">
+          <strong>&rarr; Routed to {result.selectedTerminal.displayId}</strong> ({result.selectedTerminal.gatewayShort})
+          <br/>SR {result.selectedTerminal.successRate}% &middot; &#8377;{result.selectedTerminal.costPerTxn}/txn &middot; Score {result.selectedTerminal.finalScore}
+        </div>
+      )}
+      {result.isNTF && (
+        <div className="kam-trace-result ntf">
+          <strong>&#10005; Payment Failed — No Terminal Found</strong>
+          {result.warnings?.map((w, i) => <div key={i} className="kam-trace-warning">{w}</div>)}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 export default function KAMMerchantDetail() {
@@ -919,6 +975,20 @@ export default function KAMMerchantDetail() {
   const tspCompliance = useMemo(() => merchant ? computeTSPCompliance(merchant) : null, [merchant])
   const revenue = merchant ? computeMerchantRevenue(merchant) : { grossRevenue: 0, backwardCost: 0, netRevenue: 0 }
 
+  // Bank-disabled terminals
+  const bankDisabledTerminals = useMemo(() => {
+    if (!merchant) return []
+    return merchant.gatewayMetrics.flatMap(gm => {
+      const gw = gatewayData.find(g => g.id === gm.gatewayId)
+      const term = gw?.terminals.find(t => t.id === gm.terminalId)
+      if (term?.bankStatus === 'disabled') return [{ ...term, gatewayShort: gw?.shortName }]
+      return []
+    })
+  }, [merchant])
+
+  // Platform rules applicable to this merchant
+  const applicablePlatformRules = useMemo(() => merchant ? getPlatformRulesForMerchant(merchant) : [], [merchant])
+
   // Doppler routing percentage — derived from routing strategy, rule count, and deal type
   const dopplerRoutePercent = useMemo(() => {
     if (!merchant) return 0
@@ -942,6 +1012,8 @@ export default function KAMMerchantDetail() {
   const [expandedProfiles, setExpandedProfiles] = useState(new Set())
   const [ntfActiveLayer, setNtfActiveLayer] = useState({})
   const [copiedTemplate, setCopiedTemplate] = useState(null)
+  const [traceTransaction, setTraceTransaction] = useState(null)
+  const [ntfViewMode, setNtfViewMode] = useState('ntf')
 
   const cbrOrder = useMemo(() => {
     if (!merchant || merchant.srSensitive) return null
@@ -967,6 +1039,9 @@ export default function KAMMerchantDetail() {
         dailyVolume: pickDailyVolume(terminalId),
         gatewayId: gm.gatewayId,
         internalTermId: gm.terminalId,
+        bankStatus: term?.bankStatus || 'active',
+        bankStatusReason: term?.bankStatusReason || null,
+        bankStatusSince: term?.bankStatusSince || null,
       }
     })
   }, [merchant?.gatewayMetrics, gateways])
@@ -1013,6 +1088,12 @@ export default function KAMMerchantDetail() {
     const rules = merchant.routingRulesV2 || []
     return generateNTFAnalysis(merchant, ntfTransactions, rules)
   }, [merchant, ntfTransactions])
+
+  const routingHealthData = useMemo(() => {
+    if (!merchant || transactions.length === 0) return null
+    const rules = merchant.routingRulesV2 || []
+    return generateRoutingAnalysis(merchant, transactions, rules)
+  }, [merchant, transactions])
 
   const filteredTxns = useMemo(() => {
     let result = transactions
@@ -1723,6 +1804,19 @@ export default function KAMMerchantDetail() {
       {/* ══════════════════════════════════════════════════════════ */}
       <div ref={el => sectionRefs.current.terminals = el} className="kam-tab-section">
       <div className="kam-detail-section" id="terminal-section">
+
+        {/* ── Bank-Disabled Terminal Alert Banner ──── */}
+        {bankDisabledTerminals.length > 0 && (
+          <div className="kam-bank-disabled-banner">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+              <line x1="12" y1="9" x2="12" y2="13" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+            <span><strong>{bankDisabledTerminals.length} terminal{bankDisabledTerminals.length > 1 ? 's' : ''} disabled by bank</strong> — these terminals cannot process payments regardless of your routing configuration. Contact TR team to resolve.</span>
+          </div>
+        )}
+
         <div className="kam-card">
           <div className="kam-card-header">
             <h3 className="kam-card-title">
@@ -1784,6 +1878,15 @@ export default function KAMMerchantDetail() {
                                 <span style={{ fontFamily: 'monospace', fontWeight: 600, fontSize: 13 }}>
                                   {t.terminalId}
                                 </span>
+                                {t.bankStatus === 'disabled' && (
+                                  <span className="kam-bank-disabled-badge">Bank Disabled</span>
+                                )}
+                                {t.bankStatus === 'disabled' && t.bankStatusReason && (
+                                  <div className="kam-bank-disabled-info">
+                                    {t.bankStatusReason}
+                                    {t.bankStatusSince && ` — since ${new Date(t.bankStatusSince).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}`}
+                                  </div>
+                                )}
                               </td>
                               <td>{t.provider}</td>
                               <td>
@@ -2096,24 +2199,28 @@ export default function KAMMerchantDetail() {
                     { field: 'method', label: 'Method' },
                     { field: 'status', label: 'Status' },
                     { field: 'gateway', label: 'Gateway' },
+                    { field: '_trace', label: '' },
                   ].map(col => (
                     <th
                       key={col.field}
-                      className="kam-txn-sortable"
-                      onClick={() => toggleTxnSort(col.field)}
+                      className={col.field !== '_trace' ? 'kam-txn-sortable' : ''}
+                      onClick={col.field !== '_trace' ? () => toggleTxnSort(col.field) : undefined}
+                      style={col.field === '_trace' ? { width: 40 } : undefined}
                     >
                       {col.label}
-                      <span className="kam-txn-sort-icon">
-                        {txnSort.field === col.field ? (
-                          txnSort.direction === 'asc' ? (
-                            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="18 15 12 9 6 15"/></svg>
+                      {col.field !== '_trace' && (
+                        <span className="kam-txn-sort-icon">
+                          {txnSort.field === col.field ? (
+                            txnSort.direction === 'asc' ? (
+                              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="18 15 12 9 6 15"/></svg>
+                            ) : (
+                              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>
+                            )
                           ) : (
-                            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>
-                          )
-                        ) : (
-                          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.3"><polyline points="18 15 12 9 6 15"/></svg>
-                        )}
-                      </span>
+                            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.3"><polyline points="18 15 12 9 6 15"/></svg>
+                          )}
+                        </span>
+                      )}
                     </th>
                   ))}
                 </tr>
@@ -2121,7 +2228,7 @@ export default function KAMMerchantDetail() {
               <tbody>
                 {paginatedTxns.length === 0 ? (
                   <tr>
-                    <td colSpan={6} style={{ textAlign: 'center', padding: 32, color: 'var(--rzp-text-muted)' }}>
+                    <td colSpan={7} style={{ textAlign: 'center', padding: 32, color: 'var(--rzp-text-muted)' }}>
                       No transactions match your filters.
                     </td>
                   </tr>
@@ -2134,6 +2241,17 @@ export default function KAMMerchantDetail() {
                       <td><span className="kam-badge neutral">{txn.paymentMethod.short}</span></td>
                       <td><span className={`kam-txn-status ${txn.status}`}>{txn.status}</span></td>
                       <td>{txn.routingDecision.selectedGatewayShort}</td>
+                      <td>
+                        <button
+                          className="kam-txn-trace-btn"
+                          title="Trace routing pipeline"
+                          onClick={(e) => { e.stopPropagation(); setTraceTransaction(txn) }}
+                        >
+                          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
+                            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                          </svg>
+                        </button>
+                      </td>
                     </tr>
                   ))
                 )}
@@ -2194,14 +2312,124 @@ export default function KAMMerchantDetail() {
           <div className="kam-card-header">
             <h3 className="kam-card-title">
               <WarningIcon style={{ display: 'inline', verticalAlign: '-3px', marginRight: 6 }} />
-              NTF Analysis
+              {ntfViewMode === 'ntf' ? 'NTF Analysis' : 'Routing Health'}
             </h3>
-            {ntfAnalysis?.summary && (
-              <span className="kam-badge danger">{ntfAnalysis.summary.totalNTFCount} failures</span>
-            )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div className="kam-ntfa-layer-tabs" style={{ marginBottom: 0 }}>
+                <button
+                  className={`kam-ntfa-layer-tab ${ntfViewMode === 'ntf' ? 'active' : ''}`}
+                  onClick={() => setNtfViewMode('ntf')}
+                >
+                  NTF Analysis
+                </button>
+                <button
+                  className={`kam-ntfa-layer-tab ${ntfViewMode === 'health' ? 'active' : ''}`}
+                  onClick={() => setNtfViewMode('health')}
+                >
+                  Routing Health
+                </button>
+              </div>
+              {ntfViewMode === 'ntf' && ntfAnalysis?.summary && (
+                <span className="kam-badge danger">{ntfAnalysis.summary.totalNTFCount} failures</span>
+              )}
+            </div>
           </div>
 
-          {!ntfAnalysis || ntfAnalysis.profiles.length === 0 ? (
+          {ntfViewMode === 'health' && routingHealthData ? (
+            <div className="kam-routing-health">
+              <div className="kam-routing-health-header">
+                <h3>Routing Health Report</h3>
+                <span className="kam-badge info">Based on {routingHealthData.totalTransactions} transactions</span>
+              </div>
+
+              {/* Summary cards */}
+              <div className="kam-routing-health-summary">
+                <div className="kam-routing-health-card">
+                  <div className="kam-routing-health-card-label">NTF Rate</div>
+                  <div className="kam-routing-health-card-value">{routingHealthData.ntfPercentage}%</div>
+                </div>
+                <div className="kam-routing-health-card">
+                  <div className="kam-routing-health-card-label">Active Terminals</div>
+                  <div className="kam-routing-health-card-value">{routingHealthData.terminalDistribution.filter(t => t.count > 0).length}</div>
+                </div>
+                <div className="kam-routing-health-card">
+                  <div className="kam-routing-health-card-label">Active Rules</div>
+                  <div className="kam-routing-health-card-value">{routingHealthData.highImpactRules.length}</div>
+                </div>
+                <div className="kam-routing-health-card">
+                  <div className="kam-routing-health-card-label">Dormant Rules</div>
+                  <div className={`kam-routing-health-card-value ${routingHealthData.dormantRules.length > 0 ? 'warning' : ''}`}>
+                    {routingHealthData.dormantRules.length}
+                  </div>
+                </div>
+              </div>
+
+              {/* Terminal distribution */}
+              <div className="kam-routing-health-section">
+                <h4>Terminal Distribution</h4>
+                {routingHealthData.terminalDistribution.map(td => (
+                  <div key={td.terminalId} className="kam-routing-health-dist-row">
+                    <span className="kam-routing-health-dist-name">{td.displayId} ({td.gatewayShort})</span>
+                    <div className="kam-routing-health-dist-bar-wrap">
+                      <div className="kam-routing-health-dist-bar" style={{ width: `${td.percentage}%` }}></div>
+                    </div>
+                    <span className="kam-routing-health-dist-pct">{td.percentage}% ({td.count})</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Method breakdown */}
+              <div className="kam-routing-health-section">
+                <h4>By Payment Method</h4>
+                {Object.entries(routingHealthData.methodGroups).map(([method, data]) => (
+                  <div key={method} className="kam-routing-health-method-row">
+                    <span className="kam-routing-health-method-name">{method}</span>
+                    <span>{data.count} txns</span>
+                    <span>{data.ntf} NTFs</span>
+                    <span className={data.ntf > 0 ? 'danger' : 'success'}>
+                      {((data.ntf / data.count) * 100).toFixed(1)}% NTF rate
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {/* High impact rules */}
+              <div className="kam-routing-health-section">
+                <h4>Most Active Rules</h4>
+                {routingHealthData.highImpactRules.map(r => (
+                  <div key={r.ruleId} className="kam-routing-health-rule-row">
+                    <span className="kam-routing-health-rule-name">{r.ruleName}</span>
+                    <span>{r.affectedPayments} txns affected</span>
+                    <span>{r.eliminatedTerminals} terminals eliminated</span>
+                  </div>
+                ))}
+                {routingHealthData.highImpactRules.length === 0 && (
+                  <div className="kam-routing-health-empty">No rules matched any transactions.</div>
+                )}
+              </div>
+
+              {/* Dormant rules */}
+              {routingHealthData.dormantRules.length > 0 && (
+                <div className="kam-routing-health-section warning">
+                  <h4>Dormant Rules (Never Matched)</h4>
+                  <p className="kam-routing-health-dormant-desc">
+                    These rules are enabled but did not match any of the sample transactions. Consider reviewing or disabling them.
+                  </p>
+                  {routingHealthData.dormantRules.map(r => (
+                    <div key={r.id} className="kam-routing-health-dormant-rule">
+                      <span>{r.name}</span>
+                      <span className="kam-badge neutral">No matches</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : ntfViewMode === 'health' && !routingHealthData ? (
+            <div className="kam-empty-state" style={{ minHeight: 120 }}>
+              <ActivityIcon />
+              <p>No transaction data available for routing health analysis.</p>
+            </div>
+          ) : !ntfAnalysis || ntfAnalysis.profiles.length === 0 ? (
             <div className="kam-empty-state" style={{ minHeight: 120 }}>
               <CheckCircleIcon />
               <p>No NTF failures detected. All transactions routed successfully.</p>
@@ -2602,6 +2830,33 @@ export default function KAMMerchantDetail() {
             </div>
           </div>
         </>
+      )}
+
+      {/* ── Transaction Trace Drawer ────────────────────────────── */}
+      {traceTransaction && (
+        <div className="kam-trace-overlay" onClick={() => setTraceTransaction(null)}>
+          <div className="kam-trace-drawer" onClick={e => e.stopPropagation()}>
+            <div className="kam-trace-drawer-header">
+              <h3>Routing Trace</h3>
+              <button className="kam-trace-close" onClick={() => setTraceTransaction(null)}>&times;</button>
+            </div>
+
+            {/* Transaction summary */}
+            <div className="kam-trace-txn-summary">
+              <div className="kam-trace-txn-id">{traceTransaction.txnId}</div>
+              <div className="kam-trace-txn-details">
+                {traceTransaction.paymentMethod?.type} &middot; {formatINR(traceTransaction.amount)} &middot;{' '}
+                <span className={`kam-badge ${traceTransaction.status === 'success' ? 'success' : traceTransaction.status === 'failed' ? 'danger' : 'warning'}`}>
+                  {traceTransaction.status}
+                </span>
+                {traceTransaction.isNTF && <span className="kam-badge danger">NTF</span>}
+              </div>
+            </div>
+
+            {/* Pipeline trace */}
+            <TracePipeline txn={traceTransaction} merchant={merchant} rules={merchant.routingRulesV2 || []} />
+          </div>
+        </div>
       )}
 
       {/* ── Terminal Confirmation Modal ───────────────────────────── */}
@@ -3317,7 +3572,7 @@ function RulesTabContent({
     return [...rules].sort((a, b) => a.priority - b.priority)
   }, [rules])
 
-  const nonDefaultRules = sortedRules.filter(r => !r.isDefault)
+  const nonDefaultRules = sortedRules.filter(r => !r.isDefault && !r.isMethodDefault)
   const defaultRule = sortedRules.find(r => r.isDefault)
 
   // Grouped rules for method-based display
@@ -3343,6 +3598,87 @@ function RulesTabContent({
       }
     })
   }, [merchant])
+
+  // ── Pre-Apply Simulation (Preview Impact) ──
+  const [previewTraceMethod, setPreviewTraceMethod] = useState('UPI')
+  const previewData = useMemo(() => {
+    if (wizardStep !== 4) return null
+    // Build draft rule from current wizard state
+    const draftRule = {
+      id: `draft-preview-${Date.now()}`,
+      name: ruleForm.name || 'New Rule',
+      type: ruleForm.type,
+      enabled: true,
+      priority: 0,
+      conditions: ruleForm.conditions,
+      conditionLogic: ruleForm.conditionLogic || 'AND',
+      action: {
+        type: ruleForm.type === 'volume_split' ? 'split' : 'route',
+        terminals: ruleForm.terminals,
+        splits: ruleForm.splits,
+        srThreshold: ruleForm.srThreshold || 0,
+        minPaymentCount: ruleForm.minPaymentCount || 0,
+      },
+      isDefault: false,
+      createdAt: new Date().toISOString(),
+      createdBy: 'preview',
+    }
+    const previewRules = [draftRule, ...rules]
+    const sampleTxns = generateMerchantTransactions(merchant)
+    const beforeResult = batchSimulatePayments(merchant, sampleTxns, rules)
+    const afterResult = batchSimulatePayments(merchant, sampleTxns, previewRules)
+
+    // Compute avg cost before / after
+    const beforeTotalCost = beforeResult.terminalDistribution.reduce((s, td) => s + td.avgCost * td.count, 0)
+    const afterTotalCost = afterResult.terminalDistribution.reduce((s, td) => s + td.avgCost * td.count, 0)
+    const beforeAvgCost = beforeResult.totalPayments > 0 ? beforeTotalCost / (beforeResult.totalPayments - beforeResult.ntfCount || 1) : 0
+    const afterAvgCost = afterResult.totalPayments > 0 ? afterTotalCost / (afterResult.totalPayments - afterResult.ntfCount || 1) : 0
+
+    // Build summary text
+    const summaryParts = []
+    afterResult.terminalDistribution.forEach(td => {
+      const before = beforeResult.terminalDistribution.find(b => b.terminalId === td.terminalId)
+      const delta = td.percentage - (before?.percentage || 0)
+      if (Math.abs(delta) >= 1) {
+        summaryParts.push(`${delta > 0 ? '+' : ''}${delta.toFixed(1)}% to ${td.displayId}`)
+      }
+    })
+
+    return {
+      sampleTxns,
+      beforeResult,
+      afterResult,
+      beforeAvgCost,
+      afterAvgCost,
+      summary: summaryParts.length > 0 ? `This rule shifts traffic: ${summaryParts.join(', ')}` : 'No significant traffic shift detected.',
+      draftRule,
+      previewRules,
+    }
+  }, [wizardStep, ruleForm, rules, merchant])
+
+  // Single-transaction trace for preview
+  const previewTrace = useMemo(() => {
+    if (!previewData) return null
+    const txn = {
+      payment_method: previewTraceMethod,
+      amount: 1000,
+      card_network: previewTraceMethod === 'Cards' ? 'Visa' : '',
+      card_type: previewTraceMethod === 'Cards' ? 'credit' : '',
+      international: false,
+    }
+    const beforeTrace = simulateRoutingPipeline(merchant, txn, rules)
+    const afterTrace = simulateRoutingPipeline(merchant, txn, previewData.previewRules)
+    return { beforeTrace, afterTrace }
+  }, [previewData, previewTraceMethod, merchant, rules])
+
+  // Rule view mode: list vs grid (coverage matrix)
+  const [ruleViewMode, setRuleViewMode] = useState('list')
+
+  // Coverage matrix computation
+  const coverageMatrix = useMemo(() => {
+    if (ruleViewMode !== 'grid') return null
+    return computeRuleCoverageMatrix(rules, merchant)
+  }, [ruleViewMode, rules, merchant])
 
   // AI-assisted rule builder state
   const [builderMode, setBuilderMode] = useState('ai')
@@ -4534,6 +4870,66 @@ function RulesTabContent({
         </div>
       )}
 
+      {/* ── Platform Rules (read-only) ──────────────────── */}
+      {applicablePlatformRules.length > 0 && (
+        <div className="kam-platform-rules">
+          <div className="kam-platform-rules-header">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+            <strong>Platform Rules</strong>
+            <span className="kam-badge neutral">Managed by Platform</span>
+            <span className="kam-platform-rules-count">{applicablePlatformRules.length} rule{applicablePlatformRules.length !== 1 ? 's' : ''} apply to this merchant</span>
+          </div>
+          <p className="kam-platform-rules-desc">
+            These rules are set at the Razorpay platform level and apply before your merchant-specific rules. They cannot be modified here.
+          </p>
+          {applicablePlatformRules.map(rule => (
+            <div key={rule.id} className="kam-platform-rule-card">
+              <div className="kam-platform-rule-name">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+                {rule.name}
+              </div>
+              <div className="kam-platform-rule-conditions">
+                {rule.conditions.map((c, i) => (
+                  <span key={i} className="kam-rule-condition-chip platform">
+                    {RULE_CONDITIONS[c.field]?.label || c.field} {RULE_OPERATOR_LABELS[c.operator] || c.operator} {
+                      c.field === 'amount' ? `\u20B9${Number(c.value)?.toLocaleString('en-IN')}`
+                      : c.field === 'international' ? (c.value ? 'Yes' : 'No')
+                      : String(c.value)
+                    }
+                  </span>
+                ))}
+              </div>
+              <div className="kam-platform-rule-action">
+                {rule.action.type === 'reject' ? (
+                  <span className="kam-badge danger">Blocks: {rule.action.terminals.map(tid => {
+                    for (const gw of gatewayData) {
+                      const t = gw.terminals.find(t => t.id === tid)
+                      if (t) return t.terminalId
+                    }
+                    return tid
+                  }).join(', ')}</span>
+                ) : (
+                  <span className="kam-badge info">Routes to: {rule.action.terminals.map(tid => {
+                    for (const gw of gatewayData) {
+                      const t = gw.terminals.find(t => t.id === tid)
+                      if (t) return t.terminalId
+                    }
+                    return tid
+                  }).join(', ')}</span>
+                )}
+              </div>
+              <div className="kam-platform-rule-reason">{rule.reason}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* ── Grouped Rule List ──────────────────────────── */}
       <div className="kam-detail-card">
         <div className="kam-card-header">
@@ -4557,7 +4953,147 @@ function RulesTabContent({
           Rules grouped by payment method. Empty slots use default ML-based routing.
         </p>
 
-        <div className="kam-rule-groups">
+        {/* View Toggle: List / Grid */}
+        <div className="kam-coverage-toggle">
+          <button className={ruleViewMode === 'list' ? 'active' : ''} onClick={() => setRuleViewMode('list')}>
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 4, verticalAlign: -1 }}>
+              <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+            </svg>
+            List View
+          </button>
+          <button className={ruleViewMode === 'grid' ? 'active' : ''} onClick={() => setRuleViewMode('grid')}>
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 4, verticalAlign: -1 }}>
+              <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+            </svg>
+            Grid View
+          </button>
+        </div>
+
+        {/* Coverage Matrix (Grid View) */}
+        {ruleViewMode === 'grid' && coverageMatrix && (() => {
+          const { combos, coverageMap } = coverageMatrix
+          // Get unique terminals from merchant gateway metrics
+          const terminals = merchant.gatewayMetrics.map(gm => {
+            const info = getTerminalGatewayInfo(gm.terminalId)
+            return { terminalId: gm.terminalId, displayId: info?.displayId || gm.terminalId, gatewayShort: info?.gatewayShort || '??' }
+          })
+          // Group combos by method
+          const methods = []
+          let lastMethod = null
+          for (const combo of combos) {
+            if (combo.method !== lastMethod) {
+              methods.push({ method: combo.method, combos: [] })
+              lastMethod = combo.method
+            }
+            methods[methods.length - 1].combos.push(combo)
+          }
+          // Collect coverage gaps (combos that only fall to default, not NTF)
+          const gaps = combos.filter(c => {
+            const cov = coverageMap[c.key]
+            return cov && cov.isDefault && !cov.isNTF
+          })
+
+          return (
+            <>
+              <div className="kam-coverage-matrix-wrap">
+                <table className="kam-coverage-matrix">
+                  <thead>
+                    <tr>
+                      <th className="row-header">Payment Type</th>
+                      {terminals.map(t => (
+                        <th key={t.terminalId}>{t.displayId}<br/><span style={{ fontWeight: 400, fontSize: 10, color: '#94a3b8' }}>{t.gatewayShort}</span></th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {methods.map(mg => (
+                      <React.Fragment key={mg.method}>
+                        <tr className="method-group-header">
+                          <td colSpan={terminals.length + 1}>{mg.method}</td>
+                        </tr>
+                        {mg.combos.map(combo => {
+                          const cov = coverageMap[combo.key]
+                          return (
+                            <tr key={combo.key}>
+                              <td className="row-header">{combo.label}</td>
+                              {terminals.map(t => {
+                                const isSelected = cov?.selectedTerminal?.terminalId === t.terminalId
+                                const isNTF = cov?.isNTF
+                                let cellClass = 'default'
+                                let cellLabel = 'Default'
+                                if (isNTF) {
+                                  cellClass = 'ntf'
+                                  cellLabel = 'NTF'
+                                } else if (isSelected && cov?.matchedRule && !cov.isDefault && !cov.isMethodDefault) {
+                                  cellClass = 'specific'
+                                  cellLabel = cov.matchedRule.name
+                                } else if (isSelected && cov?.isMethodDefault) {
+                                  cellClass = 'method-default'
+                                  cellLabel = cov.matchedRule?.name || 'Method Def'
+                                } else if (isSelected && cov?.isDefault) {
+                                  cellClass = 'default'
+                                  cellLabel = 'Default'
+                                } else if (!isSelected) {
+                                  // Not the selected terminal for this combo
+                                  return <td key={t.terminalId}><span style={{ color: '#e2e8f0', fontSize: 10 }}>--</span></td>
+                                }
+                                return (
+                                  <td key={t.terminalId}>
+                                    <span className={`kam-coverage-cell ${cellClass}`} title={cellLabel}>{cellLabel}</span>
+                                  </td>
+                                )
+                              })}
+                            </tr>
+                          )
+                        })}
+                      </React.Fragment>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Coverage Gaps */}
+              {gaps.length > 0 && (
+                <div className="kam-coverage-gaps">
+                  <div className="kam-coverage-gaps-header">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#92400e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                    Coverage Gaps ({gaps.length} combos using default only)
+                  </div>
+                  {gaps.map(combo => {
+                    const cov = coverageMap[combo.key]
+                    const termInfo = cov?.selectedTerminal ? getTerminalGatewayInfo(cov.selectedTerminal.terminalId) : null
+                    return (
+                      <div key={combo.key} className="kam-coverage-gap-item">
+                        <div>
+                          <span className="kam-coverage-gap-label">{combo.label}</span>
+                          {termInfo && (
+                            <span className="kam-coverage-gap-terminal"> — defaults to {termInfo.displayId} ({termInfo.gatewayShort})</span>
+                          )}
+                        </div>
+                        <button className="kam-coverage-gap-action" onClick={() => {
+                          // Pre-fill rule builder with this combo's conditions
+                          const prefill = { paymentMethod: combo.txn.payment_method }
+                          if (combo.txn.card_network) prefill.subMethodField = 'card_network'
+                          if (combo.txn.card_network) prefill.subMethodValue = combo.txn.card_network
+                          if (combo.txn.upi_flow) prefill.subMethodField = 'upi_flow'
+                          if (combo.txn.upi_flow) prefill.subMethodValue = combo.txn.upi_flow
+                          handleOpenBuilder(null, prefill)
+                        }}>
+                          Create Rule
+                        </button>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </>
+          )
+        })()}
+
+        {/* List View: Grouped Rule List */}
+        {ruleViewMode === 'list' && <div className="kam-rule-groups">
           {groupedRules.groups.map(({ groupDef, rules: groupRulesList, subMethodRules }) => {
             const isOpen = groupDef.alwaysExpanded || expandedGroups[groupDef.key]
             const ruleCount = groupRulesList.length
@@ -4574,29 +5110,42 @@ function RulesTabContent({
             // Render a single rule card (extracted for reuse)
             const renderRuleCard = (rule) => {
               const globalIdx = nonDefaultRules.indexOf(rule)
+              const isMethodDef = !!rule.isMethodDefault
               return (
-                <div key={rule.id} className={`kam-rule-card ${rule.type === 'volume_split' ? 'volume-split' : 'conditional'}${!rule.enabled ? ' disabled' : ''}`}>
+                <div key={rule.id} className={`kam-rule-card ${rule.type === 'volume_split' ? 'volume-split' : 'conditional'}${!rule.enabled ? ' disabled' : ''}${isMethodDef ? ' method-default' : ''}`}>
                   <div className="kam-rule-card-header">
                     <div className="kam-rule-left">
-                      <span className="kam-rule-priority">#{globalIdx + 1}</span>
+                      {!isMethodDef && <span className="kam-rule-priority">#{globalIdx + 1}</span>}
                       <span className="kam-rule-name">{rule.name}</span>
-                      <span className={`kam-badge ${rule.type === 'volume_split' ? 'deal-tsp' : 'info'}`} style={{ fontSize: 11 }}>
-                        {rule.type === 'volume_split' ? 'Volume Split' : 'Conditional'}
-                      </span>
+                      {isMethodDef ? (
+                        <span className="kam-badge neutral" style={{ fontSize: 11 }} title="Specific rules override this default">Method Default</span>
+                      ) : (
+                        <span className={`kam-badge ${rule.type === 'volume_split' ? 'deal-tsp' : 'info'}`} style={{ fontSize: 11 }}>
+                          {rule.type === 'volume_split' ? 'Volume Split' : 'Conditional'}
+                        </span>
+                      )}
                     </div>
                     <div className="kam-rule-actions">
-                      <button className="kam-rule-move-btn" title="Move up" disabled={globalIdx === 0} onClick={() => handleMoveRule(rule.id, 'up')}>↑</button>
-                      <button className="kam-rule-move-btn" title="Move down" disabled={globalIdx === nonDefaultRules.length - 1} onClick={() => handleMoveRule(rule.id, 'down')}>↓</button>
+                      {!isMethodDef && (
+                        <>
+                          <button className="kam-rule-move-btn" title="Move up" disabled={globalIdx === 0} onClick={() => handleMoveRule(rule.id, 'up')}>↑</button>
+                          <button className="kam-rule-move-btn" title="Move down" disabled={globalIdx === nonDefaultRules.length - 1} onClick={() => handleMoveRule(rule.id, 'down')}>↓</button>
+                        </>
+                      )}
                       <label className="kam-rule-toggle">
                         <input type="checkbox" checked={rule.enabled} onChange={() => toggleRuleEnabled(merchant.id, rule.id)} />
                         <span className="kam-rule-toggle-slider" />
                       </label>
-                      <button className="kam-rule-edit-btn" title="Edit" onClick={() => handleOpenBuilder(rule)}>
-                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
-                      </button>
-                      <button className="kam-rule-delete-btn" title="Delete" onClick={() => deleteRule(merchant.id, rule.id)}>
-                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
-                      </button>
+                      {!isMethodDef && (
+                        <>
+                          <button className="kam-rule-edit-btn" title="Edit" onClick={() => handleOpenBuilder(rule)}>
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
+                          </button>
+                          <button className="kam-rule-delete-btn" title="Delete" onClick={() => deleteRule(merchant.id, rule.id)}>
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
                   {rule.conditions.length > 0 && (
@@ -4769,7 +5318,7 @@ function RulesTabContent({
             )
           })}
 
-        </div>
+        </div>}
       </div>
 
       {/* ── Rule Builder Full-Page Overlay ───────────────────────── */}
@@ -5354,33 +5903,85 @@ function RulesTabContent({
                           <div className="kam-sr-safety-net-header">
                             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                             <strong>SR Safety Net</strong>
-                            <span className="kam-badge warning" style={{ marginLeft: 'auto' }}>Recommended</span>
                           </div>
                           <p className="kam-sr-safety-net-desc">
-                            Set a minimum success rate threshold. If a terminal's SR drops below this (after enough transactions), traffic automatically falls to the next terminal — preventing SR degradation.
+                            Set a minimum success rate. If a terminal drops below this threshold, traffic auto-shifts to the next terminal.
                           </p>
-                          <div className="kam-sr-safety-net-inputs">
-                            <div className="kam-sr-safety-net-field">
-                              <label>Min SR</label>
-                              <div className="kam-rule-builder-threshold-input-wrap">
-                                <input type="number" min="0" max="100" value={ruleForm.srThreshold} onChange={e => setRuleForm(p => ({ ...p, srThreshold: Number(e.target.value) || 0 }))} placeholder="e.g. 65" />
-                                <span className="kam-rule-builder-threshold-unit">%</span>
-                              </div>
-                            </div>
-                            <div className="kam-sr-safety-net-field">
-                              <label>Min Payments</label>
-                              <div className="kam-rule-builder-threshold-input-wrap">
-                                <input type="number" min="0" value={ruleForm.minPaymentCount} onChange={e => setRuleForm(p => ({ ...p, minPaymentCount: Number(e.target.value) || 0 }))} placeholder="e.g. 100" />
-                                <span className="kam-rule-builder-threshold-unit">txns</span>
-                              </div>
-                            </div>
+
+                          {/* Segmented control */}
+                          <div className="kam-sr-safety-segments">
+                            <button
+                              className={`kam-sr-seg${ruleForm.srThreshold === 0 ? ' active danger' : ''}`}
+                              onClick={() => setRuleForm(p => ({ ...p, srThreshold: 0 }))}
+                            >
+                              Off
+                            </button>
+                            <button
+                              className={`kam-sr-seg${ruleForm.srThreshold === 90 ? ' active' : ''}`}
+                              onClick={() => setRuleForm(p => ({ ...p, srThreshold: 90 }))}
+                            >
+                              Standard (90%)
+                            </button>
+                            <button
+                              className={`kam-sr-seg${ruleForm.srThreshold !== 0 && ruleForm.srThreshold !== 90 ? ' active' : ''}`}
+                              onClick={() => setRuleForm(p => ({ ...p, srThreshold: p.srThreshold === 0 || p.srThreshold === 90 ? 85 : p.srThreshold }))}
+                            >
+                              Custom
+                            </button>
                           </div>
-                          {ruleForm.srThreshold === 0 && (
-                            <div className="kam-sr-safety-net-warning">
-                              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                              No safety net set — if a terminal's SR drops, traffic will still be routed to it. This may impact merchant SR and wallet share.
+
+                          {/* Custom input - only when custom is selected */}
+                          {ruleForm.srThreshold !== 0 && ruleForm.srThreshold !== 90 && (
+                            <div className="kam-sr-safety-net-inputs">
+                              <div className="kam-sr-safety-net-field">
+                                <label>Min SR</label>
+                                <div className="kam-rule-builder-threshold-input-wrap">
+                                  <input type="number" min="1" max="100" value={ruleForm.srThreshold} onChange={e => setRuleForm(p => ({ ...p, srThreshold: Number(e.target.value) || 0 }))} />
+                                  <span className="kam-rule-builder-threshold-unit">%</span>
+                                </div>
+                              </div>
                             </div>
                           )}
+
+                          {/* Min payments - always shown when threshold > 0 */}
+                          {ruleForm.srThreshold > 0 && (
+                            <div className="kam-sr-safety-net-inputs">
+                              <div className="kam-sr-safety-net-field">
+                                <label>Min Payments</label>
+                                <div className="kam-rule-builder-threshold-input-wrap">
+                                  <input type="number" min="0" value={ruleForm.minPaymentCount} onChange={e => setRuleForm(p => ({ ...p, minPaymentCount: Number(e.target.value) || 0 }))} placeholder="e.g. 100" />
+                                  <span className="kam-rule-builder-threshold-unit">txns</span>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Warning when OFF */}
+                          {ruleForm.srThreshold === 0 && (
+                            <div className="kam-sr-safety-net-warning danger">
+                              Warning: Safety net disabled -- traffic will continue routing to this terminal even if SR drops to 0%.
+                              This risks merchant SR degradation and wallet share loss. Only disable if you have a commercial reason (e.g., TSP commitment).
+                            </div>
+                          )}
+
+                          {/* Explainer */}
+                          <details className="kam-sr-explainer">
+                            <summary>How does this work?</summary>
+                            <div className="kam-sr-explainer-content">
+                              <div className="kam-sr-explainer-step">
+                                <span className="kam-sr-explainer-num">1</span>
+                                <span>Terminal processes transactions normally based on priority order.</span>
+                              </div>
+                              <div className="kam-sr-explainer-step">
+                                <span className="kam-sr-explainer-num">2</span>
+                                <span>If SR drops below the threshold (after min payment count), traffic automatically shifts to the next terminal in priority.</span>
+                              </div>
+                              <div className="kam-sr-explainer-step">
+                                <span className="kam-sr-explainer-num">3</span>
+                                <span>If ALL terminals are below threshold, the system bypasses the check to prevent NTF (payment failure).</span>
+                              </div>
+                            </div>
+                          </details>
                         </div>
                       )}
 
@@ -5632,6 +6233,172 @@ function RulesTabContent({
                           </div>
                         )}
                       </div>
+
+                      {/* ── Preview Impact ── */}
+                      {previewData && (
+                        <div className="kam-preview-impact">
+                          <div className="kam-preview-impact-header">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                              <circle cx="12" cy="12" r="3" />
+                            </svg>
+                            <strong>Impact Preview</strong>
+                            <span className="kam-badge info">Based on {previewData.sampleTxns.length} sample transactions</span>
+                          </div>
+
+                          {/* Metrics: NTF Rate + Avg Cost */}
+                          <div className="kam-preview-metrics">
+                            <div className="kam-preview-metric">
+                              <div className="kam-preview-metric-label">NTF Rate</div>
+                              <div className="kam-preview-metric-before">{previewData.beforeResult.ntfPercentage}%</div>
+                              <div className="kam-preview-metric-arrow">&rarr;</div>
+                              <div className={`kam-preview-metric-after ${previewData.afterResult.ntfPercentage < previewData.beforeResult.ntfPercentage ? 'good' : previewData.afterResult.ntfPercentage > previewData.beforeResult.ntfPercentage ? 'bad' : 'neutral'}`}>
+                                {previewData.afterResult.ntfPercentage}%
+                              </div>
+                              {previewData.afterResult.ntfPercentage !== previewData.beforeResult.ntfPercentage && (
+                                <span className={`kam-preview-dist-delta ${previewData.afterResult.ntfPercentage < previewData.beforeResult.ntfPercentage ? 'decrease' : 'increase'}`}>
+                                  {(previewData.afterResult.ntfPercentage - previewData.beforeResult.ntfPercentage) > 0 ? '+' : ''}{(previewData.afterResult.ntfPercentage - previewData.beforeResult.ntfPercentage).toFixed(1)}%
+                                </span>
+                              )}
+                            </div>
+                            <div className="kam-preview-metric">
+                              <div className="kam-preview-metric-label">Avg Cost</div>
+                              <div className="kam-preview-metric-before">{'\u20B9'}{previewData.beforeAvgCost.toFixed(2)}</div>
+                              <div className="kam-preview-metric-arrow">&rarr;</div>
+                              <div className={`kam-preview-metric-after ${previewData.afterAvgCost < previewData.beforeAvgCost ? 'good' : previewData.afterAvgCost > previewData.beforeAvgCost ? 'bad' : 'neutral'}`}>
+                                {'\u20B9'}{previewData.afterAvgCost.toFixed(2)}
+                              </div>
+                              {Math.abs(previewData.afterAvgCost - previewData.beforeAvgCost) >= 0.01 && (
+                                <span className={`kam-preview-dist-delta ${previewData.afterAvgCost < previewData.beforeAvgCost ? 'decrease' : 'increase'}`}>
+                                  {(previewData.afterAvgCost - previewData.beforeAvgCost) > 0 ? '+' : ''}{'\u20B9'}{(previewData.afterAvgCost - previewData.beforeAvgCost).toFixed(2)}
+                                </span>
+                              )}
+                            </div>
+
+                            {/* Terminal Distribution */}
+                            <div className="kam-preview-distribution">
+                              <div className="kam-preview-dist-label">Traffic Distribution</div>
+                              {previewData.afterResult.terminalDistribution.map(td => {
+                                const before = previewData.beforeResult.terminalDistribution.find(b => b.terminalId === td.terminalId)
+                                const delta = td.percentage - (before?.percentage || 0)
+                                return (
+                                  <div key={td.terminalId} className="kam-preview-dist-row">
+                                    <span className="kam-preview-dist-terminal">{td.displayId}</span>
+                                    <span className="kam-preview-dist-before">{before?.percentage || 0}%</span>
+                                    <span className="kam-preview-dist-arrow">&rarr;</span>
+                                    <span className={`kam-preview-dist-after ${delta > 0 ? 'increase' : delta < 0 ? 'decrease' : ''}`}>
+                                      {td.percentage}%
+                                    </span>
+                                    {Math.abs(delta) >= 0.1 && (
+                                      <span className={`kam-preview-dist-delta ${delta > 0 ? 'increase' : 'decrease'}`}>
+                                        {delta > 0 ? '+' : ''}{delta.toFixed(1)}%
+                                      </span>
+                                    )}
+                                  </div>
+                                )
+                              })}
+                            </div>
+                          </div>
+
+                          {/* Summary */}
+                          <div className="kam-preview-summary">{previewData.summary}</div>
+
+                          {/* Single-Transaction Trace */}
+                          <div className="kam-preview-trace">
+                            <div className="kam-preview-trace-header">
+                              <span className="kam-preview-trace-label">Trace a single transaction</span>
+                              <select
+                                className="kam-preview-trace-select"
+                                value={previewTraceMethod}
+                                onChange={e => setPreviewTraceMethod(e.target.value)}
+                              >
+                                <option value="UPI">UPI</option>
+                                <option value="Cards">Cards</option>
+                                <option value="NB">Net Banking</option>
+                              </select>
+                            </div>
+                            {previewTrace && (
+                              <div className="kam-preview-trace-panels">
+                                {/* Before trace */}
+                                <div className="kam-preview-trace-panel">
+                                  <div className="kam-preview-trace-panel-title before">Before (current rules)</div>
+                                  <div className="kam-preview-trace-stages">
+                                    {previewTrace.beforeTrace.stages.map((stage, idx) => {
+                                      const isNTF = stage.type === 'ntf'
+                                      const isSorter = stage.type === 'sorter'
+                                      let stepColor = 'var(--rzp-success)'
+                                      if (stage.type === 'rule_filter') stepColor = 'var(--rzp-warning)'
+                                      if (stage.type === 'rule_ntf' || isNTF) stepColor = 'var(--rzp-danger)'
+                                      if (stage.type === 'rule_skip') stepColor = 'var(--rzp-text-muted)'
+                                      if (isSorter) stepColor = 'var(--rzp-blue)'
+                                      return (
+                                        <div key={stage.id} className={`kam-preview-trace-step${isNTF ? ' ntf' : ''}`}>
+                                          {idx > 0 && <div className="kam-preview-trace-connector" />}
+                                          <div className="kam-preview-trace-step-row">
+                                            <div className="kam-preview-trace-circle" style={{ background: stepColor }}>
+                                              {isNTF ? '\u2715' : isSorter ? '\u26A1' : stage.stepNumber}
+                                            </div>
+                                            <span className="kam-preview-trace-step-label">{stage.label}</span>
+                                            {stage.remainingCount !== undefined && !isNTF && (
+                                              <span className="kam-preview-trace-remaining">{stage.remainingCount} left</span>
+                                            )}
+                                          </div>
+                                        </div>
+                                      )
+                                    })}
+                                    <div className="kam-preview-trace-result">
+                                      {previewTrace.beforeTrace.isNTF
+                                        ? <span className="kam-badge danger">NTF - No terminal found</span>
+                                        : <span className="kam-badge success">{previewTrace.beforeTrace.selectedTerminal?.displayId} ({previewTrace.beforeTrace.selectedTerminal?.gatewayShort})</span>
+                                      }
+                                    </div>
+                                  </div>
+                                </div>
+                                {/* After trace */}
+                                <div className="kam-preview-trace-panel">
+                                  <div className="kam-preview-trace-panel-title after">After (with new rule)</div>
+                                  <div className="kam-preview-trace-stages">
+                                    {previewTrace.afterTrace.stages.map((stage, idx) => {
+                                      const isNTF = stage.type === 'ntf'
+                                      const isSorter = stage.type === 'sorter'
+                                      const isDraft = stage.ruleId?.startsWith('draft-preview-')
+                                      let stepColor = 'var(--rzp-success)'
+                                      if (stage.type === 'rule_filter') stepColor = 'var(--rzp-warning)'
+                                      if (stage.type === 'rule_ntf' || isNTF) stepColor = 'var(--rzp-danger)'
+                                      if (stage.type === 'rule_skip') stepColor = 'var(--rzp-text-muted)'
+                                      if (isSorter) stepColor = 'var(--rzp-blue)'
+                                      if (isDraft) stepColor = '#7c3aed'
+                                      return (
+                                        <div key={stage.id} className={`kam-preview-trace-step${isNTF ? ' ntf' : ''}${isDraft ? ' draft' : ''}`}>
+                                          {idx > 0 && <div className="kam-preview-trace-connector" />}
+                                          <div className="kam-preview-trace-step-row">
+                                            <div className="kam-preview-trace-circle" style={{ background: stepColor }}>
+                                              {isNTF ? '\u2715' : isSorter ? '\u26A1' : stage.stepNumber}
+                                            </div>
+                                            <span className="kam-preview-trace-step-label">
+                                              {stage.label}
+                                              {isDraft && <span className="kam-badge info" style={{ marginLeft: 4, fontSize: 9, padding: '0 4px' }}>NEW</span>}
+                                            </span>
+                                            {stage.remainingCount !== undefined && !isNTF && (
+                                              <span className="kam-preview-trace-remaining">{stage.remainingCount} left</span>
+                                            )}
+                                          </div>
+                                        </div>
+                                      )
+                                    })}
+                                    <div className="kam-preview-trace-result">
+                                      {previewTrace.afterTrace.isNTF
+                                        ? <span className="kam-badge danger">NTF - No terminal found</span>
+                                        : <span className="kam-badge success">{previewTrace.afterTrace.selectedTerminal?.displayId} ({previewTrace.afterTrace.selectedTerminal?.gatewayShort})</span>
+                                      }
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
 
                       {/* Step validation errors */}
                       {wizardStepErrors[4] && wizardStepErrors[4].length > 0 && (

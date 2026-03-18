@@ -37,7 +37,7 @@ export const gateways = [
     shortName: 'RBL',
     terminals: [
       { id: 'term-rbl-001', terminalId: 'RBL_T1', successRate: 68.8, costPerTxn: 1.10, isZeroCost: false },
-      { id: 'term-rbl-002', terminalId: 'RBL_T2', successRate: 67.5, costPerTxn: 0.95, isZeroCost: false },
+      { id: 'term-rbl-002', terminalId: 'RBL_T2', successRate: 67.5, costPerTxn: 0.95, isZeroCost: false, bankStatus: 'disabled', bankStatusReason: 'Bank maintenance — scheduled downtime', bankStatusSince: '2026-03-15T00:00:00Z' },
     ],
   },
   {
@@ -46,7 +46,7 @@ export const gateways = [
     shortName: 'Yes',
     terminals: [
       { id: 'term-yes-001', terminalId: 'YES_T1', successRate: 69.1, costPerTxn: 0, isZeroCost: true },
-      { id: 'term-yes-002', terminalId: 'YES_T2', successRate: 67.8, costPerTxn: 0.85, isZeroCost: false },
+      { id: 'term-yes-002', terminalId: 'YES_T2', successRate: 67.8, costPerTxn: 0.85, isZeroCost: false, bankStatus: 'disabled', bankStatusReason: 'Compliance review — terminal suspended by bank', bankStatusSince: '2026-03-10T00:00:00Z' },
     ],
   },
 ]
@@ -557,6 +557,51 @@ export const RULE_OPERATOR_LABELS = {
   between: 'between',
 }
 
+// ── Platform-Level Rules (read-only for KAMs) ──
+export const PLATFORM_RULES = [
+  {
+    id: 'platform-001',
+    name: 'Block RBL for Gambling MCC',
+    scope: { type: 'mcc', values: ['7995', '7993'] },
+    conditions: [{ field: 'payment_method', operator: 'equals', value: 'Cards' }],
+    action: { type: 'reject', terminals: ['term-rbl-001', 'term-rbl-002'] },
+    reason: 'Compliance: RBL Bank does not process gambling/lottery transactions',
+    createdBy: 'platform-ops',
+    createdAt: '2025-11-01T00:00:00Z',
+  },
+  {
+    id: 'platform-002',
+    name: 'International → HDFC/ICICI Only',
+    scope: { type: 'all' },
+    conditions: [{ field: 'international', operator: 'equals', value: true }],
+    action: { type: 'route', terminals: ['term-hdfc-001', 'term-icici-001'] },
+    reason: 'Only HDFC and ICICI have international acquiring licenses',
+    createdBy: 'platform-ops',
+    createdAt: '2025-10-15T00:00:00Z',
+  },
+  {
+    id: 'platform-003',
+    name: 'High-Value Cards → Tier-1 Banks',
+    scope: { type: 'all' },
+    conditions: [
+      { field: 'payment_method', operator: 'equals', value: 'Cards' },
+      { field: 'amount', operator: 'greater_than', value: 50000 },
+    ],
+    action: { type: 'route', terminals: ['term-hdfc-001', 'term-icici-001'] },
+    reason: 'Risk management: High-value transactions restricted to Tier-1 bank terminals',
+    createdBy: 'platform-risk',
+    createdAt: '2025-12-20T00:00:00Z',
+  },
+]
+
+export function getPlatformRulesForMerchant(merchant) {
+  return PLATFORM_RULES.filter(rule => {
+    if (rule.scope.type === 'all') return true
+    if (rule.scope.type === 'mcc') return rule.scope.values.includes(merchant.mcc)
+    return false
+  })
+}
+
 export const AMOUNT_PRESETS = [
   { label: '> ₹1L', operator: 'greater_than', value: 100000 },
   { label: '> ₹2L', operator: 'greater_than', value: 200000 },
@@ -595,7 +640,8 @@ export const PAYMENT_METHOD_GROUPS = [
  * Returns { groups: [...], defaultRule }
  */
 export function groupRulesByMethod(rules) {
-  const nonDefaultRules = rules.filter(r => !r.isDefault)
+  const nonDefaultRules = rules.filter(r => !r.isDefault && !r.isMethodDefault)
+  const methodDefaultRules = rules.filter(r => r.isMethodDefault)
   const defaultRule = rules.find(r => r.isDefault) || null
 
   const groups = PAYMENT_METHOD_GROUPS.map(groupDef => ({
@@ -646,6 +692,20 @@ export function groupRulesByMethod(rules) {
             }
           }
         }
+      }
+    }
+  }
+
+  // Add method default rules to their respective groups
+  for (const rule of methodDefaultRules) {
+    const methodCond = rule.conditions.find(c => c.field === 'payment_method')
+    if (methodCond) {
+      const method = methodCond.value
+      const group = groupMap[method]
+      if (group) {
+        group.rules.push(rule)
+      } else {
+        groupMap['all_methods'].rules.push(rule)
       }
     }
   }
@@ -2231,7 +2291,6 @@ export function generateSeedRules(merchant) {
   const customRules = SEED_RULES[merchant.id] || []
   const rules = customRules.map(r => ({ ...r }))
 
-  // Default rule: routes to all terminals sorted by current routing strategy
   const sortedTerminals = [...merchant.gatewayMetrics]
     .sort((a, b) => {
       if (merchant.routingStrategy === 'cost_based') return a.costPerTxn - b.costPerTxn
@@ -2239,6 +2298,40 @@ export function generateSeedRules(merchant) {
     })
     .map(gm => gm.terminalId)
 
+  // Per-method defaults
+  const methods = ['Cards', 'UPI', 'NB']
+  methods.forEach((method, idx) => {
+    const methodTerminals = merchant.gatewayMetrics
+      .filter(gm => {
+        const supportedMethods = gm.supportedMethods || []
+        return supportedMethods.includes(method)
+      })
+      .sort((a, b) => {
+        if (merchant.routingStrategy === 'cost_based') return a.costPerTxn - b.costPerTxn
+        return b.successRate - a.successRate
+      })
+      .map(gm => gm.terminalId)
+
+    if (methodTerminals.length > 0) {
+      rules.push({
+        id: `rule-${merchant.id}-default-${method.toLowerCase()}`,
+        name: `Default ${method} Routing`,
+        type: 'conditional',
+        enabled: true,
+        priority: 900 + idx,
+        conditions: [{ field: 'payment_method', operator: 'equals', value: method }],
+        conditionLogic: 'AND',
+        action: { type: 'route', terminals: methodTerminals, splits: [] },
+        isDefault: false,
+        isMethodDefault: true,
+        defaultForMethod: method,
+        createdAt: '2025-12-01T00:00:00Z',
+        createdBy: 'system',
+      })
+    }
+  })
+
+  // Catch-all default
   rules.push({
     id: `rule-${merchant.id}-default`,
     name: 'Default Routing',
@@ -2798,6 +2891,8 @@ export function simulateRoutingPipeline(merchant, transaction, rules, overrides 
       txnShare: gm.txnShare,
       supportedMethods: gm.supportedMethods || [],
       isZeroCost: gm.costPerTxn === 0,
+      bankStatus: term?.bankStatus || 'active',
+      bankStatusReason: term?.bankStatusReason || null,
     }
   })
 
@@ -2805,12 +2900,17 @@ export function simulateRoutingPipeline(merchant, transaction, rules, overrides 
   const methodEligible = allTerminals.filter(t => t.supportedMethods.includes(paymentMethod))
   const methodIneligible = allTerminals.filter(t => !t.supportedMethods.includes(paymentMethod))
 
+  // Filter by bank-disabled terminals
+  const bankDisabled = methodEligible.filter(t => t.bankStatus === 'disabled')
+  const afterBankFilter = methodEligible.filter(t => t.bankStatus !== 'disabled')
+
   // Filter by terminal availability (what-if: terminal down)
-  const downedInThisStep = methodEligible.filter(t => disabledTerminals.has(t.terminalId))
-  const eligible = methodEligible.filter(t => !disabledTerminals.has(t.terminalId))
+  const downedInThisStep = afterBankFilter.filter(t => disabledTerminals.has(t.terminalId))
+  const eligible = afterBankFilter.filter(t => !disabledTerminals.has(t.terminalId))
 
   const eliminatedInPool = [
     ...methodIneligible.map(t => ({ ...t, status: 'eliminated', reason: `Does not support ${paymentMethod}` })),
+    ...bankDisabled.map(t => ({ ...t, status: 'eliminated', reason: `Disabled by bank: ${t.bankStatusReason || 'Bank action'}` })),
     ...downedInThisStep.map(t => ({ ...t, status: 'eliminated', reason: 'Terminal marked as down' })),
   ]
 
@@ -3821,5 +3921,133 @@ function generateEscalationTemplate(merchant, profile, actionType, terminal) {
     to: 'banking-alliances@razorpay.com',
     subject: `Compliance Review: ${name} - NTF Failures`,
     body: `Hi Banking Alliances,\n\n${base}\nRequest: Review compliance/MCC restrictions that may be causing NTF failures for this merchant. An exemption or terminal addition may be needed.\n\nThanks`,
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Rule Coverage Matrix
+// ---------------------------------------------------------------------------
+/**
+ * Compute a coverage matrix showing which rule handles each payment type combo.
+ * Returns { combos: [...], coverageMap: { comboKey: { matchedRule, selectedTerminal, isDefault, isMethodDefault, isNTF } } }
+ */
+export function computeRuleCoverageMatrix(rules, merchant) {
+  // Define all payment type combinations
+  const combos = []
+
+  // Cards combos
+  const networks = ['Visa', 'Mastercard', 'RuPay']
+  const cardTypes = ['credit', 'debit']
+  const intlOptions = [false, true]
+
+  for (const network of networks) {
+    for (const cardType of cardTypes) {
+      for (const intl of intlOptions) {
+        combos.push({
+          key: `cards-${network}-${cardType}-${intl ? 'intl' : 'dom'}`,
+          label: `${network} ${cardType === 'credit' ? 'CC' : 'DC'} ${intl ? 'Intl' : 'Dom'}`,
+          shortLabel: `${network.slice(0, 2)} ${cardType === 'credit' ? 'CC' : 'DC'}${intl ? ' I' : ''}`,
+          method: 'Cards',
+          txn: { payment_method: 'Cards', card_network: network, card_type: cardType, international: intl, amount: 5000 },
+        })
+      }
+    }
+  }
+
+  // UPI combos
+  combos.push({ key: 'upi-onetime', label: 'UPI One-time', shortLabel: 'UPI 1x', method: 'UPI', txn: { payment_method: 'UPI', amount: 2000 } })
+  combos.push({ key: 'upi-autopay', label: 'UPI Autopay', shortLabel: 'UPI AP', method: 'UPI', txn: { payment_method: 'UPI', upi_flow: 'autopay', amount: 2000 } })
+
+  // NB
+  combos.push({ key: 'nb', label: 'Net Banking', shortLabel: 'NB', method: 'NB', txn: { payment_method: 'NB', amount: 5000 } })
+
+  // EMI
+  combos.push({ key: 'emi-nocost', label: 'EMI No-Cost', shortLabel: 'EMI NC', method: 'EMI', txn: { payment_method: 'EMI', emi_type: 'no_cost', amount: 10000 } })
+  combos.push({ key: 'emi-standard', label: 'EMI Standard', shortLabel: 'EMI Std', method: 'EMI', txn: { payment_method: 'EMI', emi_type: 'standard', amount: 10000 } })
+
+  // For each combo, simulate
+  const coverageMap = {}
+  for (const combo of combos) {
+    try {
+      const result = simulateRoutingPipeline(merchant, combo.txn, rules, {})
+
+      // Find which rule matched (the first rule_filter or rule_pass stage that isn't a skip)
+      const matchedStage = result.stages.find(s => s.type === 'rule_filter' || s.type === 'rule_pass' || s.type === 'rule_ntf')
+      const matchedRule = matchedStage ? rules.find(r => r.id === matchedStage.ruleId) : null
+
+      // If no specific rule matched, it fell through to default
+      const isDefault = !matchedRule || matchedRule.isDefault
+      const isMethodDefault = matchedRule?.isMethodDefault || false
+
+      coverageMap[combo.key] = {
+        matchedRule: matchedRule ? { id: matchedRule.id, name: matchedRule.name, isDefault: matchedRule.isDefault, isMethodDefault: matchedRule.isMethodDefault } : null,
+        selectedTerminal: result.selectedTerminal,
+        isNTF: result.isNTF,
+        isDefault,
+        isMethodDefault,
+      }
+    } catch (e) {
+      coverageMap[combo.key] = { matchedRule: null, selectedTerminal: null, isNTF: true, isDefault: false, isMethodDefault: false }
+    }
+  }
+
+  return { combos, coverageMap }
+}
+
+// ── Transaction-to-Simulation Input ─────────────────
+/**
+ * Convert a transaction object (from generateMerchantTransactions) to a simulation input format.
+ */
+export function transactionToSimInput(txn) {
+  const pm = txn.paymentMethod
+  let payment_method = 'Cards'
+  if (pm?.short === 'UPI') payment_method = 'UPI'
+  else if (pm?.short === 'NB') payment_method = 'NB'
+  else if (pm?.short === 'CC' || pm?.short === 'DC') payment_method = 'Cards'
+  else if (pm?.label) payment_method = pm.label
+
+  return {
+    payment_method,
+    amount: txn.amount || 1000,
+    card_network: pm?.network || '',
+    card_type: pm?.short === 'CC' ? 'credit' : pm?.short === 'DC' ? 'debit' : '',
+    international: false,
+    issuer_bank: null,
+  }
+}
+
+// ── Routing Health Analysis ─────────────────
+/**
+ * Generate a routing health analysis from batch simulation results.
+ * Shows per-profile routing outcomes, dormant rules, rule utilization.
+ */
+export function generateRoutingAnalysis(merchant, transactions, rules) {
+  const result = batchSimulatePayments(merchant, transactions, rules)
+
+  // Group transactions by payment method
+  const methodGroups = {}
+  transactions.forEach(txn => {
+    const method = txn.paymentMethod?.short === 'CC' || txn.paymentMethod?.short === 'DC' ? 'Cards'
+      : txn.paymentMethod?.short === 'UPI' ? 'UPI'
+      : txn.paymentMethod?.short === 'NB' ? 'NB' : 'Other'
+    if (!methodGroups[method]) methodGroups[method] = { count: 0, ntf: 0, success: 0 }
+    methodGroups[method].count++
+    if (txn.isNTF || txn.status === 'failed') methodGroups[method].ntf++
+    else methodGroups[method].success++
+  })
+
+  // Find dormant rules (rules that never matched any transaction)
+  const activeRuleIds = new Set(result.ruleImpact.map(r => r.ruleId))
+  const dormantRules = rules.filter(r => !r.isDefault && !r.isMethodDefault && r.enabled && !activeRuleIds.has(r.id))
+
+  // Find highest-impact rules
+  const highImpactRules = [...result.ruleImpact].sort((a, b) => b.affectedPayments - a.affectedPayments).slice(0, 5)
+
+  return {
+    ...result,
+    methodGroups,
+    dormantRules,
+    highImpactRules,
+    totalTransactions: transactions.length,
   }
 }
