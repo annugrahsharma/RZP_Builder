@@ -7758,3 +7758,112 @@ h3.kam-sr-chart-card-title {
 .kam-rule-card.platform:hover {
   border-color: #94a3b8;
 }
+
+/* Rule Group Body Layout - two columns with AI explainer */
+.kam-rule-group-body-layout {
+  display: flex;
+  gap: 16px;
+}
+.kam-rule-group-rules {
+  flex: 1;
+  min-width: 0;
+}
+.kam-rule-explainer {
+  width: 280px;
+  flex-shrink: 0;
+  padding: 14px;
+  background: linear-gradient(135deg, #f0f4ff 0%, #f8fafc 100%);
+  border: 1px solid #e0e7ff;
+  border-radius: 10px;
+  font-size: 12px;
+  line-height: 1.6;
+  align-self: flex-start;
+  position: sticky;
+  top: 80px;
+}
+.kam-rule-explainer-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  font-size: 13px;
+  color: #334155;
+}
+.kam-rule-explainer-header svg { color: #528FF0; }
+.kam-rule-explainer-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.kam-rule-explainer-step {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+.kam-rule-explainer-step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #528FF0;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.kam-rule-explainer-net {
+  padding: 8px 10px;
+  background: #dcfce7;
+  border-radius: 6px;
+  color: #166534;
+  font-size: 11px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+.kam-rule-explainer-warning {
+  padding: 8px 10px;
+  background: #fef2f2;
+  border-radius: 6px;
+  color: #991b1b;
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+.kam-rule-explainer-ask {
+  margin-top: 12px;
+  border-top: 1px solid #e0e7ff;
+  padding-top: 10px;
+}
+.kam-rule-explainer-input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 12px;
+  background: white;
+  outline: none;
+  transition: border-color 0.15s;
+  box-sizing: border-box;
+}
+.kam-rule-explainer-input:focus {
+  border-color: #528FF0;
+  box-shadow: 0 0 0 2px rgba(82, 143, 240, 0.1);
+}
+.kam-rule-explainer-input::placeholder {
+  color: #94a3b8;
+}
+.kam-rule-explainer-response {
+  margin-top: 8px;
+  padding: 8px 10px;
+  background: white;
+  border: 1px solid #e0e7ff;
+  border-radius: 8px;
+  font-size: 11px;
+  color: #334155;
+  line-height: 1.5;
+}
+.kam-rule-explainer-response strong {
+  color: #528FF0;
+}

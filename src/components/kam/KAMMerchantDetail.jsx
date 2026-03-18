@@ -34,6 +34,7 @@ import {
   merchants as allMerchantsData,
   gateways as gatewayData,
   getPlatformRulesForMerchant,
+  generateMethodExplainer,
 } from '../../data/kamMockData'
 
 // ---------------------------------------------------------------------------
@@ -3584,6 +3585,43 @@ function RulesTabContent({
     setExpandedGroups(prev => ({ ...prev, [key]: !prev[key] }))
   }, [])
 
+  // Per-group ask state for AI explainer Q&A
+  const [askState, setAskState] = useState({})
+  const handleExplainerAsk = useCallback((question, groupKey, groupDef, explainer) => {
+    const q = question.toLowerCase()
+    let response
+
+    if (q.includes('down') || q.includes('fail')) {
+      const termMatch = question.match(/(\w+_T\d)/i)
+      if (termMatch) {
+        const termId = termMatch[1]
+        // Find terminal info
+        let termDisplayId = termId
+        for (const gw of gatewayData) {
+          const t = gw.terminals.find(t => t.terminalId === termId)
+          if (t) { termDisplayId = t.terminalId; break }
+        }
+        // Check if there's a fallback
+        const hasOtherRules = explainer.steps.length > 1
+        if (hasOtherRules) {
+          response = `If ${termDisplayId} goes down, traffic would shift to the next available terminal in the routing cascade. ${explainer.netEffect}`
+        } else {
+          response = `If ${termDisplayId} goes down, this could cause NTF for ${groupDef.label} transactions. Consider adding a backup terminal.`
+        }
+      } else {
+        response = `If a terminal goes down, the routing cascade will attempt the next available terminal. ${explainer.netEffect}`
+      }
+    } else if (q.includes('ntf') || q.includes('no terminal')) {
+      response = explainer.warnings.length > 0
+        ? `There are potential NTF risks: ${explainer.warnings.join(' ')}`
+        : `Based on current rules, there are no NTF risks for ${groupDef.label} transactions. ${explainer.netEffect}`
+    } else {
+      response = `${explainer.netEffect} There are ${explainer.ruleCount} rules active for ${groupDef.label}.`
+    }
+
+    setAskState(prev => ({ ...prev, [groupKey]: { input: '', response } }))
+  }, [])
+
   // Build available terminals from merchant's gateway metrics
   const availableTerminals = useMemo(() => {
     return merchant.gatewayMetrics.map(gm => {
@@ -4846,8 +4884,21 @@ function RulesTabContent({
                 </div>
 
                 {/* Group Body */}
-                {isOpen && (
+                {isOpen && (() => {
+                  const methodDefaultRule = groupRulesList.find(r => r.isMethodDefault)
+                  const explainer = generateMethodExplainer(
+                    groupDef.label,
+                    groupPlatformRules,
+                    groupRulesList.filter(r => !r.isMethodDefault),
+                    methodDefaultRule,
+                    defaultRule,
+                    merchant
+                  )
+                  const groupAsk = askState[groupDef.key] || {}
+                  return (
                   <div className="kam-rule-group-body">
+                    <div className="kam-rule-group-body-layout">
+                      <div className="kam-rule-group-rules">
                     {/* Platform rules for this method group */}
                     {groupPlatformRules.map(pr => (
                       <div key={pr.id} className="kam-rule-card platform">
@@ -4969,8 +5020,52 @@ function RulesTabContent({
                         )}
                       </>
                     )}
+                      </div>
+                      <div className="kam-rule-explainer">
+                        <div className="kam-rule-explainer-header">
+                          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2z" /></svg>
+                          <strong>How {groupDef.label} routing works</strong>
+                        </div>
+                        <div className="kam-rule-explainer-steps">
+                          {explainer.steps.map((step, i) => (
+                            <div key={i} className="kam-rule-explainer-step">
+                              <span className="kam-rule-explainer-step-num">{i + 1}</span>
+                              <span>{step}</span>
+                            </div>
+                          ))}
+                        </div>
+                        {explainer.netEffect && (
+                          <div className="kam-rule-explainer-net">
+                            <strong>Net effect:</strong> {explainer.netEffect}
+                          </div>
+                        )}
+                        {explainer.warnings.map((w, i) => (
+                          <div key={i} className="kam-rule-explainer-warning">{w}</div>
+                        ))}
+                        <div className="kam-rule-explainer-ask">
+                          <input
+                            type="text"
+                            placeholder="Ask about these rules..."
+                            className="kam-rule-explainer-input"
+                            value={groupAsk.input || ''}
+                            onChange={(e) => setAskState(prev => ({ ...prev, [groupDef.key]: { ...prev[groupDef.key], input: e.target.value } }))}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && e.target.value.trim()) {
+                                handleExplainerAsk(e.target.value.trim(), groupDef.key, groupDef, explainer)
+                              }
+                            }}
+                          />
+                          {groupAsk.response && (
+                            <div className="kam-rule-explainer-response">
+                              <strong>AI:</strong> {groupAsk.response}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                )}
+                  )
+                })()}
               </div>
             )
           })}
