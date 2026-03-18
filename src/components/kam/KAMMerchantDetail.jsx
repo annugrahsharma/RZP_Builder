@@ -3602,21 +3602,24 @@ function RulesTabContent({
           if (t) { termDisplayId = t.terminalId; break }
         }
         // Check if there's a fallback
-        const hasOtherRules = explainer.steps.length > 1
-        if (hasOtherRules) {
-          response = `If ${termDisplayId} goes down, traffic would shift to the next available terminal in the routing cascade. ${explainer.netEffect}`
+        const scenarioSummary = explainer.scenarios.map(s => `${s.label}: ${s.eligibleTerminals.join(' → ')}`).join('. ')
+        const hasMultipleTerminals = explainer.scenarios.some(s => s.eligibleTerminals.length > 1)
+        if (hasMultipleTerminals) {
+          response = `If ${termDisplayId} goes down, traffic shifts to the next terminal in priority. Current scenarios: ${scenarioSummary}`
         } else {
           response = `If ${termDisplayId} goes down, this could cause NTF for ${groupDef.label} transactions. Consider adding a backup terminal.`
         }
       } else {
-        response = `If a terminal goes down, the routing cascade will attempt the next available terminal. ${explainer.netEffect}`
+        const scenarioSummary = explainer.scenarios.map(s => `${s.label}: ${s.eligibleTerminals.join(' → ')}`).join('. ')
+        response = `If a terminal goes down, routing cascades to the next in priority. ${scenarioSummary}`
       }
     } else if (q.includes('ntf') || q.includes('no terminal')) {
       response = explainer.warnings.length > 0
         ? `There are potential NTF risks: ${explainer.warnings.join(' ')}`
-        : `Based on current rules, there are no NTF risks for ${groupDef.label} transactions. ${explainer.netEffect}`
+        : `Based on current rules, there are no NTF risks for ${groupDef.label} transactions. ${explainer.scenarios.length} scenario(s) with eligible terminals defined.`
     } else {
-      response = `${explainer.netEffect} There are ${explainer.ruleCount} rules active for ${groupDef.label}.`
+      const scenarioLabels = explainer.scenarios.map(s => s.label).join(', ')
+      response = `${explainer.ruleCount} rules active for ${groupDef.label}. Scenarios: ${scenarioLabels}.`
     }
 
     setAskState(prev => ({ ...prev, [groupKey]: { input: '', response } }))
@@ -4895,67 +4898,73 @@ function RulesTabContent({
                     merchant
                   )
                   const groupAsk = askState[groupDef.key] || {}
+
+                  // Split rules: merchant rules first, then platform, then method defaults
+                  const merchantOnlyRules = groupRulesList.filter(r => !r.isMethodDefault)
+                  const methodDefaultsInGroup = groupRulesList.filter(r => r.isMethodDefault)
+
+                  // Helper to render platform rule cards inline
+                  const renderPlatformCards = () => groupPlatformRules.map(pr => (
+                    <div key={pr.id} className="kam-rule-card platform">
+                      <div className="kam-rule-card-header">
+                        <div className="kam-rule-left">
+                          <span className="kam-rule-priority" style={{ background: '#e2e8f0', color: '#64748b', border: 'none' }}>
+                            <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                          </span>
+                          <span className="kam-rule-name">{pr.name}</span>
+                          <span className="kam-badge neutral" style={{ fontSize: 10 }}>Platform</span>
+                        </div>
+                      </div>
+                      {pr.conditions.length > 0 && (
+                        <div className="kam-rule-conditions">
+                          <span className="kam-rule-if">IF</span>
+                          {pr.conditions.map((c, ci) => (
+                            <React.Fragment key={ci}>
+                              {ci > 0 && <span className="kam-rule-logic">AND</span>}
+                              <span className="kam-rule-condition-chip">
+                                {RULE_CONDITIONS[c.field]?.label || c.field} {RULE_OPERATOR_LABELS[c.operator] || c.operator} {
+                                  c.field === 'amount' ? `\u20B9${Number(c.value)?.toLocaleString('en-IN')}`
+                                  : c.field === 'international' ? (c.value ? 'Yes' : 'No')
+                                  : String(c.value)
+                                }
+                              </span>
+                            </React.Fragment>
+                          ))}
+                        </div>
+                      )}
+                      <div className="kam-rule-action">
+                        {pr.action.type === 'reject' ? (
+                          <>
+                            <span className="kam-rule-then" style={{ color: '#dc2626' }}>BLOCKS:</span>
+                            {pr.action.terminals.map((tid, i) => {
+                              let displayId = tid; for (const gw of gatewayData) { const t = gw.terminals.find(t => t.id === tid); if (t) { displayId = t.terminalId; break } }
+                              return <React.Fragment key={tid}>{i > 0 && <span className="kam-rule-arrow">·</span>}<span className="kam-rule-terminal-chip" style={{ background: '#fef2f2', color: '#991b1b' }}>{displayId}</span></React.Fragment>
+                            })}
+                          </>
+                        ) : (
+                          <>
+                            <span className="kam-rule-then">ROUTES TO:</span>
+                            {pr.action.terminals.map((tid, i) => {
+                              let displayId = tid; for (const gw of gatewayData) { const t = gw.terminals.find(t => t.id === tid); if (t) { displayId = t.terminalId; break } }
+                              return <React.Fragment key={tid}>{i > 0 && <span className="kam-rule-arrow">&rarr;</span>}<span className="kam-rule-terminal-chip">{displayId}</span></React.Fragment>
+                            })}
+                          </>
+                        )}
+                      </div>
+                      <div className="kam-rule-meta" style={{ color: '#94a3b8', fontStyle: 'italic' }}>{pr.reason}</div>
+                    </div>
+                  ))
+
                   return (
                   <div className="kam-rule-group-body">
                     <div className="kam-rule-group-body-layout">
                       <div className="kam-rule-group-rules">
-                    {/* Platform rules for this method group */}
-                    {groupPlatformRules.map(pr => (
-                      <div key={pr.id} className="kam-rule-card platform">
-                        <div className="kam-rule-card-header">
-                          <div className="kam-rule-left">
-                            <span className="kam-rule-priority" style={{ background: '#e2e8f0', color: '#64748b', border: 'none' }}>
-                              <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
-                            </span>
-                            <span className="kam-rule-name">{pr.name}</span>
-                            <span className="kam-badge neutral" style={{ fontSize: 10 }}>Platform</span>
-                          </div>
-                        </div>
-                        {pr.conditions.length > 0 && (
-                          <div className="kam-rule-conditions">
-                            <span className="kam-rule-if">IF</span>
-                            {pr.conditions.map((c, ci) => (
-                              <React.Fragment key={ci}>
-                                {ci > 0 && <span className="kam-rule-logic">AND</span>}
-                                <span className="kam-rule-condition-chip">
-                                  {RULE_CONDITIONS[c.field]?.label || c.field} {RULE_OPERATOR_LABELS[c.operator] || c.operator} {
-                                    c.field === 'amount' ? `\u20B9${Number(c.value)?.toLocaleString('en-IN')}`
-                                    : c.field === 'international' ? (c.value ? 'Yes' : 'No')
-                                    : String(c.value)
-                                  }
-                                </span>
-                              </React.Fragment>
-                            ))}
-                          </div>
-                        )}
-                        <div className="kam-rule-action">
-                          {pr.action.type === 'reject' ? (
-                            <>
-                              <span className="kam-rule-then" style={{ color: '#dc2626' }}>BLOCKS:</span>
-                              {pr.action.terminals.map((tid, i) => {
-                                let displayId = tid; for (const gw of gatewayData) { const t = gw.terminals.find(t => t.id === tid); if (t) { displayId = t.terminalId; break } }
-                                return <React.Fragment key={tid}>{i > 0 && <span className="kam-rule-arrow">·</span>}<span className="kam-rule-terminal-chip" style={{ background: '#fef2f2', color: '#991b1b' }}>{displayId}</span></React.Fragment>
-                              })}
-                            </>
-                          ) : (
-                            <>
-                              <span className="kam-rule-then">ROUTES TO:</span>
-                              {pr.action.terminals.map((tid, i) => {
-                                let displayId = tid; for (const gw of gatewayData) { const t = gw.terminals.find(t => t.id === tid); if (t) { displayId = t.terminalId; break } }
-                                return <React.Fragment key={tid}>{i > 0 && <span className="kam-rule-arrow">&rarr;</span>}<span className="kam-rule-terminal-chip">{displayId}</span></React.Fragment>
-                              })}
-                            </>
-                          )}
-                        </div>
-                        <div className="kam-rule-meta" style={{ color: '#94a3b8', fontStyle: 'italic' }}>{pr.reason}</div>
-                      </div>
-                    ))}
 
-                    {/* Groups with sub-methods (UPI, CC, DC) */}
+                    {/* Groups with sub-methods (Cards, EMI) */}
                     {groupDef.subMethods.length > 0 ? (
                       <>
-                        {/* Rules that match the group but not a specific sub-method */}
-                        {groupRulesList.filter(r => {
+                        {/* Merchant rules that match the group but not a specific sub-method */}
+                        {merchantOnlyRules.filter(r => {
                           const subCond = r.conditions.find(c => c.field === groupDef.subMethodField)
                           return !subCond
                         }).map(rule => renderRuleCard(rule))}
@@ -4994,12 +5003,16 @@ function RulesTabContent({
                             </div>
                           )
                         })}
+                        {/* Platform rules after merchant rules */}
+                        {renderPlatformCards()}
+                        {/* Method defaults last */}
+                        {methodDefaultsInGroup.map(rule => renderRuleCard(rule))}
                       </>
                     ) : (
-                      /* Groups without sub-methods (NB, All Transactions, All Methods) */
+                      /* Groups without sub-methods (UPI One-time, UPI Autopay, NB, All Transactions, All Methods) */
                       <>
-                        {groupRulesList.length > 0 ? (
-                          groupRulesList.map(rule => renderRuleCard(rule))
+                        {merchantOnlyRules.length > 0 ? (
+                          merchantOnlyRules.map(rule => renderRuleCard(rule))
                         ) : (
                           <div className="kam-rule-submethod-empty">
                             <span className="kam-rule-empty-sr">
@@ -5018,29 +5031,59 @@ function RulesTabContent({
                             </button>
                           </div>
                         )}
+                        {/* Platform rules after merchant rules */}
+                        {renderPlatformCards()}
+                        {/* Method defaults last */}
+                        {methodDefaultsInGroup.map(rule => renderRuleCard(rule))}
                       </>
                     )}
                       </div>
                       <div className="kam-rule-explainer">
                         <div className="kam-rule-explainer-header">
                           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2z" /></svg>
-                          <strong>How {groupDef.label} routing works</strong>
+                          <strong>{groupDef.label} — Routing Scenarios</strong>
                         </div>
-                        <div className="kam-rule-explainer-steps">
-                          {explainer.steps.map((step, i) => (
-                            <div key={i} className="kam-rule-explainer-step">
-                              <span className="kam-rule-explainer-step-num">{i + 1}</span>
-                              <span>{step}</span>
-                            </div>
+
+                        {/* Scenarios — expandable cases */}
+                        <div className="kam-rule-explainer-scenarios">
+                          {explainer.scenarios.map((scenario, si) => (
+                            <details key={si} className={`kam-explainer-scenario${scenario.isDefault ? ' default' : ''}`} open={si === 0}>
+                              <summary className="kam-explainer-scenario-summary">
+                                <span className="kam-explainer-scenario-label">{scenario.label}</span>
+                                <span className="kam-badge" style={{ fontSize: 10, background: scenario.isDefault ? '#e2e8f0' : '#e0e7ff', color: scenario.isDefault ? '#64748b' : '#528FF0' }}>
+                                  {scenario.ruleName}
+                                </span>
+                                <span style={{ marginLeft: 'auto', fontSize: 11, color: '#94a3b8' }}>{scenario.eligibleTerminals.length} terminal{scenario.eligibleTerminals.length !== 1 ? 's' : ''}</span>
+                              </summary>
+                              <div className="kam-explainer-scenario-body">
+                                <div className="kam-explainer-scenario-desc">{scenario.explanation}</div>
+                                <div className="kam-explainer-scenario-terminals">
+                                  <div className="kam-explainer-scenario-terminals-label">Eligible terminals (priority order):</div>
+                                  {scenario.eligibleTerminals.map((t, ti) => (
+                                    <div key={ti} className="kam-explainer-terminal-row">
+                                      <span className="kam-explainer-terminal-rank">P{ti + 1}</span>
+                                      <span className="kam-explainer-terminal-name">{t}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </details>
                           ))}
                         </div>
-                        {explainer.netEffect && (
-                          <div className="kam-rule-explainer-net">
-                            <strong>Net effect:</strong> {explainer.netEffect}
+
+                        {/* Platform constraints */}
+                        {explainer.platformConstraints.length > 0 && (
+                          <div className="kam-explainer-platform-constraints">
+                            <div style={{ fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>Platform constraints:</div>
+                            {explainer.platformConstraints.map((pc, i) => (
+                              <div key={i} className="kam-explainer-constraint">{pc}</div>
+                            ))}
                           </div>
                         )}
+
+                        {/* Warnings */}
                         {explainer.warnings.map((w, i) => (
-                          <div key={i} className="kam-rule-explainer-warning">{w}</div>
+                          <div key={i} className="kam-rule-explainer-warning">\u26A0 {w}</div>
                         ))}
                         <div className="kam-rule-explainer-ask">
                           <input

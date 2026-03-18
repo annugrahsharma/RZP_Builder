@@ -7869,3 +7869,109 @@ h3.kam-sr-chart-card-title {
 .kam-rule-explainer-response strong {
   color: #528FF0;
 }
+
+/* Explainer Scenarios */
+.kam-rule-explainer-scenarios {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.kam-explainer-scenario {
+  border: 1px solid #e0e7ff;
+  border-radius: 8px;
+  background: white;
+  overflow: hidden;
+}
+.kam-explainer-scenario.default {
+  border-style: dashed;
+  border-color: #cbd5e1;
+}
+.kam-explainer-scenario summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 13px;
+  list-style: none;
+}
+.kam-explainer-scenario summary::-webkit-details-marker { display: none; }
+.kam-explainer-scenario summary::before {
+  content: '▸';
+  font-size: 11px;
+  color: #94a3b8;
+  transition: transform 0.15s;
+}
+.kam-explainer-scenario[open] summary::before {
+  transform: rotate(90deg);
+}
+.kam-explainer-scenario-label {
+  font-weight: 600;
+  color: #1e293b;
+}
+.kam-explainer-scenario-body {
+  padding: 0 14px 12px;
+  border-top: 1px solid #f1f5f9;
+}
+.kam-explainer-scenario-desc {
+  font-size: 12px;
+  color: #64748b;
+  margin: 10px 0 8px;
+  line-height: 1.5;
+}
+.kam-explainer-scenario-terminals-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.kam-explainer-terminal-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  font-size: 13px;
+  border-bottom: 1px solid #f8fafc;
+}
+.kam-explainer-terminal-row:last-child { border-bottom: none; }
+.kam-explainer-terminal-rank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 22px;
+  border-radius: 4px;
+  background: #528FF0;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.kam-explainer-scenario.default .kam-explainer-terminal-rank {
+  background: #94a3b8;
+}
+.kam-explainer-terminal-name {
+  font-family: 'Menlo', 'Consolas', monospace;
+  font-size: 12px;
+  color: #334155;
+}
+.kam-explainer-platform-constraints {
+  padding: 10px 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+.kam-explainer-constraint {
+  font-size: 12px;
+  color: #64748b;
+  padding: 3px 0;
+  line-height: 1.5;
+}
+.kam-explainer-constraint::before {
+  content: '🔒 ';
+  font-size: 10px;
+}

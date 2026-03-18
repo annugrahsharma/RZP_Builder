@@ -4079,169 +4079,124 @@ export function generateRoutingAnalysis(merchant, transactions, rules) {
  * Explains the cascade: platform rules → merchant rules → method defaults → catch-all.
  */
 export function generateMethodExplainer(methodKey, platformRules, merchantRules, methodDefault, catchAllDefault, merchant) {
-  const steps = []
   const warnings = []
 
-  // 1. Platform rules that affect this method
-  platformRules.forEach(pr => {
-    const otherConds = pr.conditions.filter(c => c.field !== 'payment_method')
-
-    if (pr.action.type === 'reject') {
-      const termNames = pr.action.terminals.map(tid => {
-        for (const gw of gateways) {
-          const t = gw.terminals.find(t => t.id === tid)
-          if (t) return t.terminalId
-        }
-        return tid
-      })
-      let condDesc = ''
-      if (otherConds.length > 0) {
-        condDesc = otherConds.map(c => {
-          if (c.field === 'international' && c.value === true) return 'international transactions'
-          if (c.field === 'amount' && c.operator === 'greater_than') return `transactions above \u20B9${Number(c.value).toLocaleString('en-IN')}`
-          return `${c.field} ${c.operator} ${c.value}`
-        }).join(' and ')
-        steps.push(`Platform rule "${pr.name}" blocks ${termNames.join(', ')} for ${condDesc}.`)
-      } else {
-        steps.push(`Platform rule "${pr.name}" blocks ${termNames.join(', ')} for all ${methodKey} transactions.`)
-      }
-    } else if (pr.action.type === 'route') {
-      const termNames = pr.action.terminals.map(tid => {
-        for (const gw of gateways) {
-          const t = gw.terminals.find(t => t.id === tid)
-          if (t) return t.terminalId
-        }
-        return tid
-      })
-      let condDesc = ''
-      if (otherConds.length > 0) {
-        condDesc = otherConds.map(c => {
-          if (c.field === 'international' && c.value === true) return 'international transactions'
-          if (c.field === 'amount' && c.operator === 'greater_than') return `transactions above \u20B9${Number(c.value).toLocaleString('en-IN')}`
-          return `${c.field} ${c.operator} ${c.value}`
-        }).join(' and ')
-        steps.push(`Platform rule "${pr.name}" restricts ${condDesc} to ${termNames.join(' or ')} only.`)
-      } else {
-        steps.push(`Platform rule "${pr.name}" routes all ${methodKey} traffic to ${termNames.join(' or ')}.`)
-      }
+  // Helper to get terminal display name
+  const termName = (tid) => {
+    for (const gw of gateways) {
+      const t = gw.terminals.find(t => t.id === tid)
+      if (t) return t.terminalId
     }
-  })
+    return tid
+  }
+  const termNameFull = (tid) => {
+    for (const gw of gateways) {
+      const t = gw.terminals.find(t => t.id === tid)
+      if (t) return `${t.terminalId} (${gw.shortName}, SR ${t.successRate}%)`
+    }
+    return tid
+  }
 
-  // 2. Merchant-specific rules (sorted by priority)
   const sortedMerchantRules = [...merchantRules].filter(r => !r.isMethodDefault && !r.isDefault).sort((a, b) => a.priority - b.priority)
 
-  sortedMerchantRules.forEach((rule) => {
+  // Build scenario-based cases
+  // Each scenario = a distinct condition path with its eligible terminals + priority order
+  const scenarios = []
+
+  // Build scenarios from merchant rules
+  for (const rule of sortedMerchantRules) {
     const otherConds = rule.conditions.filter(c => c.field !== 'payment_method')
-    let condDesc = otherConds.length > 0
+    const condLabel = otherConds.length > 0
       ? otherConds.map(c => {
-          if (c.field === 'card_network') return `${c.operator === 'in' ? c.value.join('/') : c.value} cards`
-          if (c.field === 'card_type') return c.value === 'credit' ? 'credit cards' : 'debit cards'
-          if (c.field === 'issuer_bank') return `${c.value}-issued`
-          if (c.field === 'international' && c.value === true) return 'international'
-          if (c.field === 'international' && c.value === false) return 'domestic'
-          if (c.field === 'amount' && c.operator === 'greater_than') return `above \u20B9${Number(c.value).toLocaleString('en-IN')}`
-          if (c.field === 'upi_flow') return c.value === 'autopay' ? 'autopay' : 'one-time'
-          if (c.field === 'emi_type') return c.value === 'no_cost' ? 'no-cost EMI' : 'standard EMI'
+          if (c.field === 'card_network') return `${c.operator === 'in' ? c.value.join('/') : c.value}`
+          if (c.field === 'card_type') return c.value === 'credit' ? 'Credit Card' : 'Debit Card'
+          if (c.field === 'issuer_bank') return `${c.value} issued`
+          if (c.field === 'international' && c.value === true) return 'International'
+          if (c.field === 'international' && c.value === false) return 'Domestic'
+          if (c.field === 'amount' && c.operator === 'greater_than') return `> \u20B9${Number(c.value).toLocaleString('en-IN')}`
+          if (c.field === 'amount' && c.operator === 'less_than') return `< \u20B9${Number(c.value).toLocaleString('en-IN')}`
+          if (c.field === 'upi_flow') return c.value === 'autopay' ? 'Autopay' : 'One-time'
+          if (c.field === 'emi_type') return c.value === 'no_cost' ? 'No-Cost EMI' : 'Standard EMI'
           return `${c.field}=${c.value}`
-        }).join(', ')
-      : `all ${methodKey}`
+        }).join(' + ')
+      : `All ${methodKey}`
+
+    let eligibleTerminals = []
+    let explanation = ''
 
     if (rule.action.type === 'route') {
-      const termNames = rule.action.terminals.map(tid => {
-        for (const gw of gateways) {
-          const t = gw.terminals.find(t => t.id === tid)
-          if (t) return `${t.terminalId} (${gw.shortName})`
-        }
-        return tid
-      })
+      eligibleTerminals = rule.action.terminals.map(tid => termNameFull(tid))
       const srNote = rule.action.srThreshold > 0
-        ? ` If SR drops below ${rule.action.srThreshold}%, traffic shifts to the next terminal.`
-        : ''
-      steps.push(`Your rule "${rule.name}" routes ${condDesc} transactions to ${termNames.join(' \u2192 ')}.${srNote}`)
+        ? `SR safety net at ${rule.action.srThreshold}% — if primary drops below this, traffic shifts to next in line.`
+        : 'No SR safety net — traffic stays on primary regardless of SR.'
+      explanation = `Eligible terminals in priority order. ${srNote}`
     } else if (rule.action.type === 'split') {
-      const splitDesc = rule.action.splits.map(s => {
-        for (const gw of gateways) {
-          const t = gw.terminals.find(t => t.id === s.terminalId)
-          if (t) return `${s.percentage}% to ${t.terminalId}`
-        }
-        return `${s.percentage}% to ${s.terminalId}`
-      }).join(', ')
-      steps.push(`Your rule "${rule.name}" splits ${condDesc} traffic: ${splitDesc}.`)
+      eligibleTerminals = rule.action.splits.map(s => `${termName(s.terminalId)} — ${s.percentage}%`)
+      explanation = 'Traffic is split by percentage across these terminals.'
+    }
+
+    scenarios.push({ label: condLabel, ruleName: rule.name, eligibleTerminals, explanation, isDefault: false })
+  }
+
+  // Default/fallback scenario
+  if (methodDefault) {
+    const defaultTerminals = methodDefault.action.terminals.map(tid => termNameFull(tid))
+    const matchedByMerchant = sortedMerchantRules.length > 0
+    scenarios.push({
+      label: matchedByMerchant ? `All other ${methodKey}` : `All ${methodKey}`,
+      ruleName: matchedByMerchant ? 'Default Fallback' : 'Default Routing',
+      eligibleTerminals: defaultTerminals,
+      explanation: matchedByMerchant
+        ? 'Transactions not matching any specific rule above fall through to default routing.'
+        : 'All transactions route via Doppler ML scoring across these terminals.',
+      isDefault: true,
+    })
+  }
+
+  // Platform constraints (apply across all scenarios)
+  const platformConstraints = []
+  platformRules.forEach(pr => {
+    const otherConds = pr.conditions.filter(c => c.field !== 'payment_method')
+    const condDesc = otherConds.length > 0
+      ? otherConds.map(c => {
+          if (c.field === 'international' && c.value === true) return 'international transactions'
+          if (c.field === 'amount' && c.operator === 'greater_than') return `transactions above \u20B9${Number(c.value).toLocaleString('en-IN')}`
+          return `${c.field} ${c.operator} ${c.value}`
+        }).join(' and ')
+      : 'all transactions'
+
+    if (pr.action.type === 'reject') {
+      const blocked = pr.action.terminals.map(tid => termName(tid))
+      platformConstraints.push(`${blocked.join(', ')} blocked for ${condDesc} (${pr.name})`)
+    } else if (pr.action.type === 'route') {
+      const allowed = pr.action.terminals.map(tid => termName(tid))
+      platformConstraints.push(`${condDesc} restricted to ${allowed.join(', ')} only (${pr.name})`)
     }
   })
 
-  // 3. Method default fallback
-  if (methodDefault) {
-    const termNames = methodDefault.action.terminals.map(tid => {
-      for (const gw of gateways) {
-        const t = gw.terminals.find(t => t.id === tid)
-        if (t) return `${t.terminalId} (${gw.shortName})`
-      }
-      return tid
-    })
-    if (sortedMerchantRules.length > 0) {
-      steps.push(`For any ${methodKey} transactions not matching the above rules, the default routes to ${termNames.join(' \u2192 ')}.`)
-    } else {
-      steps.push(`All ${methodKey} transactions route to ${termNames.join(' \u2192 ')} by default.`)
-    }
-  }
-
-  // 4. Compute net effect
-  let netEffect = ''
-  if (sortedMerchantRules.length > 0 && methodDefault) {
-    const primaryRule = sortedMerchantRules[0]
-    const primaryTermId = primaryRule.action.terminals?.[0]
-    if (primaryTermId) {
-      let primaryName = primaryTermId
-      for (const gw of gateways) {
-        const t = gw.terminals.find(t => t.id === primaryTermId)
-        if (t) { primaryName = t.terminalId; break }
-      }
-      const fallbackTerms = methodDefault.action.terminals.map(tid => {
-        for (const gw of gateways) {
-          const t = gw.terminals.find(t => t.id === tid)
-          if (t) return t.terminalId
+  // Warnings: check if merchant rules route to terminals blocked by platform
+  sortedMerchantRules.forEach(rule => {
+    platformRules.forEach(pr => {
+      if (pr.action.type === 'reject') {
+        const blocked = new Set(pr.action.terminals)
+        const overlap = (rule.action.terminals || []).filter(t => blocked.has(t))
+        if (overlap.length > 0) {
+          warnings.push(`Rule "${rule.name}" routes to ${overlap.map(termName).join(', ')}, but platform rule "${pr.name}" blocks these for some transactions. This may cause unexpected NTFs.`)
         }
-        return tid
-      })
-      netEffect = `Most ${methodKey} traffic goes to ${primaryName}. Fallback: ${fallbackTerms.join(' \u2192 ')}.`
-    }
-  } else if (methodDefault) {
-    const termNames = methodDefault.action.terminals.map(tid => {
-      for (const gw of gateways) {
-        const t = gw.terminals.find(t => t.id === tid)
-        if (t) return t.terminalId
       }
-      return tid
     })
-    netEffect = `All ${methodKey} traffic routes to ${termNames.join(' \u2192 ')}.`
-  }
+  })
 
-  // Check for potential issues
-  if (sortedMerchantRules.length > 0) {
-    sortedMerchantRules.forEach(rule => {
-      platformRules.forEach(pr => {
-        if (pr.action.type === 'reject') {
-          const blocked = new Set(pr.action.terminals)
-          const overlap = (rule.action.terminals || []).filter(t => blocked.has(t))
-          if (overlap.length > 0) {
-            const overlapNames = overlap.map(tid => {
-              for (const gw of gateways) {
-                const t = gw.terminals.find(t => t.id === tid)
-                if (t) return t.terminalId
-              }
-              return tid
-            })
-            warnings.push(`\u26A0 Your rule "${rule.name}" routes to ${overlapNames.join(', ')}, but platform rule "${pr.name}" blocks these terminals for some transactions.`)
-          }
-        }
-      })
+  // No rules at all
+  if (sortedMerchantRules.length === 0 && platformRules.length === 0 && !methodDefault) {
+    scenarios.push({
+      label: `All ${methodKey}`,
+      ruleName: 'Doppler ML',
+      eligibleTerminals: ['All terminals eligible — ML-based routing for optimal SR'],
+      explanation: 'No specific rules defined. Doppler ML automatically routes to the highest-performing terminal.',
+      isDefault: true,
     })
   }
 
-  if (sortedMerchantRules.length === 0 && platformRules.length === 0) {
-    steps.push(`No specific rules defined. All ${methodKey} transactions use Doppler ML-based routing for optimal success rate.`)
-  }
-
-  return { steps, netEffect, warnings, ruleCount: platformRules.length + sortedMerchantRules.length + (methodDefault ? 1 : 0) }
+  return { scenarios, platformConstraints, warnings, ruleCount: platformRules.length + sortedMerchantRules.length + (methodDefault ? 1 : 0) }
 }
