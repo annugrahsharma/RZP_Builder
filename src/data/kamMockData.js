@@ -612,12 +612,12 @@ export const AMOUNT_PRESETS = [
 export const PAYMENT_METHOD_GROUPS = [
   { key: 'all_txn', label: 'All Transactions', icon: 'layers',
     methodValues: null, subMethodField: null, subMethods: [], alwaysExpanded: true },
-  { key: 'UPI', label: 'UPI', icon: 'smartphone',
-    methodValues: ['UPI'], subMethodField: 'upi_flow',
-    subMethods: [
-      { value: 'one_time', label: 'One-time' },
-      { value: 'autopay', label: 'Autopay' },
-    ] },
+  { key: 'UPI_onetime', label: 'UPI One-time', icon: 'smartphone',
+    methodValues: ['UPI'], subMethodField: null, subMethods: [],
+    upiFlowFilter: 'one_time' },
+  { key: 'UPI_autopay', label: 'UPI Autopay', icon: 'smartphone',
+    methodValues: ['UPI'], subMethodField: null, subMethods: [],
+    upiFlowFilter: 'autopay' },
   { key: 'Cards', label: 'Cards', icon: 'credit-card',
     methodValues: ['Cards'], subMethodField: 'card_network',
     subMethods: [
@@ -676,19 +676,40 @@ export function groupRulesByMethod(rules) {
     }
 
     for (const method of targetMethods) {
-      const group = groupMap[method]
-      if (!group) { groupMap['all_methods'].rules.push(rule); continue }
+      // Find all groups that match this method
+      const matchingGroups = groups.filter(g => {
+        if (!g.groupDef.methodValues || g.groupDef.methodValues === 'catch_all') return false
+        return g.groupDef.methodValues.includes(method)
+      })
 
-      group.rules.push(rule)
+      if (matchingGroups.length === 0) {
+        groupMap['all_methods'].rules.push(rule)
+        continue
+      }
 
-      if (group.groupDef.subMethodField) {
-        const subCond = rule.conditions.find(c => c.field === group.groupDef.subMethodField)
-        if (subCond) {
-          const subValues = subCond.operator === 'in' && Array.isArray(subCond.value)
-            ? subCond.value : [subCond.value]
-          for (const sv of subValues) {
-            if (group.subMethodRules.has(sv)) {
-              group.subMethodRules.get(sv).push(rule)
+      for (const group of matchingGroups) {
+        // For UPI split groups, check upi_flow filter
+        if (group.groupDef.upiFlowFilter) {
+          const flowCond = rule.conditions.find(c => c.field === 'upi_flow')
+          if (flowCond) {
+            // Rule specifies a flow — only add to the matching flow group
+            const flowValue = flowCond.value
+            if (flowValue !== group.groupDef.upiFlowFilter) continue
+          }
+          // No flow condition — rule applies to all UPI, add to both groups
+        }
+
+        group.rules.push(rule)
+
+        if (group.groupDef.subMethodField) {
+          const subCond = rule.conditions.find(c => c.field === group.groupDef.subMethodField)
+          if (subCond) {
+            const subValues = subCond.operator === 'in' && Array.isArray(subCond.value)
+              ? subCond.value : [subCond.value]
+            for (const sv of subValues) {
+              if (group.subMethodRules.has(sv)) {
+                group.subMethodRules.get(sv).push(rule)
+              }
             }
           }
         }
@@ -701,9 +722,10 @@ export function groupRulesByMethod(rules) {
     const methodCond = rule.conditions.find(c => c.field === 'payment_method')
     if (methodCond) {
       const method = methodCond.value
-      const group = groupMap[method]
-      if (group) {
-        group.rules.push(rule)
+      // Find all groups matching this method (handles UPI split into two groups)
+      const matchingGroups = groups.filter(g => g.groupDef.methodValues && g.groupDef.methodValues !== 'catch_all' && g.groupDef.methodValues.includes(method))
+      if (matchingGroups.length > 0) {
+        matchingGroups.forEach(g => g.rules.push(rule))
       } else {
         groupMap['all_methods'].rules.push(rule)
       }
