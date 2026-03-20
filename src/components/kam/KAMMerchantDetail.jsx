@@ -889,7 +889,7 @@ function ThesysWidget({ merchantName, merchantId }) {
 
       embedWidget({
         type: 'full-screen',
-        url: 'https://console.thesys.dev/app/LXBs_T8qKh-J2QkrFSiJc',
+        url: 'https://console.thesys.dev/app/LXBs_T8qKh-J2QkrFSiJc?hideLogin=true',
         theme: 'light',
         // BYOI: When backend is ready, uncomment and wire up JWT token
         // identityToken: token,
@@ -905,7 +905,7 @@ function ThesysWidget({ merchantName, merchantId }) {
       console.warn('Thesys widget failed to load:', err)
       // Fallback to iframe if SDK fails
       if (containerRef.current) {
-        containerRef.current.innerHTML = `<iframe src="https://console.thesys.dev/app/LXBs_T8qKh-J2QkrFSiJc" style="width:100%;height:700px;border:none;border-radius:12px" title="AI Assist" allow="clipboard-write"></iframe>`
+        containerRef.current.innerHTML = `<iframe src="https://console.thesys.dev/app/LXBs_T8qKh-J2QkrFSiJc?hideLogin=true" style="width:100%;height:700px;border:none;border-radius:12px" title="AI Assist" allow="clipboard-write"></iframe>`
       }
     })
 
@@ -2824,7 +2824,7 @@ export default function KAMMerchantDetail() {
         </div>
         <div className="kam-ai-assist-container" style={{ width: '100%', minHeight: '600px', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--rzp-border)' }}>
           <iframe
-            src="https://console.thesys.dev/app/LXBs_T8qKh-J2QkrFSiJc"
+            src="https://console.thesys.dev/app/LXBs_T8qKh-J2QkrFSiJc?hideLogin=true"
             style={{ width: '100%', height: '700px', border: 'none', borderRadius: '12px' }}
             title="AI Assist"
             allow="clipboard-write"
