@@ -904,8 +904,8 @@ export default function KAMMerchantDetail() {
   const [expandedRecs, setExpandedRecs] = useState(new Set())
 
   // ---- Tab & scroll-based navigation ----
-  const TAB_ORDER = ['ai-recs', 'routing', 'terminals', 'metrics', 'sr-trend', 'transactions', 'ntfs', 'audit']
-  const TAB_LABELS = { 'ai-recs': 'AI Recommendations', routing: 'Routing', terminals: 'Terminals', metrics: 'Metrics', 'sr-trend': 'SR Trend', transactions: 'Transactions', ntfs: 'NTFs', audit: 'Audit Log' }
+  const TAB_ORDER = ['ai-recs', 'routing', 'terminals', 'metrics', 'sr-trend', 'transactions', 'ntfs', 'audit', 'ai-assist']
+  const TAB_LABELS = { 'ai-recs': 'AI Recommendations', routing: 'Routing', terminals: 'Terminals', metrics: 'Metrics', 'sr-trend': 'SR Trend', transactions: 'Transactions', ntfs: 'NTFs', audit: 'Audit Log', 'ai-assist': 'AI Assist' }
   const [activeTab, setActiveTab] = useState('ai-recs')
   const sectionRefs = useRef({})
   const tabsBarRef = useRef(null)
@@ -2741,6 +2741,25 @@ export default function KAMMerchantDetail() {
           </div>
         )}
       </div>
+      </div>
+
+      {/* ── AI Assist ─────────────────────── */}
+      <div ref={el => sectionRefs.current['ai-assist'] = el} className="kam-tab-section">
+        <div className="kam-section-header">
+          <h3>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a10 10 0 1 0 10 10H12V2z"/><path d="M12 2a10 10 0 0 1 10 10"/><circle cx="12" cy="12" r="3"/></svg>
+            AI Assist
+          </h3>
+          <span className="kam-badge info">Beta</span>
+        </div>
+        <div className="kam-ai-assist-container" style={{ width: '100%', minHeight: '600px', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--rzp-border)' }}>
+          <iframe
+            src="https://console.thesys.dev/app/LXBs_T8qKh-J2QkrFSiJc"
+            style={{ width: '100%', height: '700px', border: 'none', borderRadius: '12px' }}
+            title="AI Assist"
+            allow="clipboard-write"
+          />
+        </div>
       </div>
 
       {/* ── Transaction Routing Drawer ─────────────────────── */}
