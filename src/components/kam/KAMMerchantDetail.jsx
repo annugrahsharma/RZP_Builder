@@ -2806,7 +2806,14 @@ export default function KAMMerchantDetail() {
           </h3>
           <span className="kam-badge info">Beta</span>
         </div>
-        <ThesysWidget merchantName={merchant?.name} merchantId={merchantId} />
+        <div className="kam-ai-assist-container" style={{ width: '100%', minHeight: '600px', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--rzp-border)' }}>
+          <iframe
+            src="https://console.thesys.dev/app/LXBs_T8qKh-J2QkrFSiJc"
+            style={{ width: '100%', height: '700px', border: 'none', borderRadius: '12px' }}
+            title="AI Assist"
+            allow="clipboard-write"
+          />
+        </div>
       </div>
 
       {/* ── Transaction Routing Drawer ─────────────────────── */}
