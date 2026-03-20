@@ -1434,6 +1434,22 @@ export default function KAMMerchantDetail() {
             )}
           </div>
         </div>
+        <Link
+          to={`/kam/agent/${merchantId}`}
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            padding: '8px 16px', background: 'linear-gradient(135deg, #528FF0, #6C5CE7)',
+            color: '#fff', borderRadius: 8, fontSize: 13, fontWeight: 600,
+            textDecoration: 'none', whiteSpace: 'nowrap',
+            boxShadow: '0 1px 3px rgba(82,143,240,0.3)',
+          }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1.27A7 7 0 0 1 14 23h-4a7 7 0 0 1-6.73-4H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/>
+            <circle cx="9" cy="15" r="1" fill="currentColor"/><circle cx="15" cy="15" r="1" fill="currentColor"/>
+          </svg>
+          Try AI Agent
+        </Link>
       </div>
 
       {/* ── Tabs (sticky, scroll-based) ──────────────────────── */}

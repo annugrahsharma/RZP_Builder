@@ -8,6 +8,7 @@ import KAMLayout from './components/kam/KAMLayout'
 import KAMOverview from './components/kam/KAMOverview'
 import KAMMerchantTable from './components/kam/KAMMerchantTable'
 import KAMMerchantDetail from './components/kam/KAMMerchantDetail'
+import KAMAgentView from './components/kam/KAMAgentView'
 import './styles/App.css'
 
 // Wrapper component for onboarding with provider
@@ -37,6 +38,7 @@ function App() {
           <Route index element={<KAMOverview />} />
           <Route path="merchants" element={<KAMMerchantTable />} />
           <Route path="merchant/:merchantId" element={<KAMMerchantDetail />} />
+          <Route path="agent/:merchantId" element={<KAMAgentView />} />
         </Route>
         <Route element={<MobileLayout />}>
           <Route path="/" element={<Navigate to="/kam" replace />} />
