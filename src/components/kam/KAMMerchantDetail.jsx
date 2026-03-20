@@ -872,6 +872,60 @@ function TracePipeline({ txn, merchant, rules }) {
 }
 
 // ---------------------------------------------------------------------------
+// Thesys AI Assist Widget (BYOI-ready)
+// ---------------------------------------------------------------------------
+function ThesysWidget({ merchantName, merchantId }) {
+  const containerRef = useRef(null)
+  const widgetInitialized = useRef(false)
+
+  useEffect(() => {
+    if (widgetInitialized.current || !containerRef.current) return
+    widgetInitialized.current = true
+
+    // Dynamic import to avoid SSR issues
+    import('agent-embed-widget').then(({ embedWidget }) => {
+      // Clear container before embedding
+      if (containerRef.current) containerRef.current.innerHTML = ''
+
+      embedWidget({
+        type: 'full-screen',
+        url: 'https://console.thesys.dev/app/LXBs_T8qKh-J2QkrFSiJc',
+        theme: 'light',
+        // BYOI: When backend is ready, uncomment and wire up JWT token
+        // identityToken: token,
+        // getIdentityToken: async () => {
+        //   const res = await fetch('/api/thesys-token')
+        //   const { token } = await res.json()
+        //   return token
+        // },
+        // hideLogin: true,
+        container: containerRef.current,
+      })
+    }).catch(err => {
+      console.warn('Thesys widget failed to load:', err)
+      // Fallback to iframe if SDK fails
+      if (containerRef.current) {
+        containerRef.current.innerHTML = `<iframe src="https://console.thesys.dev/app/LXBs_T8qKh-J2QkrFSiJc" style="width:100%;height:700px;border:none;border-radius:12px" title="AI Assist" allow="clipboard-write"></iframe>`
+      }
+    })
+
+    return () => { widgetInitialized.current = false }
+  }, [])
+
+  return (
+    <div
+      ref={containerRef}
+      className="kam-ai-assist-container"
+      style={{ width: '100%', minHeight: '600px', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--rzp-border)' }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '200px', color: '#94a3b8', fontSize: '14px' }}>
+        Loading AI Assist...
+      </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 export default function KAMMerchantDetail() {
@@ -2752,14 +2806,7 @@ export default function KAMMerchantDetail() {
           </h3>
           <span className="kam-badge info">Beta</span>
         </div>
-        <div className="kam-ai-assist-container" style={{ width: '100%', minHeight: '600px', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--rzp-border)' }}>
-          <iframe
-            src="https://console.thesys.dev/app/LXBs_T8qKh-J2QkrFSiJc"
-            style={{ width: '100%', height: '700px', border: 'none', borderRadius: '12px' }}
-            title="AI Assist"
-            allow="clipboard-write"
-          />
-        </div>
+        <ThesysWidget merchantName={merchant?.name} merchantId={merchantId} />
       </div>
 
       {/* ── Transaction Routing Drawer ─────────────────────── */}
